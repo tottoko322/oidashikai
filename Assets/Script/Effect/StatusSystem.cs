@@ -1,16 +1,20 @@
-using UnityEngine;
+using System.Collections.Generic;
 
-public class StatusSystem : MonoBehaviour
+public class StatusSystem
 {
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
+    // 超最小：ターン終了前の自傷/呪いなどを積む枠
+    private readonly List<int> pendingSelfDamage = new();
+
+    public void AddSelfDamageAtTurnEnd(int amount)
     {
-        
+        if (amount > 0) pendingSelfDamage.Add(amount);
     }
 
-    // Update is called once per frame
-    void Update()
+    public int ConsumeTurnEndSelfDamage()
     {
-        
+        int sum = 0;
+        for (int i = 0; i < pendingSelfDamage.Count; i++) sum += pendingSelfDamage[i];
+        pendingSelfDamage.Clear();
+        return sum;
     }
 }

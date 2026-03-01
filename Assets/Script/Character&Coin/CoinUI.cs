@@ -1,16 +1,17 @@
 using UnityEngine;
+using TMPro;
 
 public class CoinUI : MonoBehaviour
 {
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
+    public TMP_Text label;
+
+    public void SetTossing()
     {
-        
+        if (label) label.text = "Coin Toss...";
     }
 
-    // Update is called once per frame
-    void Update()
+    public void SetResult(CoinFace face, bool playerFirst)
     {
-        
+        if (label) label.text = $"{face} / {(playerFirst ? "You First" : "Enemy First")}";
     }
 }

@@ -2,15 +2,17 @@ using UnityEngine;
 
 public class WinLoseSystem : MonoBehaviour
 {
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
+    public SceneFlowManager flow;
+
+    public void Win()
     {
-        
+        Debug.Log("WIN");
+        flow.GoTitle();
     }
 
-    // Update is called once per frame
-    void Update()
+    public void Lose()
     {
-        
+        Debug.Log("LOSE");
+        flow.GoTitle();
     }
 }

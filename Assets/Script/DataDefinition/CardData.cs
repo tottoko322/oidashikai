@@ -1,16 +1,19 @@
 using UnityEngine;
 
-public class CardData : MonoBehaviour
+[CreateAssetMenu(menuName = "Qpic/Data/CardData")]
+public class CardData : ScriptableObject
 {
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
-    {
-        
-    }
+    public string cardId;
+    public string displayName;
 
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
+    [Header("Stats")]
+    public int cost;
+    public int attack;
+    public int defense;
+
+    [Header("Effect")]
+    public EffectData effect;
+
+    [Header("Art")]
+    public Sprite artwork;
 }

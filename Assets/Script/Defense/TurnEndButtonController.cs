@@ -1,16 +1,17 @@
 using UnityEngine;
+using UnityEngine.UI;
+using TMPro;
 
 public class TurnEndButtonController : MonoBehaviour
 {
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
-    {
-        
-    }
+    public Button button;
+    public TMP_Text label;
 
-    // Update is called once per frame
-    void Update()
+    private string normalText = "ターン終了";
+    private string idleText = "何もしない";
+
+    public void SetIdleOnly(bool idle)
     {
-        
+        if (label) label.text = idle ? idleText : normalText;
     }
 }

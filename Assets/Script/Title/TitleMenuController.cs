@@ -2,15 +2,22 @@ using UnityEngine;
 
 public class TitleMenuController : MonoBehaviour
 {
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
+    public SceneFlowManager flow;
+
+    public void OnDistributedDeckBattle()
     {
-        
+        ModeContext.I.mode = GameMode.DistributedDeckBattle;
+        flow.GoCharacterSelect();
     }
 
-    // Update is called once per frame
-    void Update()
+    public void OnDeckBuildBattle()
     {
-        
+        ModeContext.I.mode = GameMode.DeckBuildBattle;
+        flow.GoCharacterSelect();
+    }
+
+    public void OnRules()
+    {
+        flow.GoRules();
     }
 }

@@ -2,15 +2,15 @@ using UnityEngine;
 
 public class ZoneHighlighter : MonoBehaviour
 {
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
-    {
-        
-    }
+    public GameObject enemyHighlight;
+    public GameObject effectHighlight;
 
-    // Update is called once per frame
-    void Update()
+    public void SetEnemy(bool on) { if (enemyHighlight) enemyHighlight.SetActive(on); }
+    public void SetEffect(bool on) { if (effectHighlight) effectHighlight.SetActive(on); }
+
+    public void Clear()
     {
-        
+        SetEnemy(false);
+        SetEffect(false);
     }
 }

@@ -2,15 +2,24 @@ using UnityEngine;
 
 public class CarouselController : MonoBehaviour
 {
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
+    public int Index { get; private set; }
+    public int Count { get; private set; }
+
+    public void Init(int count)
     {
-        
+        Count = Mathf.Max(1, count);
+        Index = Mathf.Clamp(Index, 0, Count - 1);
     }
 
-    // Update is called once per frame
-    void Update()
+    public int Prev()
     {
-        
+        Index = (Index - 1 + Count) % Count;
+        return Index;
+    }
+
+    public int Next()
+    {
+        Index = (Index + 1) % Count;
+        return Index;
     }
 }

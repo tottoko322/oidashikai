@@ -1,16 +1,13 @@
-using UnityEngine;
+public enum TurnOwner { Player, Enemy }
 
-public class TurnSystem : MonoBehaviour
+public class TurnSystem
 {
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
-    {
-        
-    }
+    public TurnOwner Current { get; private set; }
 
-    // Update is called once per frame
-    void Update()
+    public void SetFirst(TurnOwner first) => Current = first;
+
+    public void NextTurn()
     {
-        
+        Current = (Current == TurnOwner.Player) ? TurnOwner.Enemy : TurnOwner.Player;
     }
 }

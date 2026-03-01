@@ -2,15 +2,6 @@ using UnityEngine;
 
 public class ConfirmController : MonoBehaviour
 {
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
-    {
-        
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
+    public GameConfig config;
+    public bool UseConfirm => config != null && config.useConfirm;
 }

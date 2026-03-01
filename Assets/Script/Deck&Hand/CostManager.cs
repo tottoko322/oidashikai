@@ -2,15 +2,29 @@ using UnityEngine;
 
 public class CostManager : MonoBehaviour
 {
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
+    public int Current { get; private set; }
+    public int Max { get; private set; }
+
+    public void Init(int start, int max)
     {
-        
+        Max = max;
+        Current = Mathf.Clamp(start, 0, Max);
     }
 
-    // Update is called once per frame
-    void Update()
+    public void OnTurnStartGainOne()
     {
-        
+        Current = Mathf.Min(Max, Current + 1);
+    }
+
+    public bool TryPay(int cost)
+    {
+        if (Current < cost) return false;
+        Current -= cost;
+        return true;
+    }
+
+    public void Add(int amount)
+    {
+        Current = Mathf.Clamp(Current + amount, 0, Max);
     }
 }

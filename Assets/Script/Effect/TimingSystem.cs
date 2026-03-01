@@ -1,16 +1,10 @@
-using UnityEngine;
+using System;
 
-public class TimingSystem : MonoBehaviour
+public class TimingSystem
 {
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
-    {
-        
-    }
+    public event Action OnTurnStart;
+    public event Action OnTurnEndBeforeCurse;
 
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
+    public void FireTurnStart() => OnTurnStart?.Invoke();
+    public void FireTurnEndBeforeCurse() => OnTurnEndBeforeCurse?.Invoke();
 }

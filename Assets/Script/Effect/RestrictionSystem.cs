@@ -1,16 +1,7 @@
-using UnityEngine;
-
-public class RestrictionSystem : MonoBehaviour
+public class RestrictionSystem
 {
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
-    {
-        
-    }
+    // 進捗確認カードなど「効果を使えない」制限に対応する枠
+    public bool IsEffectBlocked { get; private set; }
 
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
+    public void SetEffectBlocked(bool blocked) => IsEffectBlocked = blocked;
 }

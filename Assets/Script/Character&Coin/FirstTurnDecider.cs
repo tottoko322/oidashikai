@@ -2,15 +2,8 @@ using UnityEngine;
 
 public class FirstTurnDecider : MonoBehaviour
 {
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
+    public bool DecidePlayerFirst(CharacterData character, CoinFace faceResult)
     {
-        
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
+        return faceResult == character.faceForFirst;
     }
 }

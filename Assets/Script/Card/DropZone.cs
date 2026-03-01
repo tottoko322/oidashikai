@@ -1,16 +1,28 @@
 using UnityEngine;
+using UnityEngine.EventSystems;
 
-public class DropZone : MonoBehaviour
+public enum DropZoneType { Enemy, Effect }
+
+public class DropZone : MonoBehaviour, IDropHandler, IPointerEnterHandler, IPointerExitHandler
 {
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
+    public DropZoneType zoneType;
+    public ZoneHighlighter highlighter;
+
+    public void OnDrop(PointerEventData eventData)
     {
-        
+        // 実ドロップ処理は DragDropController / CardInteraction 側で拾う（後で）
     }
 
-    // Update is called once per frame
-    void Update()
+    public void OnPointerEnter(PointerEventData eventData)
     {
-        
+        if (!highlighter) return;
+        if (zoneType == DropZoneType.Enemy) highlighter.SetEnemy(true);
+        if (zoneType == DropZoneType.Effect) highlighter.SetEffect(true);
+    }
+
+    public void OnPointerExit(PointerEventData eventData)
+    {
+        if (!highlighter) return;
+        highlighter.Clear();
     }
 }

@@ -2,15 +2,19 @@ using UnityEngine;
 
 public class HandRootMover : MonoBehaviour
 {
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
+    public RectTransform handRoot;
+    public float loweredOffsetY = 40f;
+    private Vector2 normalPos;
+
+    private void Awake()
     {
-        
+        normalPos = handRoot.anchoredPosition;
     }
 
-    // Update is called once per frame
-    void Update()
+    public void SetLowered(bool lowered)
     {
-        
+        handRoot.anchoredPosition = lowered
+            ? normalPos + new Vector2(0f, -loweredOffsetY)
+            : normalPos;
     }
 }

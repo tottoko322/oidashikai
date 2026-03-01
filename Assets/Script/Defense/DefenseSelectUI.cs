@@ -1,16 +1,55 @@
+using System.Collections;
 using UnityEngine;
+using UnityEngine.UI;
+using TMPro;
 
 public class DefenseSelectUI : MonoBehaviour
 {
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
+    [Header("UI")]
+    public GameObject root;
+    public TMP_Text message;
+    public Button skipButton;
+
+    [Header("Refs")]
+    public HandManager hand;
+    public HandLayoutController layout;
+
+    private CardView selected;
+    private bool decided;
+
+    public void Open()
     {
-        
+        selected = null;
+        decided = false;
+        if (root) root.SetActive(true);
+        if (message) message.text = "防御カードを選ぶか、スキップしてください";
     }
 
-    // Update is called once per frame
-    void Update()
+    public void Close()
     {
-        
+        if (root) root.SetActive(false);
     }
+
+    // CardInteraction 側から「防御としてこのカードを選びたい」を通知する想定（後で接続）
+    public void SelectDefense(CardView v)
+    {
+        selected = v;
+        decided = true;
+    }
+
+    public void OnSkip()
+    {
+        selected = null;
+        decided = true;
+    }
+
+    public IEnumerator WaitDecision()
+    {
+        Open();
+        // スキップ不可ならskipButtonを無効化するなども可能
+        while (!decided) yield return null;
+        Close();
+    }
+
+    public CardView GetSelected() => selected;
 }

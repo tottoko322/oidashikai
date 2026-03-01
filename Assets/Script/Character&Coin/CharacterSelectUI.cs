@@ -1,16 +1,15 @@
 using UnityEngine;
+using UnityEngine.UI;
+using TMPro;
 
 public class CharacterSelectUI : MonoBehaviour
 {
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
-    {
-        
-    }
+    public Image portrait;
+    public TMP_Text nameText;
 
-    // Update is called once per frame
-    void Update()
+    public void Set(CharacterData data)
     {
-        
+        portrait.sprite = data.portrait;
+        nameText.text = data.displayName;
     }
 }

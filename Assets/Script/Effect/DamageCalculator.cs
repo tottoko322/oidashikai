@@ -1,16 +1,11 @@
 using UnityEngine;
 
-public class DamageCalculator : MonoBehaviour
+public static class DamageCalculator
 {
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
+    public static int Calc(int attack, int defense, float multiplier = 1f, bool pierce = false)
     {
-        
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
+        int baseDmg = pierce ? attack : Mathf.Max(0, attack - defense);
+        int dmg = Mathf.FloorToInt(baseDmg * multiplier);
+        return Mathf.Max(0, dmg);
     }
 }

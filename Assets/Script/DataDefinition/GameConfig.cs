@@ -1,16 +1,18 @@
 using UnityEngine;
 
-public class GameConfig : MonoBehaviour
+[CreateAssetMenu(menuName = "Qpic/Data/GameConfig")]
+public class GameConfig : ScriptableObject
 {
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
-    {
-        
-    }
+    [Header("Hand / Deck")]
+    public int maxHand = 8;
+    public int deckLimit = 15;
+    public int sameCardLimit = 2;
 
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
+    [Header("Battle")]
+    public int startHandCount = 4;
+    public int maxCost = 5;
+    public int startCost = 0;
+
+    [Header("Options")]
+    public bool useConfirm = false;
 }

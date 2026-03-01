@@ -1,16 +1,16 @@
+using System.Collections.Generic;
 using UnityEngine;
 
-public class DeckDefinition : MonoBehaviour
+[System.Serializable]
+public class DeckEntry
 {
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
-    {
-        
-    }
+    public CardData card;
+    [Range(1, 9)] public int count = 1;
+}
 
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
+[CreateAssetMenu(menuName = "Qpic/Data/DeckDefinition")]
+public class DeckDefinition : ScriptableObject
+{
+    public string deckId;
+    public List<DeckEntry> entries = new();
 }

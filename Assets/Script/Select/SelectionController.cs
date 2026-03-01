@@ -1,16 +1,28 @@
+using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 
 public class SelectionController : MonoBehaviour
 {
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
-    {
-        
-    }
+    public CardSelectUI selectUI;
 
-    // Update is called once per frame
-    void Update()
+    private List<CardView> result = new();
+    private bool done;
+
+    public IEnumerator SelectCards(List<CardView> candidates, SelectionRule rule, System.Action<List<CardView>> onDone)
     {
-        
+        done = false;
+        result.Clear();
+
+        selectUI.Open(candidates, rule);
+
+        while (!selectUI.IsFinished)
+            yield return null;
+
+        result = selectUI.GetResult();
+        selectUI.Close();
+
+        onDone?.Invoke(result);
+        done = true;
     }
 }
