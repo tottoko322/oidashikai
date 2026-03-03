@@ -16,8 +16,8 @@ public class CardInteraction : MonoBehaviour,
     public AudioManager audioManager;
 
     [Header("Drag Visual")]
-    public Transform dragTopLayer;         // ドラッグ中に一時的に親をここへ（Canvas配下推奨）
-    public float loweredCheckPadding = 0f; // 手札領域判定の余白（必要なら）
+    public Transform dragTopLayer;         // ドラッグ中に一時的に親をここへ
+    public float loweredCheckPadding = 0f; // 手札領域判定の余白
 
     private CardView view;
     private RectTransform rt;
@@ -44,7 +44,6 @@ public class CardInteraction : MonoBehaviour,
         if (dragging) return;
 
         popupUI.Toggle(view);
-        // popup開閉中はホバーを止めたい場合、UI側で制御してOK
     }
 
     public void OnBeginDrag(PointerEventData eventData)
@@ -70,7 +69,7 @@ public class CardInteraction : MonoBehaviour,
         // 手札から一時除外（詰まってスペース広く）
         if (handManager != null)
         {
-            // “手札リストから抜く”は HandManager に任せる
+            // 手札リストから抜くのは HandManager に任せる
             handManager.BeginDrag(view);
         }
         handLayout?.Rebuild();
@@ -93,7 +92,7 @@ public class CardInteraction : MonoBehaviour,
             rt.anchoredPosition = local;
         }
 
-        // 手札領域の外なら手札全体を下げる（B）
+        // 手札領域の外なら手札全体を下げる
         bool insideHand = IsPointerInsideHandArea(eventData);
         handRootMover?.SetLowered(!insideHand);
 
@@ -114,7 +113,6 @@ public class CardInteraction : MonoBehaviour,
 
         var zone = DragDropController.I != null ? DragDropController.I.RaycastDropZone(eventData) : null;
 
-        // Confirm ON の場合：ここでは確定せず“仮置き”扱いにする
         bool useConfirm = confirmController != null && confirmController.UseConfirm;
 
         if (zone == null)
@@ -123,15 +121,12 @@ public class CardInteraction : MonoBehaviour,
             return;
         }
 
-        // ここで「攻撃ゾーン or 効果ゾーンへドロップ」確定（Confirm OFFなら即確定）
         if (!useConfirm)
         {
             CommitDrop(zone);
         }
         else
         {
-            // Confirm ON：仮置き → ConfirmController経由で確定する設計
-            // 今は最小実装として「仮置き」＝手札に戻さず、表示は残す（親を元に戻して固定）
             PlaceAsPending(zone);
         }
     }
@@ -144,9 +139,6 @@ public class CardInteraction : MonoBehaviour,
         handManager?.ConfirmRemoveDragged();
 
         // ここで「カードの行動」をBattle側へ通知
-        // ResolveManager が本格稼働したらここを呼ぶ：
-        // ResolveManager.I.EnqueuePlay(view, zone.zoneType);
-
         // ワープ消滅（あれば）
         var vanish = GetComponent<CardVanishVfx>();
         if (vanish != null)
@@ -164,8 +156,7 @@ public class CardInteraction : MonoBehaviour,
 
     private void PlaceAsPending(DropZone zone)
     {
-        // “仮置き”は、今は最小として「元の親に戻す＆位置固定」。
-        // 本番は zone の中に見た目を置くなどもOK。
+        // 仮置きは、今は最小として「元の親に戻す＆位置固定」。
         transform.SetParent(originalParent, true);
         transform.SetSiblingIndex(originalSiblingIndex);
 
@@ -174,7 +165,6 @@ public class CardInteraction : MonoBehaviour,
         handLayout?.SetHoverEnabled(true);
         handLayout?.Rebuild();
 
-        // TODO: ConfirmController に pending を登録して、実行ボタンで CommitDrop する形に拡張
         Debug.Log($"Pending drop: {zone.zoneType} (Confirm ON)");
     }
 

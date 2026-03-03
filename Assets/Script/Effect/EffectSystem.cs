@@ -35,11 +35,10 @@ public class EffectSystem : MonoBehaviour
                     yield break;
                 }
             case EffectType.Heal:
-                // HP管理導入後に実装（いまは枠）
+                // HP管理導入後に実装
                 yield break;
 
             case EffectType.DealDamage:
-                // 対象や防御を参照する必要があるため ResolveManager 側で扱うのが安全
                 yield break;
 
             default:

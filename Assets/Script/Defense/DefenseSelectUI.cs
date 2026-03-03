@@ -30,7 +30,6 @@ public class DefenseSelectUI : MonoBehaviour
         if (root) root.SetActive(false);
     }
 
-    // CardInteraction 側から「防御としてこのカードを選びたい」を通知する想定（後で接続）
     public void SelectDefense(CardView v)
     {
         selected = v;
@@ -46,7 +45,6 @@ public class DefenseSelectUI : MonoBehaviour
     public IEnumerator WaitDecision()
     {
         Open();
-        // スキップ不可ならskipButtonを無効化するなども可能
         while (!decided) yield return null;
         Close();
     }

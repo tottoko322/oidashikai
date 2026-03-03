@@ -18,8 +18,6 @@ public class DeckManager : MonoBehaviour
 
         if (ModeContext.I.mode == GameMode.DeckBuildBattle)
         {
-            // 相談：DeckBuildで作ったデッキの受け渡しが必要（DeckRuntimeContext）
-            // ここも一覧に無いので、追加OKなら採用します。
             if (DeckRuntimeContext.I != null && DeckRuntimeContext.I.builtDeck.Count > 0)
             {
                 runtimeDeck.AddRange(DeckRuntimeContext.I.builtDeck);

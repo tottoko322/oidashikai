@@ -50,6 +50,6 @@ public class BattleStateMachine : MonoBehaviour
         handLayout.Rebuild();
 
         Debug.Log("Battle Ready (next: TurnStart)");
-        // ここから TurnStart→行動→防御→解決…を追加していく
+        // ここから TurnStart→行動→防御→解決…を追加していく予定だよ
     }
 }

@@ -7,8 +7,8 @@ public enum EffectType
     Heal,
     DealDamage,
     AddCost,
-    MultiplyNextDamage, // 拡張枠（例）
-    PierceDefense       // 拡張枠（例）
+    MultiplyNextDamage, 
+    PierceDefense       
 }
 
 public enum EffectTiming

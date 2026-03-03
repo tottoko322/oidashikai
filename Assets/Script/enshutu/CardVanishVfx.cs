@@ -7,7 +7,7 @@ using UnityEngine.UI;
 public class CardVanishVfx : MonoBehaviour
 {
     [Header("Warp VFX")]
-    public GameObject warpPrefab;     // 透明背景のリング画像Prefab（任意）
+    public GameObject warpPrefab;
     public float duration = 0.18f;
     public float endScale = 0.0f;
 

@@ -14,7 +14,6 @@ public class SaveManager : MonoBehaviour
         I = this;
         DontDestroyOnLoad(gameObject);
     }
-
     public float GetBgm(float def = 0.8f) => PlayerPrefs.GetFloat(KEY_BGM, def);
     public float GetSe(float def = 0.8f) => PlayerPrefs.GetFloat(KEY_SE, def);
     public bool GetConfirm(bool def = false) => PlayerPrefs.GetInt(KEY_CONFIRM, def ? 1 : 0) == 1;

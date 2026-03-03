@@ -2,7 +2,6 @@ using System.Collections.Generic;
 
 public class StatusSystem
 {
-    // 超最小：ターン終了前の自傷/呪いなどを積む枠
     private readonly List<int> pendingSelfDamage = new();
 
     public void AddSelfDamageAtTurnEnd(int amount)

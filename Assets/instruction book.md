@@ -59,15 +59,15 @@
 - DamageCalculator（atk-def、倍率、貫通、加算を吸収）
 - EffectSystem（EffectData実行の中心）
 - StatusSystem（呪い/継続：TurnEnd前に処理）
-- TimingSystem（TurnStart/TurnEnd前などのトリガ）※入れると拡張が楽
-- RestrictionSystem（効果禁止など）※進捗確認系のため推奨
+- TimingSystem（TurnStart/TurnEnd前などのトリガ）
+- RestrictionSystem（効果禁止など）
 
-## 防御フェーズ（必須UI）(Defense)
+## 防御フェーズ(Defense)
 
 - DefenseSelectUI（防御カード選択 or スキップ必須）
 - TurnEndButtonController（「何もしない」時だけ押す、文言切替）
 
-## 選択効果（任意/必須選択を含む拡張基盤）(Select)
+## 選択効果(Select)
 
 - SelectionController（選択待ちでResolveを止める）
 - CardSelectUI（手札/捨て札など候補表示、キャンセル可）
@@ -79,11 +79,11 @@
     - 防御：最大防御、同値なら攻撃低い方
     - 攻撃/効果の選択ロジック（後で強化可）
 
-## 演出（あなたの要望分）(enshutu)
+## 演出(enshutu)
 
 - CharacterHitVfx（防御後に上下揺れ＋赤フラッシュ）
 - CardVanishVfx（ドロップ確定でワープ消滅）
-- TurnBannerController（Battle Start/先攻後攻/ターン表示）※任意だが相性良い
+- TurnBannerController（Battle Start/先攻後攻/ターン表示）
 
 ## 音・設定(Audio)
 
