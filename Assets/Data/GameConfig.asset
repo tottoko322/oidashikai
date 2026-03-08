@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: GameConfig
   m_EditorClassIdentifier: 
   maxHand: 8
-  deckLimit: 15
+  deckLimit: 20
   sameCardLimit: 2
   startHandCount: 4
   maxCost: 5

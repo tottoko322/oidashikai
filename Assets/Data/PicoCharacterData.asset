@@ -12,8 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 904adbd21ab880742ab6aa67478cbde6, type: 3}
   m_Name: PicoCharacterData
   m_EditorClassIdentifier: 
-  characterId: 
-  displayName: 
-  portrait: {fileID: 0}
+  characterId: 0
+  displayName: pico
+  portrait: {fileID: -5980854697740831171, guid: e869c685b41c29f4fbd629d4474952bc, type: 3}
   faceForFirst: 0
-  distributedDeck: {fileID: 0}
+  distributedDeck: {fileID: 11400000, guid: ae8a0cb143b61834e90671ff2880d979, type: 2}

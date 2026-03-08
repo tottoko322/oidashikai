@@ -12,8 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a3f21289bf1a2ea4cab463637ea3534e, type: 3}
   m_Name: kouza
   m_EditorClassIdentifier: 
-  effectId: 
-  type: 0
+  effectId: hand_count_minus_2_damage
+  type: 9
   timing: 0
   valueA: 0
   valueF: 1

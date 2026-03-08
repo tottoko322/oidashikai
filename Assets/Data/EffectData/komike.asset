@@ -13,9 +13,9 @@ MonoBehaviour:
   m_Name: komike
   m_EditorClassIdentifier: 
   effectId: 
-  type: 0
+  type: 11
   timing: 0
-  valueA: 0
+  valueA: 1
   valueF: 1
   refMode: 0
   refSource: 0

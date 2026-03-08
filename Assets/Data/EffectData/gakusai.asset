@@ -12,11 +12,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a3f21289bf1a2ea4cab463637ea3534e, type: 3}
   m_Name: gakusai
   m_EditorClassIdentifier: 
-  effectId: 
-  type: 0
+  effectId: next_attack_x2
+  type: 5
   timing: 0
   valueA: 0
-  valueF: 1
+  valueF: 2
   refMode: 0
   refSource: 0
   selectionRule:
