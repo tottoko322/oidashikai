@@ -9,8 +9,13 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 684008c5bcfcee543896cf99ed587ecd, type: 3}
-  m_Name: DeckDefinition
+  m_Script: {fileID: 11500000, guid: 8eccf9a3823ec634db399959d7b01900, type: 3}
+  m_Name: PJ
   m_EditorClassIdentifier: 
-  deckId: 
-  entries: []
+  cardId: 1
+  displayName: PJ
+  cost: 0
+  attack: 1
+  defense: 2
+  effect: {fileID: 0}
+  artwork: {fileID: 0}
