@@ -21,8 +21,10 @@ public class CharacterSelectManager : MonoBehaviour
         // 相談スクリプト：SelectedCharacterContext
         SelectedCharacterContext.I.selected = characters[carousel.Index];
 
-        if (ModeContext.I.mode == GameMode.DistributedDeckBattle) flow.GoBattle();
-        else flow.GoDeckBuild();
+        //if (ModeContext.I.mode == GameMode.DistributedDeckBattle) flow.GoBattle();
+        //else flow.GoDeckBuild();
+        //直結(デッキビルドなし)
+        flow.GoBattle();
     }
 
     public void OnBack() => flow.GoTitle();
