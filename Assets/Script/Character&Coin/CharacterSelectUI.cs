@@ -9,7 +9,6 @@ public class CharacterSelectUI : MonoBehaviour
 
     public void Set(CharacterData data)
     {
-        Debug.Log(data);
         portrait.sprite = data.portrait;
         nameText.text = data.displayName;
     }
