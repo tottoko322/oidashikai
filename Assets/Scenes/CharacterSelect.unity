@@ -119,6 +119,51 @@ NavMeshSettings:
     debug:
       m_Flags: 0
   m_NavMeshData: {fileID: 0}
+--- !u!1 &543553
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 543555}
+  - component: {fileID: 543554}
+  m_Layer: 0
+  m_Name: ModeContext
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &543554
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 543553}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f0ff30dde752d6045bd71c47a0f8b78e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  mode: 0
+--- !u!4 &543555
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 543553}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 530.60394, y: 239.45226, z: -3.5896165}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &55949525
 GameObject:
   m_ObjectHideFlags: 0
@@ -267,6 +312,7 @@ GameObject:
   - component: {fileID: 390644378}
   - component: {fileID: 390644377}
   - component: {fileID: 390644376}
+  - component: {fileID: 390644379}
   m_Layer: 5
   m_Name: Dismiss
   m_TagString: Untagged
@@ -349,6 +395,18 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
+      - m_Target: {fileID: 390644379}
+        m_TargetAssemblyTypeName: BtnClick, Assembly-CSharp
+        m_MethodName: Cnacel
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!114 &390644377
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -387,6 +445,18 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 390644374}
   m_CullTransparentMesh: 1
+--- !u!114 &390644379
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 390644374}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 128291378a8da2b48a5638b538fbc453, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &421011298
 GameObject:
   m_ObjectHideFlags: 0
@@ -1956,6 +2026,7 @@ GameObject:
   - component: {fileID: 2030013708}
   - component: {fileID: 2030013707}
   - component: {fileID: 2030013706}
+  - component: {fileID: 2030013709}
   m_Layer: 5
   m_Name: Continue
   m_TagString: Untagged
@@ -2039,6 +2110,18 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
+      - m_Target: {fileID: 2030013709}
+        m_TargetAssemblyTypeName: BtnClick, Assembly-CSharp
+        m_MethodName: Click
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!114 &2030013707
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2077,6 +2160,18 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2030013704}
   m_CullTransparentMesh: 1
+--- !u!114 &2030013709
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2030013704}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 128291378a8da2b48a5638b538fbc453, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &2040863670
 GameObject:
   m_ObjectHideFlags: 0
@@ -2159,3 +2254,4 @@ SceneRoots:
   - {fileID: 761009869}
   - {fileID: 1538496733}
   - {fileID: 574121954}
+  - {fileID: 543555}
