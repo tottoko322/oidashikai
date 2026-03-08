@@ -10,6 +10,10 @@ public class SettingsModalUI : MonoBehaviour
 
     public GameConfig config;
 
+    private void Awake()
+    {
+        if(root)root.SetActive(false);
+    }
     private void Start()
     {
         if (SaveManager.I != null)
@@ -23,14 +27,16 @@ public class SettingsModalUI : MonoBehaviour
     public void Open() { if (root) root.SetActive(true); }
     public void Close() { if (root) root.SetActive(false); }
 
-    public void OnBgmChanged(float v)
+    public void OnBgmChanged()
     {
+        float v=bgmSlider.value;
         SaveManager.I?.SetBgm(v);
         AudioManager.I?.SetBgmVolume(v);
     }
 
-    public void OnSeChanged(float v)
+    public void OnSeChanged()
     {
+        float v=seSlider.value;
         SaveManager.I?.SetSe(v);
         AudioManager.I?.SetSeVolume(v);
     }
