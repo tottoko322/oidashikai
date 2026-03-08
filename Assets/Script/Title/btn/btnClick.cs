@@ -16,11 +16,4 @@ public class BtnClick : MonoBehaviour
             audioManager.PlayClick();
         }
     }
-        public void Cnacel()
-    {
-        if (audioManager != null)
-        {
-            audioManager.PlayClick();
-        }
-    }
 }

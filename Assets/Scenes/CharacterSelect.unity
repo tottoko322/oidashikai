@@ -397,7 +397,7 @@ MonoBehaviour:
         m_CallState: 2
       - m_Target: {fileID: 390644379}
         m_TargetAssemblyTypeName: BtnClick, Assembly-CSharp
-        m_MethodName: Cnacel
+        m_MethodName: Click
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
