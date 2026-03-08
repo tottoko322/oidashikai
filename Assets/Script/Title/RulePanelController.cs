@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -10,6 +11,7 @@ public class RulePanelController : MonoBehaviour
     public Sprite image2;
     public Sprite image3;
     public Sprite image4;
+    public TMP_Text counter;
     private Sprite[] imageSprites;
     private int descIndex=4;
 
@@ -32,5 +34,6 @@ public class RulePanelController : MonoBehaviour
     private void Apply()
     {
         descImage.sprite=imageSprites[carousel.Index];
+        counter.text=(carousel.Index+1)+"/"+descIndex;
     }
 }
