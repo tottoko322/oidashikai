@@ -14,12 +14,14 @@ public class CarouselController : MonoBehaviour
     public int Prev()
     {
         Index = (Index - 1 + Count) % Count;
+        Debug.Log(Index);
         return Index;
     }
 
     public int Next()
     {
         Index = (Index + 1) % Count;
+        Debug.Log(Index);
         return Index;
     }
 }
