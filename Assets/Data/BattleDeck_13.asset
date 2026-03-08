@@ -1,0 +1,42 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 684008c5bcfcee543896cf99ed587ecd, type: 3}
+  m_Name: BattleDeck_13
+  m_EditorClassIdentifier: 
+  deckId: 0
+  entries:
+  - card: {fileID: 11400000, guid: 24c3d1f561d56fd46aa4301cb75f0de3, type: 2}
+    count: 3
+  - card: {fileID: 11400000, guid: cd9d1e3bc46743e41990ae49ae52faef, type: 2}
+    count: 3
+  - card: {fileID: 11400000, guid: c9508a15dc793a7428f4a5591b2775bb, type: 2}
+    count: 2
+  - card: {fileID: 11400000, guid: e9c52e6bdbd10e34eb3468f3ff9f52c9, type: 2}
+    count: 2
+  - card: {fileID: 11400000, guid: 1848a1cb4978aa94b8a2ff68b5754967, type: 2}
+    count: 2
+  - card: {fileID: 11400000, guid: 68cad9ce27b23c74693959e731490732, type: 2}
+    count: 0
+  - card: {fileID: 11400000, guid: 777e20af6fc14e042862823cf5723f37, type: 2}
+    count: 0
+  - card: {fileID: 11400000, guid: c82b5a9112f561a4896034461a161372, type: 2}
+    count: 0
+  - card: {fileID: 11400000, guid: 2f49663c323a553488a94da32e2dc366, type: 2}
+    count: 0
+  - card: {fileID: 11400000, guid: 13373304b29687043b8224f198dbab63, type: 2}
+    count: 0
+  - card: {fileID: 11400000, guid: 1b9288dcdab8be9439b3b6a002f82517, type: 2}
+    count: 0
+  - card: {fileID: 11400000, guid: f762dc3532a76b44d921891e7c5e1b9b, type: 2}
+    count: 0
+  - card: {fileID: 11400000, guid: b7d3b134fbece1747be7b60feb0310b9, type: 2}
+    count: 0

@@ -3,19 +3,25 @@ using UnityEngine.EventSystems;
 
 public class CardHoverNotifier : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
 {
-    public HandLayoutController layout;
-    private CardView view;
+    [SerializeField] public HandLayoutController layout;
 
-    private void Awake() => view = GetComponent<CardView>();
+    private void Awake()
+    {
+        if (layout == null)
+        {
+            layout = FindFirstObjectByType<HandLayoutController>();
+        }
+    }
 
     public void OnPointerEnter(PointerEventData eventData)
     {
-        if (InputLockManager.I != null && InputLockManager.I.IsLocked) { /* hover OK */ }
-        layout.SetHovered(view);
+        if (layout == null) return;
+        layout.NotifyHoverChanged(gameObject, true);
     }
 
     public void OnPointerExit(PointerEventData eventData)
     {
-        layout.ClearHovered();
+        if (layout == null) return;
+        layout.NotifyHoverChanged(gameObject, false);
     }
 }

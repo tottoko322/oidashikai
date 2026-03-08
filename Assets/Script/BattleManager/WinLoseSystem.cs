@@ -7,12 +7,18 @@ public class WinLoseSystem : MonoBehaviour
     public void Win()
     {
         Debug.Log("WIN");
-        flow.GoTitle();
+        if (flow != null)
+        {
+            flow.GoTitle();
+        }
     }
 
     public void Lose()
     {
         Debug.Log("LOSE");
-        flow.GoTitle();
+        if (flow != null)
+        {
+            flow.GoTitle();
+        }
     }
 }

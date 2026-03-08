@@ -18,7 +18,6 @@ public class BattleBootstrap : MonoBehaviour
 
     private IEnumerator Start()
     {
-        // SaveManager は PlayerPrefs を直接読む設計なので Load() は不要
         if (audioManager != null)
         {
             audioManager.ApplySavedVolume();
@@ -54,14 +53,13 @@ public class BattleBootstrap : MonoBehaviour
             yield break;
         }
 
+        // BattleBootstrap で指定した配布デッキを強制利用
+        deckManager.forcedDeckDefinition = deckDefinition;
+
         bool ok = deckManager.SetupFromModeAndCharacter();
         if (!ok)
         {
             Debug.LogError("[BattleBootstrap] Deck setup failed.");
-            if (deckManager.winLose != null)
-            {
-                deckManager.winLose.Lose();
-            }
             yield break;
         }
 

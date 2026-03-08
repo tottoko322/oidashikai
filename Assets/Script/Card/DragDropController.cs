@@ -18,7 +18,12 @@ public class DragDropController : MonoBehaviour
 
     private void Awake()
     {
-        if (I != null) { Destroy(gameObject); return; }
+        if (I != null)
+        {
+            Destroy(gameObject);
+            return;
+        }
+
         I = this;
 
         if (eventSystem == null) eventSystem = EventSystem.current;
@@ -27,31 +32,69 @@ public class DragDropController : MonoBehaviour
 
     public DropZone RaycastDropZone(PointerEventData eventData)
     {
-        if (eventSystem == null || raycaster == null) return null;
+        if (eventSystem == null || raycaster == null || eventData == null) return null;
 
         results.Clear();
         raycaster.Raycast(eventData, results);
 
         for (int i = 0; i < results.Count; i++)
         {
-            var go = results[i].gameObject;
-            var zone = go.GetComponentInParent<DropZone>();
+            GameObject go = results[i].gameObject;
+            DropZone zone = go.GetComponentInParent<DropZone>();
             if (zone != null) return zone;
         }
+
         return null;
     }
 
+    // ドラッグ開始時：両方光らせる
+    public void StartHighlight()
+    {
+        if (highlighter == null) return;
+
+        highlighter.Clear();
+        highlighter.SetEnemy(true);
+        highlighter.SetEffect(true);
+    }
+
+    // ドラッグ終了時：全部消す
+    public void StopHighlight()
+    {
+        if (highlighter == null) return;
+
+        highlighter.Clear();
+    }
+
+    // ドラッグ中：現在マウスが乗っているゾーンを強調
     public void UpdateHighlight(DropZone zone)
     {
         if (highlighter == null) return;
 
         if (zone == null)
         {
+            // ゾーンに乗っていない間も両方光らせたい場合
             highlighter.Clear();
+            highlighter.SetEnemy(true);
+            highlighter.SetEffect(true);
             return;
         }
 
-        if (zone.zoneType == DropZoneType.Enemy) highlighter.SetEnemy(true);
-        if (zone.zoneType == DropZoneType.Effect) highlighter.SetEffect(true);
+        highlighter.Clear();
+
+        if (zone.zoneType == DropZoneType.Enemy)
+        {
+            highlighter.SetEnemy(true);
+            highlighter.SetEffect(true);
+        }
+        else if (zone.zoneType == DropZoneType.Effect)
+        {
+            highlighter.SetEnemy(true);
+            highlighter.SetEffect(true);
+        }
+        else
+        {
+            highlighter.SetEnemy(true);
+            highlighter.SetEffect(true);
+        }
     }
 }

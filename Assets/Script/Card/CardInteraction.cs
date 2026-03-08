@@ -37,15 +37,27 @@ public class CardInteraction : MonoBehaviour,
 
     public void OnPointerClick(PointerEventData eventData)
     {
-        // ロック中でもクリック音はOK・処理は進めない方針
         audioManager?.PlayClick();
 
-        if (popupUI == null) return;
         if (dragging) return;
 
+        // 防御選択中
+        if (BattleStateMachine.I != null && BattleStateMachine.I.IsWaitingForDefense)
+        {
+            BattleStateMachine.I.SelectDefenseCard(view);
+            return;
+        }
+
+        // 捨てるカード選択中
+        if (BattleStateMachine.I != null && BattleStateMachine.I.IsWaitingForDiscardSelect)
+        {
+            BattleStateMachine.I.SelectDiscardCard(view);
+            return;
+        }
+
+        if (popupUI == null) return;
         popupUI.Toggle(view);
     }
-
     public void OnBeginDrag(PointerEventData eventData)
     {
         if (InputLockManager.I != null && InputLockManager.I.IsLocked)
@@ -75,8 +87,13 @@ public class CardInteraction : MonoBehaviour,
         handLayout?.Rebuild();
 
         if (dragTopLayer != null) transform.SetParent(dragTopLayer, true);
-        cg.blocksRaycasts = false; // DropZoneへのRaycastを通す
+
+        // DropZoneへのRaycastを通す
+        cg.blocksRaycasts = false;
         cg.alpha = 1f;
+
+        // ここで両方ハイライト開始
+        DragDropController.I?.StartHighlight();
 
         audioManager?.PlayDragStart();
     }
@@ -97,7 +114,7 @@ public class CardInteraction : MonoBehaviour,
         handRootMover?.SetLowered(!insideHand);
 
         // ハイライト更新
-        var zone = DragDropController.I != null ? DragDropController.I.RaycastDropZone(eventData) : null;
+        DropZone zone = DragDropController.I != null ? DragDropController.I.RaycastDropZone(eventData) : null;
         DragDropController.I?.UpdateHighlight(zone);
     }
 
@@ -107,11 +124,13 @@ public class CardInteraction : MonoBehaviour,
         dragging = false;
 
         handRootMover?.SetLowered(false);
-        DragDropController.I?.UpdateHighlight(null);
+
+        // ハイライト停止
+        DragDropController.I?.StopHighlight();
 
         cg.blocksRaycasts = true;
 
-        var zone = DragDropController.I != null ? DragDropController.I.RaycastDropZone(eventData) : null;
+        DropZone zone = DragDropController.I != null ? DragDropController.I.RaycastDropZone(eventData) : null;
 
         bool useConfirm = confirmController != null && confirmController.UseConfirm;
 
@@ -133,14 +152,25 @@ public class CardInteraction : MonoBehaviour,
 
     private void CommitDrop(DropZone zone)
     {
+        if (zone == null)
+        {
+            ReturnToHand();
+            return;
+        }
+
+        bool accepted = BattleStateMachine.I != null && BattleStateMachine.I.TryPlayCard(view, zone.zoneType);
+        if (!accepted)
+        {
+            ReturnToHand();
+            return;
+        }
+
         audioManager?.PlayDrop();
 
         // 手札から除外状態を確定
         handManager?.ConfirmRemoveDragged();
 
-        // ここで「カードの行動」をBattle側へ通知
-        // ワープ消滅（あれば）
-        var vanish = GetComponent<CardVanishVfx>();
+        CardVanishVfx vanish = GetComponent<CardVanishVfx>();
         if (vanish != null)
         {
             vanish.Play(() => Destroy(gameObject));
@@ -186,7 +216,11 @@ public class CardInteraction : MonoBehaviour,
     private bool IsPointerInsideHandArea(PointerEventData eventData)
     {
         if (handAreaRect == null) return true;
+
         return RectTransformUtility.RectangleContainsScreenPoint(
-            handAreaRect, eventData.position, eventData.pressEventCamera);
+            handAreaRect,
+            eventData.position,
+            eventData.pressEventCamera
+        );
     }
 }

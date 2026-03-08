@@ -13,11 +13,10 @@ public class HandLayoutController : MonoBehaviour
     public float[] scaleByCount = new float[9]
     { 0f, 1.00f, 1.00f, 1.00f, 1.00f, 0.92f, 0.86f, 0.80f, 0.75f };
 
-    [Header("Hover (whole hand pushes)")]
+    [Header("Hover")]
     public float hoverGap = 32f;
     public float hoverScale = 1.18f;
     public float hoverRaiseY = 12f;
-    public float[] falloff = new float[] { 0f, 1.0f, 0.6f, 0.35f, 0.2f, 0.15f, 0.12f, 0.10f };
 
     private int hoveredIndex = -1;
     private bool hoverEnabled = true;
@@ -29,23 +28,37 @@ public class HandLayoutController : MonoBehaviour
         Rebuild();
     }
 
-    public void SetHovered(CardView v)
-    {
-        if (!hoverEnabled) return;
-        hoveredIndex = handManager.handViews.IndexOf(v);
-        Rebuild();
-    }
-
     public void ClearHovered()
     {
         hoveredIndex = -1;
         Rebuild();
     }
 
+    public void NotifyHoverChanged(GameObject card, bool hover)
+    {
+        if (!hoverEnabled) return;
+
+        var view = card.GetComponent<CardView>();
+        if (view == null) return;
+
+        if (hover)
+        {
+            hoveredIndex = handManager.handViews.IndexOf(view);
+        }
+        else
+        {
+            hoveredIndex = -1;
+        }
+
+        Rebuild();
+    }
+
     public void Rebuild()
     {
+        if (handManager == null) return;
+
         int n = handManager.handViews.Count;
-        if (n <= 0) return;
+        if (n == 0) return;
 
         float scale = (n <= 8) ? scaleByCount[n] : scaleByCount[8];
         float spacing = Mathf.Clamp(baseSpacing - (n - 4) * 12f, minSpacing, baseSpacing);
@@ -55,31 +68,26 @@ public class HandLayoutController : MonoBehaviour
 
         for (int i = 0; i < n; i++)
         {
+            var view = handManager.handViews[i];
+            if (view == null) continue;
+
+            RectTransform rt = view.transform as RectTransform;
+
             float x = startX + i * spacing;
             float y = baseY;
             float s = scale;
 
-            if (hoverEnabled && hoveredIndex >= 0 && hoveredIndex < n)
+            if (hoverEnabled && hoveredIndex == i)
             {
-                if (i == hoveredIndex)
-                {
-                    y += hoverRaiseY;
-                    s *= hoverScale;
-                }
-                else
-                {
-                    int d = Mathf.Abs(i - hoveredIndex);
-                    float f = (d < falloff.Length) ? falloff[d] : falloff[falloff.Length - 1];
-                    float sign = (i < hoveredIndex) ? -1f : 1f;
-                    x += sign * hoverGap * f;
-                }
+                y += hoverRaiseY;
+                s *= hoverScale;
             }
 
-            var rt = (RectTransform)handManager.handViews[i].transform;
             rt.anchoredPosition = new Vector2(x, y);
             rt.localScale = Vector3.one * s;
 
-            if (hoverEnabled && hoveredIndex == i) rt.SetAsLastSibling();
+            // 重要：毎回順序を整理
+            rt.SetSiblingIndex(i);
         }
     }
 }

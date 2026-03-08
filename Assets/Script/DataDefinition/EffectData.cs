@@ -7,9 +7,19 @@ public enum EffectType
     Heal,
     DealDamage,
     AddCost,
-    MultiplyNextDamage, 
-    PierceDefense       
+    MultiplyNextDamage,
+    PierceDefense,
+
+    DiscardAttackMinusOneDamage,
+    DiscardDefenseMinusOneHeal,
+    HandCountMinusTwoDamage,
+
+    HealAndSelfDamageNextTurnEnd,
+    ReduceEnemyMaxHP,
+    BlockEffectsAndSelfDamageWhileInHand
+
 }
+
 
 public enum EffectTiming
 {
