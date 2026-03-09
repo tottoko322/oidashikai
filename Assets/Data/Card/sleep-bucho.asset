@@ -17,5 +17,5 @@ MonoBehaviour:
   cost: 0
   attack: 2
   defense: 2
-  effect: {fileID: 0}
-  artwork: {fileID: 0}
+  effect: {fileID: 11400000, guid: 1844414379709844f9d1a0465c37931b, type: 2}
+  artwork: {fileID: 2513799804417702227, guid: 470935d50b8b90a4f8f2597859bf5c9f, type: 3}
