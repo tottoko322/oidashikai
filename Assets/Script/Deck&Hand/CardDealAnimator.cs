@@ -43,6 +43,7 @@ public class CardDealAnimator : MonoBehaviour
         }
 
         var view = hand.AddCard(c);
+        AudioManager.I?.PlayDraw();
 
         // ホバー通知や入力は CardInteraction 側で付ける想定（後で）
         var hover = view.gameObject.GetComponent<CardHoverNotifier>();

@@ -7,8 +7,8 @@ public class TurnEndButtonController : MonoBehaviour
     public Button button;
     public TMP_Text label;
 
-    private string normalText = "ターン終了";
-    private string idleText = "何もしない";
+    private string normalText = "turn end";
+    private string idleText = "Skip";
 
     public void SetIdleOnly(bool idle)
     {

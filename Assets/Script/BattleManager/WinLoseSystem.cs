@@ -6,6 +6,7 @@ public class WinLoseSystem : MonoBehaviour
 
     public void Win()
     {
+        AudioManager.I?.PlayYouWin();
         Debug.Log("WIN");
         if (flow != null)
         {
@@ -15,6 +16,7 @@ public class WinLoseSystem : MonoBehaviour
 
     public void Lose()
     {
+        AudioManager.I?.PlayYouWin();
         Debug.Log("LOSE");
         if (flow != null)
         {

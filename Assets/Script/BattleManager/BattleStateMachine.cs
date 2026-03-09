@@ -169,8 +169,9 @@ private bool IsEffectCardBlocked()
         if (turnSystem.Current == TurnOwner.Player)
         {
             InputLockManager.I?.Lock();
+            AudioManager.I?.PlayTurnStart();
 
-            turnBanner?.SetText("プレイヤーターン");
+            turnBanner?.SetText("My Turn");
 
             costManager.OnTurnStartGainOne();
 
@@ -185,8 +186,9 @@ private bool IsEffectCardBlocked()
         else
         {
             InputLockManager.I?.Lock();
+            AudioManager.I?.PlayTurnStart();
 
-            turnBanner?.SetText("敵ターン");
+            turnBanner?.SetText("Enemy Turn");
 
             yield return new WaitForSeconds(enemyThinkTime);
             yield return StartCoroutine(CoEnemyTurn());
@@ -274,6 +276,7 @@ private bool IsEffectCardBlocked()
             EnemyHP = Mathf.Max(0, EnemyHP - damage);
             RefreshHpUI();
             enemyHitVfx?.Play();
+            AudioManager.I?.PlayDamage();
 
             Debug.Log($"[Battle] Player attack: {card.displayName} / ATK {rawAttack} -> {buffedAttack} / Damage {damage} / EnemyHP {EnemyHP}");
             yield return new WaitForSeconds(0.35f);
@@ -313,6 +316,7 @@ private bool IsEffectCardBlocked()
 
             case EffectType.Heal:
                 PlayerHP = Mathf.Min(playerMaxHP, PlayerHP + Mathf.Max(0, e.valueA));
+                AudioManager.I?.PlayHeal();
                 RefreshHpUI();
                 Debug.Log($"[Battle] Heal {e.valueA} / PlayerHP {PlayerHP}");
                 yield return new WaitForSeconds(0.2f);
@@ -322,24 +326,28 @@ private bool IsEffectCardBlocked()
                 EnemyHP = Mathf.Max(0, EnemyHP - Mathf.Max(0, e.valueA));
                 RefreshHpUI();
                 enemyHitVfx?.Play();
+                AudioManager.I?.PlayDamage();
                 Debug.Log($"[Battle] Effect damage {e.valueA} / EnemyHP {EnemyHP}");
                 yield return new WaitForSeconds(0.35f);
                 yield break;
 
             case EffectType.AddCost:
                 costManager.Add(Mathf.Max(0, e.valueA));
+                AudioManager.I?.PlayBuff();
                 Debug.Log($"[Battle] Add cost {e.valueA} / CurrentCost {costManager.Current}");
                 yield return new WaitForSeconds(0.15f);
                 yield break;
 
             case EffectType.MultiplyNextDamage:
                 pendingNextAttackMultiplier = Mathf.Max(1f, e.valueF);
+                AudioManager.I?.PlayBuff();
                 Debug.Log($"[Battle] Next attack multiplier = x{pendingNextAttackMultiplier}");
                 yield return new WaitForSeconds(0.15f);
                 yield break;
 
             case EffectType.PierceDefense:
                 pendingNextDefenseMultiplier = Mathf.Max(1f, e.valueF);
+                AudioManager.I?.PlayBuff();
                 Debug.Log($"[Battle] Next defense multiplier = x{pendingNextDefenseMultiplier}");
                 yield return new WaitForSeconds(0.15f);
                 yield break;
@@ -362,6 +370,7 @@ private bool IsEffectCardBlocked()
                     int selfDamage = Mathf.Max(0, Mathf.RoundToInt(e.valueF));
 
                     PlayerHP = Mathf.Min(playerMaxHP, PlayerHP + heal);
+                    AudioManager.I?.PlayHeal();
                     RefreshHpUI();
                     pendingSelfDamageAtNextPlayerTurnEnd += selfDamage;
 
@@ -376,6 +385,7 @@ private bool IsEffectCardBlocked()
 
                     enemyMaxHP = Mathf.Max(1, enemyMaxHP - reduce);
                     EnemyHP = Mathf.Min(EnemyHP, enemyMaxHP);
+                    AudioManager.I?.PlayBuff();
                     RefreshHpUI();
 
                     Debug.Log($"[Battle] Enemy MaxHP -{reduce} / EnemyMaxHP {enemyMaxHP} / EnemyHP {EnemyHP}");
@@ -403,7 +413,7 @@ private bool IsEffectCardBlocked()
             yield break;
         }
 
-        yield return StartCoroutine(CoWaitForDiscardSelection("捨てるカードを選択してください"));
+        yield return StartCoroutine(CoWaitForDiscardSelection("すてるカードをえらんで"));
 
         if (selectedDiscardCard == null || selectedDiscardCard.Data == null)
             yield break;
@@ -415,6 +425,7 @@ private bool IsEffectCardBlocked()
         EnemyHP = Mathf.Max(0, EnemyHP - damage);
         RefreshHpUI();
         enemyHitVfx?.Play();
+        AudioManager.I?.PlayDamage();
 
         Debug.Log($"[Battle] QGJ effect / Damage {damage} / EnemyHP {EnemyHP}");
         yield return new WaitForSeconds(0.35f);
@@ -434,7 +445,7 @@ private bool IsEffectCardBlocked()
             yield break;
         }
 
-        yield return StartCoroutine(CoWaitForDiscardSelection("捨てるカードを選択してください"));
+        yield return StartCoroutine(CoWaitForDiscardSelection("すてるカードをえらんで"));
 
         if (selectedDiscardCard == null || selectedDiscardCard.Data == null)
             yield break;
@@ -444,6 +455,7 @@ private bool IsEffectCardBlocked()
         yield return StartCoroutine(CoConsumeHandCard(selectedDiscardCard));
 
         PlayerHP = Mathf.Min(playerMaxHP, PlayerHP + heal);
+        AudioManager.I?.PlayHeal();
         RefreshHpUI();
 
         Debug.Log($"[Battle] 部室 effect / Heal {heal} / PlayerHP {PlayerHP}");
@@ -458,6 +470,7 @@ private bool IsEffectCardBlocked()
         EnemyHP = Mathf.Max(0, EnemyHP - damage);
         RefreshHpUI();
         enemyHitVfx?.Play();
+        AudioManager.I?.PlayDamage();
 
         Debug.Log($"[Battle] 講座 effect / Hand {handCount} / Damage {damage} / EnemyHP {EnemyHP}");
         yield return new WaitForSeconds(0.35f);
@@ -518,6 +531,7 @@ private bool IsEffectCardBlocked()
         if (waitingForDefense) return;
         if (waitingForDiscardSelect) return;
         if (InputLockManager.I != null && InputLockManager.I.IsLocked) return;
+        AudioManager.I?.PlayTurnEnd();
 
         StartCoroutine(CoEndPlayerTurn());
     }
@@ -533,6 +547,7 @@ private bool IsEffectCardBlocked()
             PlayerHP = Mathf.Max(0, PlayerHP - 1);
             RefreshHpUI();
             playerHitVfx?.Play();
+            AudioManager.I?.PlayDamage();
 
             Debug.Log($"[Battle] 進捗確認 self damage 1 / PlayerHP {PlayerHP}");
             yield return new WaitForSeconds(0.35f);
@@ -555,6 +570,7 @@ private bool IsEffectCardBlocked()
             PlayerHP = Mathf.Max(0, PlayerHP - selfDamage);
             RefreshHpUI();
             playerHitVfx?.Play();
+            AudioManager.I?.PlayDamage();
 
             Debug.Log($"[Battle] Self damage at player turn end: {selfDamage} / PlayerHP {PlayerHP}");
             yield return new WaitForSeconds(0.35f);
@@ -627,6 +643,7 @@ private bool IsEffectCardBlocked()
             PlayerHP = Mathf.Max(0, PlayerHP - damage);
             RefreshHpUI();
             playerHitVfx?.Play();
+            AudioManager.I?.PlayDamage();
         }
 
         Debug.Log($"[Battle] Enemy attack {attack} / Defense {defenseValue} / Damage {damage} / PlayerHP {PlayerHP}");
@@ -666,10 +683,10 @@ private bool IsEffectCardBlocked()
     private void RefreshHpUI()
     {
         if (playerHpText != null)
-            playerHpText.text = $"HP {PlayerHP} / {playerMaxHP}";
+            playerHpText.text = $"{PlayerHP}";
 
         if (enemyHpText != null)
-            enemyHpText.text = $"HP {EnemyHP} / {enemyMaxHP}";
+            enemyHpText.text = $"{EnemyHP}";
     }
 
 }

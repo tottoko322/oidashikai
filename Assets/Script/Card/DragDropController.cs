@@ -65,36 +65,13 @@ public class DragDropController : MonoBehaviour
         highlighter.Clear();
     }
 
-    // ドラッグ中：現在マウスが乗っているゾーンを強調
+    // ドラッグ中：現在のゾーンに乗っていなくても両方光らせる
     public void UpdateHighlight(DropZone zone)
     {
         if (highlighter == null) return;
 
-        if (zone == null)
-        {
-            // ゾーンに乗っていない間も両方光らせたい場合
-            highlighter.Clear();
-            highlighter.SetEnemy(true);
-            highlighter.SetEffect(true);
-            return;
-        }
-
         highlighter.Clear();
-
-        if (zone.zoneType == DropZoneType.Enemy)
-        {
-            highlighter.SetEnemy(true);
-            highlighter.SetEffect(true);
-        }
-        else if (zone.zoneType == DropZoneType.Effect)
-        {
-            highlighter.SetEnemy(true);
-            highlighter.SetEffect(true);
-        }
-        else
-        {
-            highlighter.SetEnemy(true);
-            highlighter.SetEffect(true);
-        }
+        highlighter.SetEnemy(true);
+        highlighter.SetEffect(true);
     }
 }

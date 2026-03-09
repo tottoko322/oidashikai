@@ -22,7 +22,7 @@ public class DefenseSelectUI : MonoBehaviour
         selected = null;
         decided = false;
         if (root) root.SetActive(true);
-        if (message) message.text = "防御カードを選ぶか、スキップしてください";
+        if (message) message.text = "defense or skip";
     }
 
     public void Close()
