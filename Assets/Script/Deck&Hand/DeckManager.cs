@@ -14,12 +14,8 @@ public class DeckManager : MonoBehaviour
 
     public int Remaining => runtimeDeck.Count - index;
 
-    // 追加：指定DeckDefinitionから直接デッキを作る
     public bool SetupFromDefinition(DeckDefinition definition)
     {
-        Debug.Log("[DeckManager] definition name = " + definition.name);
-        Debug.Log("[DeckManager] entry count = " + definition.entries.Count);
-
         runtimeDeck.Clear();
         index = 0;
 
@@ -35,9 +31,15 @@ public class DeckManager : MonoBehaviour
             return false;
         }
 
+        Debug.Log("[DeckManager] definition name = " + definition.name);
+        Debug.Log("[DeckManager] entry count = " + definition.entries.Count);
+
+        int totalRequested = 0;
+
         for (int e = 0; e < definition.entries.Count; e++)
         {
             var entry = definition.entries[e];
+
             if (entry == null)
             {
                 Debug.LogWarning($"[DeckManager] Entry {e} is null.");
@@ -50,8 +52,17 @@ public class DeckManager : MonoBehaviour
                 continue;
             }
 
-            int count = Mathf.Max(0, entry.count);
-            Debug.Log($"[DeckManager] Add {entry.card.displayName} x{count}");
+            int count = entry.count;
+
+            Debug.Log($"[DeckManager] Entry {e} / Card = {entry.card.displayName} / Count = {count}");
+
+            if (count <= 0)
+            {
+                Debug.LogWarning($"[DeckManager] Entry {e} ({entry.card.displayName}) has count <= 0, so it will not be added.");
+                continue;
+            }
+
+            totalRequested += count;
 
             for (int i = 0; i < count; i++)
             {
@@ -61,7 +72,7 @@ public class DeckManager : MonoBehaviour
 
         Shuffle(runtimeDeck);
 
-        Debug.Log($"[DeckManager] SetupFromDefinition complete. Deck count = {runtimeDeck.Count}");
+        Debug.Log($"[DeckManager] SetupFromDefinition complete. Requested = {totalRequested} / Deck count = {runtimeDeck.Count}");
         return runtimeDeck.Count > 0;
     }
 
@@ -70,14 +81,12 @@ public class DeckManager : MonoBehaviour
         runtimeDeck.Clear();
         index = 0;
 
-        // まずは BattleBootstrap / BattleStateMachine から渡された強制デッキを最優先
         if (forcedDeckDefinition != null && forcedDeckDefinition.entries != null && forcedDeckDefinition.entries.Count > 0)
         {
             Debug.Log($"[DeckManager] Using forced deck: {forcedDeckDefinition.name}");
             return SetupFromDefinition(forcedDeckDefinition);
         }
 
-        // 構築デッキバトル時
         if (ModeContext.I != null && ModeContext.I.mode == GameMode.DeckBuildBattle)
         {
             if (DeckRuntimeContext.I != null && DeckRuntimeContext.I.builtDeck.Count > 0)
@@ -89,12 +98,30 @@ public class DeckManager : MonoBehaviour
             }
         }
 
-        // 配布デッキ
-        if (SelectedCharacterContext.I == null) return false;
+        if (SelectedCharacterContext.I == null)
+        {
+            Debug.LogError("[DeckManager] SelectedCharacterContext.I is null.");
+            return false;
+        }
 
         var ch = SelectedCharacterContext.I.selected;
-        if (ch == null || ch.distributedDeck == null) return false;
-        if (ch.distributedDeck.entries == null || ch.distributedDeck.entries.Count == 0) return false;
+        if (ch == null)
+        {
+            Debug.LogError("[DeckManager] selected character is null.");
+            return false;
+        }
+
+        if (ch.distributedDeck == null)
+        {
+            Debug.LogError("[DeckManager] selected character's distributedDeck is null.");
+            return false;
+        }
+
+        if (ch.distributedDeck.entries == null || ch.distributedDeck.entries.Count == 0)
+        {
+            Debug.LogError("[DeckManager] selected character deck entries are empty.");
+            return false;
+        }
 
         bool ok = SetupFromDefinition(ch.distributedDeck);
         Debug.Log($"[DeckManager] Using selected character deck. Deck count = {runtimeDeck.Count}");
@@ -109,7 +136,8 @@ public class DeckManager : MonoBehaviour
             return false;
         }
 
-        card = runtimeDeck[index++];
+        card = runtimeDeck[index];
+        index++;
         return true;
     }
 

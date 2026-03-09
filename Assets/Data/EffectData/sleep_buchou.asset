@@ -13,9 +13,9 @@ MonoBehaviour:
   m_Name: sleep_buchou
   m_EditorClassIdentifier: 
   effectId: 
-  type: 0
+  type: 2
   timing: 0
-  valueA: 0
+  valueA: 1
   valueF: 1
   refMode: 0
   refSource: 0

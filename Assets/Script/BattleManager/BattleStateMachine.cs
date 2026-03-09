@@ -29,6 +29,11 @@ public class BattleStateMachine : MonoBehaviour
     public DefenseSelectUI defenseSelectUI;
     public TMP_Text playerHpText;
     public TMP_Text enemyHpText;
+    [Header("Extra UI")]
+    public TMP_Text gameStartText;
+    public TMP_Text deckCountText;
+    public TMP_Text enemyActionText;
+
 
     
 
@@ -79,6 +84,32 @@ public class BattleStateMachine : MonoBehaviour
         }
         I = this;
     }
+        private void RefreshDeckUI()
+    {
+        if (deckCountText != null && deckManager != null)
+        {
+            deckCountText.text = $"やまふだ {deckManager.Remaining}";
+        }
+    }
+
+    private void ShowEnemyAction(string message)
+    {
+        if (enemyActionText != null)
+        {
+            enemyActionText.text = message;
+        }
+    }
+
+    private IEnumerator ShowGameStart()
+    {
+        if (gameStartText == null) yield break;
+
+        gameStartText.gameObject.SetActive(true);
+        gameStartText.text = "GAME START";
+        yield return new WaitForSeconds(1.2f);
+        gameStartText.gameObject.SetActive(false);
+    }
+
     private bool HasProgressCheckInHand()
     {
         if (handManager == null) return false;
@@ -95,10 +126,10 @@ public class BattleStateMachine : MonoBehaviour
         return false;
     }
 
-private bool IsEffectCardBlocked()
-{
-    return HasProgressCheckInHand();
-}
+    private bool IsEffectCardBlocked()
+    {
+        return HasProgressCheckInHand();
+    }
 
 
     private IEnumerator Start()
@@ -125,6 +156,8 @@ private bool IsEffectCardBlocked()
         RefreshHpUI();
         TurnCount = 1;
 
+        ShowEnemyAction("");
+
         bool playerFirst = true;
         if (coinToss != null)
         {
@@ -145,10 +178,13 @@ private bool IsEffectCardBlocked()
             yield break;
         }
 
+        RefreshDeckUI();
+
         costManager.Init(config.startCost, config.maxCost);
 
         yield return cardDealAnimator.DealStartHand(config.startHandCount);
         handLayout?.Rebuild();
+        RefreshDeckUI();
 
         BattleReady = true;
 
@@ -179,7 +215,7 @@ private bool IsEffectCardBlocked()
             {
                 yield return cardDealAnimator.Draw(1);
             }
-
+            RefreshDeckUI();
             handLayout?.Rebuild();
             InputLockManager.I?.Unlock();
         }
@@ -590,6 +626,8 @@ private bool IsEffectCardBlocked()
     private IEnumerator CoEnemyTurn()
     {
         int attack = Mathf.Max(0, enemyFixedDamage);
+        ShowEnemyAction($"てきのこうげき {attack}");
+
 
         CardView defenseCard = null;
         int defenseValue = 0;
