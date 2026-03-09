@@ -58,6 +58,7 @@ public class AudioManager : MonoBehaviour
         {
             PlayBgm(bgmClip, true);
         }
+        DontDestroyOnLoad(this);
     }
 
     // =========================
@@ -91,7 +92,6 @@ public class AudioManager : MonoBehaviour
         if (PlayerPrefs.HasKey(SeKey))
             seVolume = PlayerPrefs.GetFloat(SeKey);
     }
-
     public void SetMasterVolume(float value)
     {
         masterVolume = Mathf.Clamp01(value);
