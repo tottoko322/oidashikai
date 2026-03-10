@@ -18,4 +18,4 @@ MonoBehaviour:
   attack: 1
   defense: 1
   effect: {fileID: 11400000, guid: dd36e6051b2fa17448f503fd91c6324e, type: 2}
-  artwork: {fileID: 0}
+  artwork: {fileID: -195114260649759302, guid: 935e848dfa6145b44aa5b81d0f26ecc1, type: 3}
