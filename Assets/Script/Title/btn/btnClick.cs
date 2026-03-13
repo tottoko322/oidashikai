@@ -16,4 +16,11 @@ public class BtnClick : MonoBehaviour
             audioManager.PlayClick();
         }
     }
+    public void BgmFadeOut()
+    {
+        if (audioManager != null)
+        {
+            audioManager.FadeOutBgm();
+        }
+    }
 }

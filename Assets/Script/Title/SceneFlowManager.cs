@@ -8,4 +8,5 @@ public class SceneFlowManager : MonoBehaviour
     public void GoCharacterSelect() => SceneManager.LoadScene("CharacterSelect");
     public void GoDeckBuild() => SceneManager.LoadScene("DeckBuild");
     public void GoBattle() => SceneManager.LoadScene("Battle");
+    public void GoDic() => SceneManager.LoadScene("Dic");
 }

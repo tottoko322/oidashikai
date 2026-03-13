@@ -1,0 +1,101 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bbb281ee3bf0b054c82ac2347e9e782c, type: 3}
+  m_Name: CardAssets
+  m_EditorClassIdentifier: 
+  m_GroupName: CardAssets
+  m_GUID: 7ea3011967c107d40900572f0ad8ad17
+  m_SerializeEntries:
+  - m_GUID: 13373304b29687043b8224f198dbab63
+    m_Address: Assets/Data/Card/komike.asset
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - cards
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 1848a1cb4978aa94b8a2ff68b5754967
+    m_Address: Assets/Data/Card/gasshuku.asset
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - cards
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 1b9288dcdab8be9439b3b6a002f82517
+    m_Address: Assets/Data/Card/iubeam.asset
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - cards
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 24c3d1f561d56fd46aa4301cb75f0de3
+    m_Address: Assets/Data/Card/kyokukai.asset
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - cards
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 2f49663c323a553488a94da32e2dc366
+    m_Address: Assets/Data/Card/kouza.asset
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - cards
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 68cad9ce27b23c74693959e731490732
+    m_Address: Assets/Data/Card/QGJ.asset
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - cards
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 777e20af6fc14e042862823cf5723f37
+    m_Address: Assets/Data/Card/haishin.asset
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - cards
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: b7d3b134fbece1747be7b60feb0310b9
+    m_Address: Assets/Data/Card/sleep-bucho.asset
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - cards
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: c82b5a9112f561a4896034461a161372
+    m_Address: Assets/Data/Card/bushitu.asset
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - cards
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: c9508a15dc793a7428f4a5591b2775bb
+    m_Address: Assets/Data/Card/gakusai.asset
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - cards
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: cd9d1e3bc46743e41990ae49ae52faef
+    m_Address: Assets/Data/Card/PJ.asset
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - cards
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: e9c52e6bdbd10e34eb3468f3ff9f52c9
+    m_Address: Assets/Data/Card/sengakoukankai.asset
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - cards
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: f762dc3532a76b44d921891e7c5e1b9b
+    m_Address: Assets/Data/Card/shinchoku.asset
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - cards
+    FlaggedDuringContentUpdateRestriction: 0
+  m_ReadOnly: 0
+  m_Settings: {fileID: 11400000, guid: ad590a6e26c8c2245a4ae7ed694cac73, type: 2}
+  m_SchemaSet:
+    m_Schemas:
+    - {fileID: 11400000, guid: ebaa52efe3c4ea84b8d454dac03f9d62, type: 2}
+    - {fileID: 11400000, guid: 75ade18a6970a854eb96daeb6fa991d1, type: 2}
