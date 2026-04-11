@@ -10,8 +10,9 @@ public class CardOnClick : MonoBehaviour
     {
         if (DicManager.allLoaded)
         {
-            Image img = btn.GetComponent<CardView>().art;
-            DicManager.ShowCards(img);
+            CardView card = btn.GetComponent<CardView>();
+            DicManager.ShowCards(card.art);
+            DicManager.ChangeText(card.atkText);
         }
     }
 }
