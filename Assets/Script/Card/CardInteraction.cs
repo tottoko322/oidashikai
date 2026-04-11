@@ -41,20 +41,6 @@ public class CardInteraction : MonoBehaviour,
 
         if (dragging) return;
 
-        // 防御選択中
-        if (BattleStateMachine.I != null && BattleStateMachine.I.IsWaitingForDefense)
-        {
-            BattleStateMachine.I.SelectDefenseCard(view);
-            return;
-        }
-
-        // 捨てるカード選択中
-        if (BattleStateMachine.I != null && BattleStateMachine.I.IsWaitingForDiscardSelect)
-        {
-            BattleStateMachine.I.SelectDiscardCard(view);
-            return;
-        }
-
         if (popupUI == null) return;
         popupUI.Toggle(view);
     }
@@ -158,6 +144,30 @@ public class CardInteraction : MonoBehaviour,
             return;
         }
 
+        // 防御待ち中は、攻撃/効果どちらのゾーンに落としても防御カードとして扱う
+        if (BattleStateMachine.I != null && BattleStateMachine.I.IsWaitingForDefense)
+        {
+            bool acceptedDefense = BattleStateMachine.I.TrySelectDefenseByDrop(view);
+            if (!acceptedDefense)
+            {
+                ReturnToHand();
+                return;
+            }
+
+            // BeginDrag で手札リストから一時除外されているので戻しておく
+            // （このあと CoEnemyTurn 側で正式に RemoveCard + Destroy される）
+            transform.SetParent(originalParent, true);
+            transform.SetSiblingIndex(originalSiblingIndex);
+            rt.anchoredPosition = originalAnchoredPos;
+
+            handManager?.CancelDrag(view);
+            handLayout?.SetHoverEnabled(true);
+            handLayout?.Rebuild();
+
+            audioManager?.PlayDrop();
+            return;
+        }
+
         bool accepted = BattleStateMachine.I != null && BattleStateMachine.I.TryPlayCard(view, zone.zoneType);
         if (!accepted)
         {
@@ -183,7 +193,6 @@ public class CardInteraction : MonoBehaviour,
         handLayout?.SetHoverEnabled(true);
         handLayout?.Rebuild();
     }
-
     private void PlaceAsPending(DropZone zone)
     {
         // 仮置きは、今は最小として「元の親に戻す＆位置固定」。

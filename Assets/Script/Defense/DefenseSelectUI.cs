@@ -1,7 +1,7 @@
 using System.Collections;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
-using TMPro;
 
 public class DefenseSelectUI : MonoBehaviour
 {
@@ -15,39 +15,65 @@ public class DefenseSelectUI : MonoBehaviour
     public HandLayoutController layout;
 
     private CardView selected;
-    private bool decided;
+    private bool waiting;
+    private bool skipped;
 
-    public void Open()
+    private void Awake()
     {
-        selected = null;
-        decided = false;
-        if (root) root.SetActive(true);
-        if (message) message.text = "defense or skip";
-    }
-
-    public void Close()
-    {
-        if (root) root.SetActive(false);
-    }
-
-    public void SelectDefense(CardView v)
-    {
-        selected = v;
-        decided = true;
-    }
-
-    public void OnSkip()
-    {
-        selected = null;
-        decided = true;
+        if (root != null)
+            root.SetActive(false);
     }
 
     public IEnumerator WaitDecision()
     {
-        Open();
-        while (!decided) yield return null;
-        Close();
+        waiting = true;
+        skipped = false;
+        selected = null;
+
+        if (root != null)
+            root.SetActive(true);
+
+        if (message != null)
+            message.text = "defense or skip?";
+
+        while (waiting)
+            yield return null;
+
+        if (root != null)
+            root.SetActive(false);
     }
 
-    public CardView GetSelected() => selected;
+    public void SelectDefense(CardView view)
+    {
+        if (!waiting) return;
+        if (view == null) return;
+
+        selected = view;
+        skipped = false;
+        waiting = false;
+    }
+
+    public void OnSkip()
+    {
+        if (!waiting) return;
+
+        selected = null;
+        skipped = true;
+        waiting = false;
+    }
+
+    public CardView GetSelected()
+    {
+        return selected;
+    }
+
+    public bool WasSkipped()
+    {
+        return skipped;
+    }
+
+    public bool IsWaiting()
+    {
+        return waiting;
+    }
 }

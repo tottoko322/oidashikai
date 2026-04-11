@@ -75,6 +75,8 @@ public class BattleStateMachine : MonoBehaviour
     private float pendingNextAttackMultiplier = 1f;
     private float pendingNextDefenseMultiplier = 1f;
 
+    private bool firstPlayerTurnStarted = false;
+
     private void Awake()
     {
         if (I != null && I != this)
@@ -134,12 +136,12 @@ public class BattleStateMachine : MonoBehaviour
 
     private IEnumerator Start()
     {
-        InputLockManager.I?.Lock();
         BattleReady = false;
         PlayerActionUsed = false;
         resolvingAction = false;
         waitingForDefense = false;
         waitingForDiscardSelect = false;
+        firstPlayerTurnStarted = false;
 
         if (config == null || winLose == null || costManager == null || deckManager == null || handManager == null || cardDealAnimator == null)
         {
@@ -211,10 +213,25 @@ public class BattleStateMachine : MonoBehaviour
 
             costManager.OnTurnStartGainOne();
 
-            if (cardDealAnimator != null)
+            bool shouldDraw = true;
+
+            // 最初のプレイヤーターンだけ特別処理
+            if (!firstPlayerTurnStarted)
+            {
+                firstPlayerTurnStarted = true;
+
+                // 先攻プレイヤーの最初のターンはドローしない
+                if (TurnCount == 1)
+                {
+                    shouldDraw = false;
+                }
+            }
+
+            if (shouldDraw && cardDealAnimator != null)
             {
                 yield return cardDealAnimator.Draw(1);
-            }
+            } 
+
             RefreshDeckUI();
             handLayout?.Rebuild();
             InputLockManager.I?.Unlock();
@@ -562,16 +579,25 @@ public class BattleStateMachine : MonoBehaviour
     public void OnTurnEndButtonPressed()
     {
         if (!BattleReady) return;
-        if (turnSystem.Current != TurnOwner.Player) return;
         if (resolvingAction) return;
-        if (waitingForDefense) return;
         if (waitingForDiscardSelect) return;
-        if (InputLockManager.I != null && InputLockManager.I.IsLocked) return;
-        AudioManager.I?.PlayTurnEnd();
 
+        // 防御待ち中は最優先でスキップ
+        if (waitingForDefense)
+        {
+            AudioManager.I?.PlayTurnEnd();
+            SkipDefense();
+            return;
+        }
+
+        // 通常のターン終了はプレイヤーターンのみ
+        if (turnSystem.Current != TurnOwner.Player) return;
+        if (InputLockManager.I != null && InputLockManager.I.IsLocked) return;
+
+        AudioManager.I?.PlayTurnEnd();
         StartCoroutine(CoEndPlayerTurn());
     }
-
+    
     private IEnumerator CoEndPlayerTurn()
     {
         InputLockManager.I?.Lock();
@@ -726,5 +752,24 @@ public class BattleStateMachine : MonoBehaviour
         if (enemyHpText != null)
             enemyHpText.text = $"{EnemyHP}";
     }
+
+    public bool TrySelectDefenseByDrop(CardView view)
+    {
+        if (!waitingForDefense) return false;
+        if (view == null) return false;
+        if (defenseSelectUI == null) return false;
+
+        // ドラッグ中は handViews から一時的に外れているので Contains 判定はしない
+        defenseSelectUI.SelectDefense(view);
+        return true;
+    }
+
+    public void SkipDefense()
+    {
+        if (!waitingForDefense) return;
+        if (defenseSelectUI == null) return;
+
+        defenseSelectUI.OnSkip();
+    }    
 
 }
