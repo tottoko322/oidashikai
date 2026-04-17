@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
 using UnityEngine.ResourceManagement.AsyncOperations;
@@ -11,6 +12,10 @@ public class DicManager : MonoBehaviour
     public GameObject card;
     public Transform content;
     public GameObject cardViewFB;
+    public TMP_Text descTextFB;
+    public GameObject descriptionFB;
+    public static GameObject description;
+    public static TMP_Text descText; 
     public List<Transform> cardList;
     public static GameObject cardView;
     public static bool allLoaded=false;
@@ -23,6 +28,9 @@ public class DicManager : MonoBehaviour
         cardView.SetActive(false);
         if(!sortOptionUI)return;
         sortOptionUI.SetActive(false);
+        description=descriptionFB;
+        descText=descTextFB;
+        description.SetActive(false);
     }
     void Start()
     {
@@ -114,9 +122,17 @@ public class DicManager : MonoBehaviour
     {
         return trans.GetComponent<CardView>().defText.text;
     }
+    public void ToggleDesc()
+    {
+        description.SetActive(!description.activeSelf);
+    }
     public void Sorting(string orderRule)
     {
         cardList=GetContentChildren();
         SetContentChildren(SortBy(cardList,orderRule));
+    }
+    public static void ChangeText(TMP_Text text)
+    {
+        descText.text=text.text;
     }
 }
