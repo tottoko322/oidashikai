@@ -1,4 +1,3 @@
-using System.Collections;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -10,34 +9,34 @@ public class DefenseSelectUI : MonoBehaviour
     public TMP_Text message;
     public Button skipButton;
 
-    [Header("Refs")]
-    public HandManager hand;
-    public HandLayoutController layout;
-
-    private CardView selected;
     private bool waiting;
-    private bool skipped;
 
     private void Awake()
     {
         if (root != null)
             root.SetActive(false);
+
+        if (skipButton != null)
+        {
+            skipButton.onClick.RemoveAllListeners();
+            skipButton.onClick.AddListener(OnSkip);
+        }
     }
 
-    public IEnumerator WaitDecision()
+    public void BeginSelection(string msg = "defense or skip")
     {
         waiting = true;
-        skipped = false;
-        selected = null;
 
         if (root != null)
             root.SetActive(true);
 
         if (message != null)
-            message.text = "defense or skip?";
+            message.text = msg;
+    }
 
-        while (waiting)
-            yield return null;
+    public void EndSelection()
+    {
+        waiting = false;
 
         if (root != null)
             root.SetActive(false);
@@ -46,34 +45,17 @@ public class DefenseSelectUI : MonoBehaviour
     public void SelectDefense(CardView view)
     {
         if (!waiting) return;
-        if (view == null) return;
 
-        selected = view;
-        skipped = false;
-        waiting = false;
+        BattleStateMachine.I?.TrySelectDefenseByDrop(view);
     }
 
     public void OnSkip()
     {
         if (!waiting) return;
 
-        selected = null;
-        skipped = true;
-        waiting = false;
-    }
+        Debug.Log("[DefenseUI] Skip button pressed");
 
-    public CardView GetSelected()
-    {
-        return selected;
-    }
-
-    public bool WasSkipped()
-    {
-        return skipped;
-    }
-
-    public bool IsWaiting()
-    {
-        return waiting;
+        // ここから1回だけ呼ぶ
+        BattleStateMachine.I?.SkipDefense();
     }
 }

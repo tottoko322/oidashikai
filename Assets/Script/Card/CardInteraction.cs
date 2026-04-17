@@ -144,7 +144,7 @@ public class CardInteraction : MonoBehaviour,
             return;
         }
 
-        // 防御待ち中は、攻撃/効果どちらのゾーンに落としても防御カードとして扱う
+        // 防御待ち中は、攻撃時と同じドロップエリアを防御入力として使う
         if (BattleStateMachine.I != null && BattleStateMachine.I.IsWaitingForDefense)
         {
             bool acceptedDefense = BattleStateMachine.I.TrySelectDefenseByDrop(view);
@@ -154,8 +154,6 @@ public class CardInteraction : MonoBehaviour,
                 return;
             }
 
-            // BeginDrag で手札リストから一時除外されているので戻しておく
-            // （このあと CoEnemyTurn 側で正式に RemoveCard + Destroy される）
             transform.SetParent(originalParent, true);
             transform.SetSiblingIndex(originalSiblingIndex);
             rt.anchoredPosition = originalAnchoredPos;
@@ -176,8 +174,6 @@ public class CardInteraction : MonoBehaviour,
         }
 
         audioManager?.PlayDrop();
-
-        // 手札から除外状態を確定
         handManager?.ConfirmRemoveDragged();
 
         CardVanishVfx vanish = GetComponent<CardVanishVfx>();
@@ -193,6 +189,7 @@ public class CardInteraction : MonoBehaviour,
         handLayout?.SetHoverEnabled(true);
         handLayout?.Rebuild();
     }
+
     private void PlaceAsPending(DropZone zone)
     {
         // 仮置きは、今は最小として「元の親に戻す＆位置固定」。
