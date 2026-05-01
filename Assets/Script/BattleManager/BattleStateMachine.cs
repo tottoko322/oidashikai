@@ -313,29 +313,24 @@ public class BattleStateMachine : MonoBehaviour
             return false;
         }
 
-        StartCoroutine(CoResolvePlayerCard(view.Data, zoneType));
-        return true;
+        StartCoroutine(CoResolvePlayerCard(view, zoneType));
+        return true;    
     }
 
-    private IEnumerator CoResolvePlayerCard(CardData card, DropZoneType zoneType)
+    private IEnumerator CoResolvePlayerCard(CardView usedCard, DropZoneType zoneType)
     {
+        if (usedCard == null || usedCard.Data == null)
+            yield break;
+
+        CardData card = usedCard.Data;
+
         resolvingAction = true;
         PlayerActionUsed = true;
         InputLockManager.I?.Lock();
         turnEndButton?.SetIdleOnly(true);
 
-        CardView usedCard = null;
-
-        for (int i = 0; i < handManager.handViews.Count; i++)
-        {
-            if (handManager.handViews[i].Data == card)
-            {
-                usedCard = handManager.handViews[i];
-                break;
-            }
-        }
-
-        if (usedCard != null)
+        // ★ここ重要：そのカード自身だけ削除する
+        if (handManager.Contains(usedCard))
         {
             handManager.RemoveCard(usedCard);
             handLayout?.Rebuild();
@@ -360,6 +355,7 @@ public class BattleStateMachine : MonoBehaviour
             }
         }
 
+        // ===== 攻撃 =====
         if (zoneType == DropZoneType.Enemy)
         {
             int rawAttack = Mathf.Max(0, card.attack);
@@ -375,11 +371,13 @@ public class BattleStateMachine : MonoBehaviour
             Debug.Log($"[Battle] Player attack: {card.displayName} / ATK {rawAttack} -> {buffedAttack} / Damage {damage} / EnemyHP {EnemyHP}");
             yield return new WaitForSeconds(0.35f);
         }
+        // ===== 効果 =====
         else if (zoneType == DropZoneType.Effect)
         {
             yield return StartCoroutine(CoApplyEffect(card));
         }
 
+        // ===== 勝利判定 =====
         if (EnemyHP <= 0)
         {
             BattleReady = false;
