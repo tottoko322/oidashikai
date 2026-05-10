@@ -51,6 +51,13 @@ public class BattleStateMachine : MonoBehaviour
     public int enemyFixedDamage = 1;
     public float enemyThinkTime = 0.8f;
 
+    [Header("Center Message")]
+    public TMP_Text centerMessageText;
+    public float centerMessageDuration = 1.0f;
+    public bool playBgmAfterBattleStart = true;
+
+    private bool firstTurnIntroSkipped = false;
+
     public int PlayerHP { get; private set; }
     public int EnemyHP { get; private set; }
     public int TurnCount { get; private set; } = 1;
@@ -227,7 +234,16 @@ public class BattleStateMachine : MonoBehaviour
 
         BattleReady = true;
 
-        yield return StartCoroutine(CoStartCurrentTurn());
+        yield return StartCoroutine(ShowCenterMessage("Battle Start!"));
+
+        if (playBgmAfterBattleStart)
+        {
+            // AudioManager側にBGM開始関数がある場合だけ使ってください
+            // AudioManager.I?.PlayBgm();
+        }
+
+        firstTurnIntroSkipped = true;
+        yield return StartCoroutine(CoStartCurrentTurn());    
     }
 
     private IEnumerator CoStartCurrentTurn()
@@ -248,6 +264,16 @@ public class BattleStateMachine : MonoBehaviour
 
         if (turnSystem.Current == TurnOwner.Player)
         {
+
+            if (!firstTurnIntroSkipped)
+            {
+                yield return StartCoroutine(ShowCenterMessage("Your Turn"));
+            }
+            else
+            {
+                firstTurnIntroSkipped = false;
+            }
+
             InputLockManager.I?.Lock();
             AudioManager.I?.PlayTurnStart();
 
@@ -280,6 +306,16 @@ public class BattleStateMachine : MonoBehaviour
         }
         else
         {
+
+            if (!firstTurnIntroSkipped)
+            {
+                yield return StartCoroutine(ShowCenterMessage("Enemy Turn"));
+            }
+            else
+            {
+                firstTurnIntroSkipped = false;
+            }
+
             InputLockManager.I?.Lock();
             AudioManager.I?.PlayTurnStart();
 
@@ -329,7 +365,7 @@ public class BattleStateMachine : MonoBehaviour
         InputLockManager.I?.Lock();
         turnEndButton?.SetIdleOnly(true);
 
-        // ★ここ重要：そのカード自身だけ削除する
+        // 使用したカード1枚だけを手札から消す
         if (handManager.Contains(usedCard))
         {
             handManager.RemoveCard(usedCard);
@@ -355,7 +391,7 @@ public class BattleStateMachine : MonoBehaviour
             }
         }
 
-        // ===== 攻撃 =====
+        // 攻撃
         if (zoneType == DropZoneType.Enemy)
         {
             int rawAttack = Mathf.Max(0, card.attack);
@@ -371,13 +407,13 @@ public class BattleStateMachine : MonoBehaviour
             Debug.Log($"[Battle] Player attack: {card.displayName} / ATK {rawAttack} -> {buffedAttack} / Damage {damage} / EnemyHP {EnemyHP}");
             yield return new WaitForSeconds(0.35f);
         }
-        // ===== 効果 =====
+        // 効果
         else if (zoneType == DropZoneType.Effect)
         {
             yield return StartCoroutine(CoApplyEffect(card));
         }
 
-        // ===== 勝利判定 =====
+        // 敵HPが0ならターンエンドせず勝利
         if (EnemyHP <= 0)
         {
             BattleReady = false;
@@ -385,9 +421,20 @@ public class BattleStateMachine : MonoBehaviour
             yield break;
         }
 
+        // 自分HPが0ならターンエンドせず敗北
+        if (PlayerHP <= 0)
+        {
+            BattleReady = false;
+            winLose.Lose();
+            yield break;
+        }
+
         resolvingAction = false;
-        InputLockManager.I?.Unlock();
+
+        // カード処理が終わった瞬間、自動でターンエンド
+        yield return StartCoroutine(CoEndPlayerTurn());
     }
+
 
     private IEnumerator CoApplyEffect(CardData card)
     {
@@ -695,8 +742,10 @@ public class BattleStateMachine : MonoBehaviour
         pendingSelfDamageThisPlayerTurnEnd = pendingSelfDamageNextPlayerTurnEnd;
         pendingSelfDamageNextPlayerTurnEnd = 0;
 
+        yield return StartCoroutine(ShowCenterMessage("Turn End"));
+
         turnSystem.NextTurn();
-        yield return StartCoroutine(CoStartCurrentTurn());
+        yield return StartCoroutine(CoStartCurrentTurn());    
     }
 
     private IEnumerator CoEnemyTurn()
@@ -776,9 +825,11 @@ public class BattleStateMachine : MonoBehaviour
             yield break;
         }
 
+        yield return StartCoroutine(ShowCenterMessage("Turn End"));
+
         turnSystem.NextTurn();
         TurnCount++;
-        yield return StartCoroutine(CoStartCurrentTurn());
+        yield return StartCoroutine(CoStartCurrentTurn());    
     }
 
     public void SelectDefenseCard(CardView view)
@@ -830,5 +881,27 @@ public class BattleStateMachine : MonoBehaviour
 
         if (enemyHpText != null)
             enemyHpText.text = $"{EnemyHP}";
+    }
+
+    private IEnumerator ShowCenterMessage(string message)
+    {
+        bool wasLocked = InputLockManager.I != null && InputLockManager.I.IsLocked;
+
+        if (!wasLocked)
+            InputLockManager.I?.Lock();
+
+        if (centerMessageText != null)
+        {
+            centerMessageText.gameObject.SetActive(true);
+            centerMessageText.text = message;
+        }
+
+        yield return new WaitForSeconds(centerMessageDuration);
+
+        if (centerMessageText != null)
+            centerMessageText.gameObject.SetActive(false);
+
+        if (!wasLocked)
+            InputLockManager.I?.Unlock();
     }
 }
