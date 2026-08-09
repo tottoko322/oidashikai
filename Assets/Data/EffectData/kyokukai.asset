@@ -16,7 +16,7 @@ MonoBehaviour:
   type: 1
   timing: 0
   valueA: 2
-  valueF: 1
+  valueF: 0
   refMode: 0
   refSource: 0
   selectionRule:

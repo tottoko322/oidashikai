@@ -17,15 +17,14 @@ public enum EffectType
     HealAndSelfDamageNextTurnEnd,
     ReduceEnemyMaxHP,
     BlockEffectsAndSelfDamageWhileInHand
-
 }
-
 
 public enum EffectTiming
 {
     Immediate,
     TurnStart,
-    TurnEndBeforeCurse
+    TurnEndBeforeCurse,
+    NextPlayerTurnEnd
 }
 
 [CreateAssetMenu(menuName = "Qpic/Data/EffectData")]

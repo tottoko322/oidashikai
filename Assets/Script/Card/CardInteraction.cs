@@ -41,20 +41,6 @@ public class CardInteraction : MonoBehaviour,
 
         if (dragging) return;
 
-        // 防御選択中
-        if (BattleStateMachine.I != null && BattleStateMachine.I.IsWaitingForDefense)
-        {
-            BattleStateMachine.I.SelectDefenseCard(view);
-            return;
-        }
-
-        // 捨てるカード選択中
-        if (BattleStateMachine.I != null && BattleStateMachine.I.IsWaitingForDiscardSelect)
-        {
-            BattleStateMachine.I.SelectDiscardCard(view);
-            return;
-        }
-
         if (popupUI == null) return;
         popupUI.Toggle(view);
     }
@@ -67,7 +53,8 @@ public class CardInteraction : MonoBehaviour,
             return;
         }
 
-        if (popupUI != null && popupUI.IsOpen) popupUI.Close();
+        if (popupUI != null && popupUI.IsOpen)
+            popupUI.Close(false);
 
         dragging = true;
 
@@ -158,6 +145,28 @@ public class CardInteraction : MonoBehaviour,
             return;
         }
 
+        // 防御待ち中は、攻撃時と同じドロップエリアを防御入力として使う
+        if (BattleStateMachine.I != null && BattleStateMachine.I.IsWaitingForDefense)
+        {
+            bool acceptedDefense = BattleStateMachine.I.TrySelectDefenseByDrop(view);
+            if (!acceptedDefense)
+            {
+                ReturnToHand();
+                return;
+            }
+
+            transform.SetParent(originalParent, true);
+            transform.SetSiblingIndex(originalSiblingIndex);
+            rt.anchoredPosition = originalAnchoredPos;
+
+            handManager?.CancelDrag(view);
+            handLayout?.SetHoverEnabled(true);
+            handLayout?.Rebuild();
+
+            audioManager?.PlayDrop();
+            return;
+        }
+
         bool accepted = BattleStateMachine.I != null && BattleStateMachine.I.TryPlayCard(view, zone.zoneType);
         if (!accepted)
         {
@@ -166,8 +175,6 @@ public class CardInteraction : MonoBehaviour,
         }
 
         audioManager?.PlayDrop();
-
-        // 手札から除外状態を確定
         handManager?.ConfirmRemoveDragged();
 
         CardVanishVfx vanish = GetComponent<CardVanishVfx>();

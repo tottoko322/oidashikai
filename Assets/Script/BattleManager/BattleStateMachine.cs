@@ -2,7 +2,6 @@ using System.Collections;
 using UnityEngine;
 using TMPro;
 
-
 public class BattleStateMachine : MonoBehaviour
 {
     public static BattleStateMachine I { get; private set; }
@@ -29,13 +28,11 @@ public class BattleStateMachine : MonoBehaviour
     public DefenseSelectUI defenseSelectUI;
     public TMP_Text playerHpText;
     public TMP_Text enemyHpText;
+
     [Header("Extra UI")]
     public TMP_Text gameStartText;
     public TMP_Text deckCountText;
     public TMP_Text enemyActionText;
-
-
-    
 
     [Header("VFX")]
     public CharacterHitVfx playerHitVfx;
@@ -54,6 +51,13 @@ public class BattleStateMachine : MonoBehaviour
     public int enemyFixedDamage = 1;
     public float enemyThinkTime = 0.8f;
 
+    [Header("Center Message")]
+    public TMP_Text centerMessageText;
+    public float centerMessageDuration = 1.0f;
+    public bool playBgmAfterBattleStart = true;
+
+    private bool firstTurnIntroSkipped = false;
+
     public int PlayerHP { get; private set; }
     public int EnemyHP { get; private set; }
     public int TurnCount { get; private set; } = 1;
@@ -65,15 +69,22 @@ public class BattleStateMachine : MonoBehaviour
     private bool resolvingAction;
     private bool waitingForDefense;
     private bool waitingForDiscardSelect;
+    private bool defenseSkipped;
 
     private CardView selectedDiscardCard;
 
-    private int pendingSelfDamageAtNextPlayerTurnEnd = 0;
-
+    // 配信などの自傷予約
+    // this  : 今回の自分ターン終了時に発動
+    // next  : 次の自分ターン終了時に発動
+    private int pendingSelfDamageThisPlayerTurnEnd = 0;
+    private int pendingSelfDamageNextPlayerTurnEnd = 0;
 
     // 次の攻撃 / 次の防御
     private float pendingNextAttackMultiplier = 1f;
     private float pendingNextDefenseMultiplier = 1f;
+
+    private bool firstPlayerTurnStarted = false;
+    private CardView pendingDefenseCard;
 
     private void Awake()
     {
@@ -84,7 +95,8 @@ public class BattleStateMachine : MonoBehaviour
         }
         I = this;
     }
-        private void RefreshDeckUI()
+
+    private void RefreshDeckUI()
     {
         if (deckCountText != null && deckManager != null)
         {
@@ -131,15 +143,50 @@ public class BattleStateMachine : MonoBehaviour
         return HasProgressCheckInHand();
     }
 
+    private void ReserveSelfDamageByTiming(EffectData effect, int selfDamage)
+    {
+        if (effect == null || selfDamage <= 0) return;
+
+        switch (effect.timing)
+        {
+            case EffectTiming.Immediate:
+                PlayerHP = Mathf.Max(0, PlayerHP - selfDamage);
+                RefreshHpUI();
+                playerHitVfx?.Play();
+                AudioManager.I?.PlayDamage();
+                Debug.Log($"[Battle] Self damage immediate: {selfDamage} / PlayerHP {PlayerHP}");
+                break;
+
+            case EffectTiming.TurnEndBeforeCurse:
+                pendingSelfDamageThisPlayerTurnEnd += selfDamage;
+                Debug.Log($"[Battle] Self damage reserved(this player turn end): {selfDamage}");
+                break;
+
+            case EffectTiming.NextPlayerTurnEnd:
+                pendingSelfDamageNextPlayerTurnEnd += selfDamage;
+                Debug.Log($"[Battle] Self damage reserved(next player turn end): {selfDamage}");
+                break;
+
+            case EffectTiming.TurnStart:
+            default:
+                // 今は自傷のTurnStart処理を作っていないので、
+                // 未対応タイミングは次の自分ターン終了時扱いにする
+                pendingSelfDamageNextPlayerTurnEnd += selfDamage;
+                Debug.Log($"[Battle] Self damage reserved(default next player turn end): {selfDamage}");
+                break;
+        }
+    }
 
     private IEnumerator Start()
     {
-        InputLockManager.I?.Lock();
         BattleReady = false;
         PlayerActionUsed = false;
         resolvingAction = false;
         waitingForDefense = false;
         waitingForDiscardSelect = false;
+        firstPlayerTurnStarted = false;
+        pendingDefenseCard = null;
+        defenseSkipped = false;
 
         if (config == null || winLose == null || costManager == null || deckManager == null || handManager == null || cardDealAnimator == null)
         {
@@ -151,11 +198,10 @@ public class BattleStateMachine : MonoBehaviour
             config.useConfirm = SaveManager.I.GetConfirm(config.useConfirm);
 
         PlayerHP = Mathf.Clamp(playerStartHP, 0, playerMaxHP);
-        RefreshHpUI();
         EnemyHP = Mathf.Clamp(enemyStartHP, 0, enemyMaxHP);
         RefreshHpUI();
-        TurnCount = 1;
 
+        TurnCount = 1;
         ShowEnemyAction("");
 
         bool playerFirst = true;
@@ -188,7 +234,16 @@ public class BattleStateMachine : MonoBehaviour
 
         BattleReady = true;
 
-        yield return StartCoroutine(CoStartCurrentTurn());
+        yield return StartCoroutine(ShowCenterMessage("Battle Start!"));
+
+        if (playBgmAfterBattleStart)
+        {
+            // AudioManager側にBGM開始関数がある場合だけ使ってください
+            // AudioManager.I?.PlayBgm();
+        }
+
+        firstTurnIntroSkipped = true;
+        yield return StartCoroutine(CoStartCurrentTurn());    
     }
 
     private IEnumerator CoStartCurrentTurn()
@@ -201,27 +256,69 @@ public class BattleStateMachine : MonoBehaviour
         waitingForDiscardSelect = false;
         selectedDiscardCard = null;
         turnEndButton?.SetIdleOnly(false);
+        pendingDefenseCard = null;
+        defenseSkipped = false;
+
+        if (defenseSelectUI != null)
+            defenseSelectUI.EndSelection();
 
         if (turnSystem.Current == TurnOwner.Player)
         {
+            // ターン開始時点で即ロック
             InputLockManager.I?.Lock();
+
+            if (!firstTurnIntroSkipped)
+            {
+                yield return StartCoroutine(ShowCenterMessage("Your Turn"));
+            }
+            else
+            {
+                firstTurnIntroSkipped = false;
+            }
+                
             AudioManager.I?.PlayTurnStart();
 
             turnBanner?.SetText("My Turn");
 
             costManager.OnTurnStartGainOne();
 
-            if (cardDealAnimator != null)
+            bool shouldDraw = true;
+
+            // 最初のプレイヤーターンだけ特別処理
+            if (!firstPlayerTurnStarted)
+            {
+                firstPlayerTurnStarted = true;
+
+                // 先攻プレイヤーの最初のターンはドローしない
+                if (TurnCount == 1)
+                {
+                    shouldDraw = false;
+                }
+            }
+
+            if (shouldDraw && cardDealAnimator != null)
             {
                 yield return cardDealAnimator.Draw(1);
             }
+
             RefreshDeckUI();
             handLayout?.Rebuild();
             InputLockManager.I?.Unlock();
         }
         else
         {
+            // Enemy Turn開始時点で即ロック
             InputLockManager.I?.Lock();
+
+            if (!firstTurnIntroSkipped)
+            {
+                yield return StartCoroutine(ShowCenterMessage("Enemy Turn"));
+            }
+            else
+            {
+                firstTurnIntroSkipped = false;
+            }
+    
             AudioManager.I?.PlayTurnStart();
 
             turnBanner?.SetText("Enemy Turn");
@@ -248,60 +345,55 @@ public class BattleStateMachine : MonoBehaviour
             return false;
         }
 
-
         if (!costManager.TryPay(view.Data.cost))
         {
             Debug.Log("[BattleStateMachine] Cost is not enough.");
             return false;
         }
 
-        StartCoroutine(CoResolvePlayerCard(view.Data, zoneType));
-        return true;
+        StartCoroutine(CoResolvePlayerCard(view, zoneType));
+        return true;    
     }
 
-    private IEnumerator CoResolvePlayerCard(CardData card, DropZoneType zoneType)
+    private IEnumerator CoResolvePlayerCard(CardView usedCard, DropZoneType zoneType)
     {
+        if (usedCard == null || usedCard.Data == null)
+            yield break;
+
+        CardData card = usedCard.Data;
+
         resolvingAction = true;
         PlayerActionUsed = true;
         InputLockManager.I?.Lock();
         turnEndButton?.SetIdleOnly(true);
-        CardView usedCard = null;
 
-    for (int i = 0; i < handManager.handViews.Count; i++)
-    {
-        if (handManager.handViews[i].Data == card)
+        // 使用したカード1枚だけを手札から消す
+        if (handManager.Contains(usedCard))
         {
-            usedCard = handManager.handViews[i];
-            break;
-        }
-    }
+            handManager.RemoveCard(usedCard);
+            handLayout?.Rebuild();
 
-    if (usedCard != null)
-    {
-        handManager.RemoveCard(usedCard);
-        handLayout?.Rebuild();
+            CardVanishVfx vanish = usedCard.GetComponent<CardVanishVfx>();
 
-        CardVanishVfx vanish = usedCard.GetComponent<CardVanishVfx>();
+            if (vanish != null)
+            {
+                bool done = false;
 
-        if (vanish != null)
-        {
-            bool done = false;
+                vanish.Play(() =>
+                {
+                    Destroy(usedCard.gameObject);
+                    done = true;
+                });
 
-            vanish.Play(() =>
+                while (!done) yield return null;
+            }
+            else
             {
                 Destroy(usedCard.gameObject);
-                done = true;
-            });
-
-            while (!done) yield return null;
+            }
         }
-        else
-        {
-        Destroy(usedCard.gameObject);
-    }
-}
 
-
+        // 攻撃
         if (zoneType == DropZoneType.Enemy)
         {
             int rawAttack = Mathf.Max(0, card.attack);
@@ -317,11 +409,13 @@ public class BattleStateMachine : MonoBehaviour
             Debug.Log($"[Battle] Player attack: {card.displayName} / ATK {rawAttack} -> {buffedAttack} / Damage {damage} / EnemyHP {EnemyHP}");
             yield return new WaitForSeconds(0.35f);
         }
+        // 効果
         else if (zoneType == DropZoneType.Effect)
         {
             yield return StartCoroutine(CoApplyEffect(card));
         }
 
+        // 敵HPが0ならターンエンドせず勝利
         if (EnemyHP <= 0)
         {
             BattleReady = false;
@@ -329,9 +423,20 @@ public class BattleStateMachine : MonoBehaviour
             yield break;
         }
 
+        // 自分HPが0ならターンエンドせず敗北
+        if (PlayerHP <= 0)
+        {
+            BattleReady = false;
+            winLose.Lose();
+            yield break;
+        }
+
         resolvingAction = false;
-        InputLockManager.I?.Unlock();
+
+        // カード処理が終わった瞬間、自動でターンエンド
+        yield return StartCoroutine(CoEndPlayerTurn());
     }
+
 
     private IEnumerator CoApplyEffect(CardData card)
     {
@@ -401,40 +506,47 @@ public class BattleStateMachine : MonoBehaviour
                 yield break;
 
             case EffectType.HealAndSelfDamageNextTurnEnd:
+            {
+                int heal = Mathf.Max(0, e.valueA);
+                int selfDamage = Mathf.Max(0, Mathf.RoundToInt(e.valueF));
+
+                PlayerHP = Mathf.Min(playerMaxHP, PlayerHP + heal);
+                AudioManager.I?.PlayHeal();
+                RefreshHpUI();
+
+                ReserveSelfDamageByTiming(e, selfDamage);
+
+                Debug.Log($"[Battle] Heal {heal} / PlayerHP {PlayerHP} / SelfDamage {selfDamage} / Timing {e.timing}");
+                yield return new WaitForSeconds(0.25f);
+
+                if (PlayerHP <= 0)
                 {
-                    int heal = Mathf.Max(0, e.valueA);
-                    int selfDamage = Mathf.Max(0, Mathf.RoundToInt(e.valueF));
-
-                    PlayerHP = Mathf.Min(playerMaxHP, PlayerHP + heal);
-                    AudioManager.I?.PlayHeal();
-                    RefreshHpUI();
-                    pendingSelfDamageAtNextPlayerTurnEnd += selfDamage;
-
-                    Debug.Log($"[Battle] Heal {heal} / PlayerHP {PlayerHP} / SelfDamageReserved {pendingSelfDamageAtNextPlayerTurnEnd}");
-                    yield return new WaitForSeconds(0.25f);
-                    yield break;
+                    BattleReady = false;
+                    winLose.Lose();
                 }
+
+                yield break;
+            }
 
             case EffectType.ReduceEnemyMaxHP:
+            {
+                int reduce = Mathf.Max(0, e.valueA);
+
+                enemyMaxHP = Mathf.Max(1, enemyMaxHP - reduce);
+                EnemyHP = Mathf.Min(EnemyHP, enemyMaxHP);
+                AudioManager.I?.PlayBuff();
+                RefreshHpUI();
+
+                Debug.Log($"[Battle] Enemy MaxHP -{reduce} / EnemyMaxHP {enemyMaxHP} / EnemyHP {EnemyHP}");
+                yield return new WaitForSeconds(0.25f);
+
+                if (EnemyHP <= 0)
                 {
-                    int reduce = Mathf.Max(0, e.valueA);
-
-                    enemyMaxHP = Mathf.Max(1, enemyMaxHP - reduce);
-                    EnemyHP = Mathf.Min(EnemyHP, enemyMaxHP);
-                    AudioManager.I?.PlayBuff();
-                    RefreshHpUI();
-
-                    Debug.Log($"[Battle] Enemy MaxHP -{reduce} / EnemyMaxHP {enemyMaxHP} / EnemyHP {EnemyHP}");
-                    yield return new WaitForSeconds(0.25f);
-
-                    if (EnemyHP <= 0)
-                    {
-                        BattleReady = false;
-                        winLose.Win();
-                    }
-                    yield break;
+                    BattleReady = false;
+                    winLose.Win();
                 }
-
+                yield break;
+            }
 
             default:
                 yield break;
@@ -561,23 +673,42 @@ public class BattleStateMachine : MonoBehaviour
 
     public void OnTurnEndButtonPressed()
     {
-        if (!BattleReady) return;
-        if (turnSystem.Current != TurnOwner.Player) return;
-        if (resolvingAction) return;
-        if (waitingForDefense) return;
-        if (waitingForDiscardSelect) return;
-        if (InputLockManager.I != null && InputLockManager.I.IsLocked) return;
-        AudioManager.I?.PlayTurnEnd();
+        Debug.Log("[TurnEnd] Button pressed");
 
+        if (!BattleReady) return;
+        if (waitingForDiscardSelect) return;
+
+        // すでに入力ロック中なら何もしない
+        if (InputLockManager.I != null && InputLockManager.I.IsLocked)
+            return;
+
+        // 防御待ち中はSkip
+        if (waitingForDefense)
+        {
+            // クリックされた瞬間に即ロック
+            InputLockManager.I?.Lock();
+
+            AudioManager.I?.PlayTurnEnd();
+            SkipDefense();
+            return;
+        }
+
+        if (resolvingAction) return;
+        if (turnSystem.Current != TurnOwner.Player) return;
+
+        // Turn Endもクリックされた瞬間に即ロック
+        InputLockManager.I?.Lock();
+
+        AudioManager.I?.PlayTurnEnd();
         StartCoroutine(CoEndPlayerTurn());
-    }
+    }    
 
     private IEnumerator CoEndPlayerTurn()
     {
         InputLockManager.I?.Lock();
         yield return new WaitForSeconds(0.1f);
 
-                // 進捗確認：手札にある間、自分ターン終了時に1ダメージ
+        // 進捗確認：手札にある間、自分ターン終了時に1ダメージ
         if (HasProgressCheckInHand())
         {
             PlayerHP = Mathf.Max(0, PlayerHP - 1);
@@ -596,19 +727,18 @@ public class BattleStateMachine : MonoBehaviour
             }
         }
 
-
-        // 配信などの「次の自分ターン終了時に自分へダメージ」
-        if (pendingSelfDamageAtNextPlayerTurnEnd > 0)
+        // 今回の自分ターン終了時に発動する予約分
+        if (pendingSelfDamageThisPlayerTurnEnd > 0)
         {
-            int selfDamage = pendingSelfDamageAtNextPlayerTurnEnd;
-            pendingSelfDamageAtNextPlayerTurnEnd = 0;
+            int selfDamage = pendingSelfDamageThisPlayerTurnEnd;
+            pendingSelfDamageThisPlayerTurnEnd = 0;
 
             PlayerHP = Mathf.Max(0, PlayerHP - selfDamage);
             RefreshHpUI();
             playerHitVfx?.Play();
             AudioManager.I?.PlayDamage();
 
-            Debug.Log($"[Battle] Self damage at player turn end: {selfDamage} / PlayerHP {PlayerHP}");
+            Debug.Log($"[Battle] Self damage at this player turn end: {selfDamage} / PlayerHP {PlayerHP}");
             yield return new WaitForSeconds(0.35f);
 
             if (PlayerHP <= 0)
@@ -619,47 +749,62 @@ public class BattleStateMachine : MonoBehaviour
             }
         }
 
+        // 次の自分ターン終了時予約を、次回の終了判定用に移す
+        pendingSelfDamageThisPlayerTurnEnd = pendingSelfDamageNextPlayerTurnEnd;
+        pendingSelfDamageNextPlayerTurnEnd = 0;
+
+        yield return StartCoroutine(ShowCenterMessage("Turn End"));
+
         turnSystem.NextTurn();
-        yield return StartCoroutine(CoStartCurrentTurn());
+        yield return StartCoroutine(CoStartCurrentTurn());    
     }
 
     private IEnumerator CoEnemyTurn()
     {
         int attack = Mathf.Max(0, enemyFixedDamage);
-        ShowEnemyAction($"てきのこうげき {attack}");
-
 
         CardView defenseCard = null;
         int defenseValue = 0;
 
-        if (defenseSelectUI != null && handManager.handViews.Count > 0)
+        if (handManager != null && handManager.handViews.Count > 0)
         {
             waitingForDefense = true;
+            pendingDefenseCard = null;
+            defenseSkipped = false;
+
             InputLockManager.I?.Unlock();
 
-            yield return defenseSelectUI.WaitDecision();
+            if (defenseSelectUI != null)
+                defenseSelectUI.BeginSelection("defense or skip");
+
+            while (pendingDefenseCard == null && !defenseSkipped)
+                yield return null;
 
             InputLockManager.I?.Lock();
             waitingForDefense = false;
 
-            defenseCard = defenseSelectUI.GetSelected();
+            if (defenseSelectUI != null)
+                defenseSelectUI.EndSelection();
+
+            defenseCard = pendingDefenseCard;
+
             if (defenseCard != null && defenseCard.Data != null)
             {
                 int rawDefense = Mathf.Max(0, defenseCard.Data.defense);
                 defenseValue = Mathf.FloorToInt(rawDefense * pendingNextDefenseMultiplier);
-                pendingNextDefenseMultiplier = 1f;
             }
+
+            pendingNextDefenseMultiplier = 1f;
         }
 
         int damage = DamageCalculator.Calc(attack, defenseValue);
 
         if (defenseCard != null)
         {
-            Debug.Log($"[Battle] Defense card used: {defenseCard.Data.displayName} / DEF {defenseValue}");
             handManager.RemoveCard(defenseCard);
             handLayout?.Rebuild();
 
-            CardVanishVfx vanish = defenseCard.GetComponent<CardVanishVfx>();
+            var vanish = defenseCard.GetComponent<CardVanishVfx>();
             if (vanish != null)
             {
                 bool done = false;
@@ -684,9 +829,6 @@ public class BattleStateMachine : MonoBehaviour
             AudioManager.I?.PlayDamage();
         }
 
-        Debug.Log($"[Battle] Enemy attack {attack} / Defense {defenseValue} / Damage {damage} / PlayerHP {PlayerHP}");
-        yield return new WaitForSeconds(0.35f);
-
         if (PlayerHP <= 0)
         {
             BattleReady = false;
@@ -694,19 +836,60 @@ public class BattleStateMachine : MonoBehaviour
             yield break;
         }
 
+        yield return StartCoroutine(ShowCenterMessage("Turn End"));
+
         turnSystem.NextTurn();
         TurnCount++;
-        yield return StartCoroutine(CoStartCurrentTurn());
+        yield return StartCoroutine(CoStartCurrentTurn());    
     }
 
     public void SelectDefenseCard(CardView view)
     {
         if (!waitingForDefense) return;
         if (view == null) return;
-        if (defenseSelectUI == null) return;
         if (!handManager.Contains(view)) return;
 
-        defenseSelectUI.SelectDefense(view);
+        // 選んだ瞬間に入力禁止
+        InputLockManager.I?.Lock();
+
+        pendingDefenseCard = view;
+        defenseSkipped = false;
+
+        if (defenseSelectUI != null)
+            defenseSelectUI.SelectDefense(view);
+    }
+
+    public bool TrySelectDefenseByDrop(CardView view)
+    {
+        Debug.Log("ドラッグ防御検出");
+
+        if (!waitingForDefense)
+            return false;
+
+        if (view == null)
+            return false;
+
+        // ドロップ成立した瞬間にロック
+        InputLockManager.I?.Lock();
+
+        pendingDefenseCard = view;
+        defenseSkipped = false;
+
+        return true;
+    }
+
+    public void SkipDefense()
+    {
+        Debug.Log("SkipDefense 呼ばれた");
+
+        if (!waitingForDefense)
+            return;
+
+        // 念のためここでもロック
+        InputLockManager.I?.Lock();
+
+        defenseSkipped = true;
+        pendingDefenseCard = null;
     }
 
     public void SelectDiscardCard(CardView view)
@@ -714,6 +897,9 @@ public class BattleStateMachine : MonoBehaviour
         if (!waitingForDiscardSelect) return;
         if (view == null) return;
         if (!handManager.Contains(view)) return;
+
+        // 捨て札を選んだ瞬間に入力禁止
+        InputLockManager.I?.Lock();
 
         selectedDiscardCard = view;
     }
@@ -727,4 +913,25 @@ public class BattleStateMachine : MonoBehaviour
             enemyHpText.text = $"{EnemyHP}";
     }
 
+    private IEnumerator ShowCenterMessage(string message)
+    {
+        bool wasLocked = InputLockManager.I != null && InputLockManager.I.IsLocked;
+
+        if (!wasLocked)
+            InputLockManager.I?.Lock();
+
+        if (centerMessageText != null)
+        {
+            centerMessageText.gameObject.SetActive(true);
+            centerMessageText.text = message;
+        }
+
+        yield return new WaitForSeconds(centerMessageDuration);
+
+        if (centerMessageText != null)
+            centerMessageText.gameObject.SetActive(false);
+
+        if (!wasLocked)
+            InputLockManager.I?.Unlock();
+    }
 }

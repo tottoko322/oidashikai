@@ -1,7 +1,6 @@
-using System.Collections;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
-using TMPro;
 
 public class DefenseSelectUI : MonoBehaviour
 {
@@ -10,44 +9,53 @@ public class DefenseSelectUI : MonoBehaviour
     public TMP_Text message;
     public Button skipButton;
 
-    [Header("Refs")]
-    public HandManager hand;
-    public HandLayoutController layout;
+    private bool waiting;
 
-    private CardView selected;
-    private bool decided;
-
-    public void Open()
+    private void Awake()
     {
-        selected = null;
-        decided = false;
-        if (root) root.SetActive(true);
-        if (message) message.text = "defense or skip";
+        if (root != null)
+            root.SetActive(false);
+
+        if (skipButton != null)
+        {
+            skipButton.onClick.RemoveAllListeners();
+            skipButton.onClick.AddListener(OnSkip);
+        }
     }
 
-    public void Close()
+    public void BeginSelection(string msg = "defense or skip")
     {
-        if (root) root.SetActive(false);
+        waiting = true;
+
+        if (root != null)
+            root.SetActive(true);
+
+        if (message != null)
+            message.text = msg;
     }
 
-    public void SelectDefense(CardView v)
+    public void EndSelection()
     {
-        selected = v;
-        decided = true;
+        waiting = false;
+
+        if (root != null)
+            root.SetActive(false);
+    }
+
+    public void SelectDefense(CardView view)
+    {
+        if (!waiting) return;
+
+        BattleStateMachine.I?.TrySelectDefenseByDrop(view);
     }
 
     public void OnSkip()
     {
-        selected = null;
-        decided = true;
-    }
+        if (!waiting) return;
 
-    public IEnumerator WaitDecision()
-    {
-        Open();
-        while (!decided) yield return null;
-        Close();
-    }
+        Debug.Log("[DefenseUI] Skip button pressed");
 
-    public CardView GetSelected() => selected;
+        // ここから1回だけ呼ぶ
+        BattleStateMachine.I?.SkipDefense();
+    }
 }

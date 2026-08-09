@@ -24,12 +24,10 @@ MonoBehaviour:
     count: 2
   - card: {fileID: 11400000, guid: 1848a1cb4978aa94b8a2ff68b5754967, type: 2}
     count: 2
-  - card: {fileID: 11400000, guid: 68cad9ce27b23c74693959e731490732, type: 2}
-    count: 2
   - card: {fileID: 11400000, guid: 777e20af6fc14e042862823cf5723f37, type: 2}
-    count: 1
+    count: 2
   - card: {fileID: 11400000, guid: c82b5a9112f561a4896034461a161372, type: 2}
-    count: 1
+    count: 2
   - card: {fileID: 11400000, guid: 2f49663c323a553488a94da32e2dc366, type: 2}
     count: 1
   - card: {fileID: 11400000, guid: 13373304b29687043b8224f198dbab63, type: 2}

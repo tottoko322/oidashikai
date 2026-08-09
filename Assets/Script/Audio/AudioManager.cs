@@ -58,12 +58,10 @@ public class AudioManager : MonoBehaviour
         {
             PlayBgm(bgmClip, true);
         }
-        DontDestroyOnLoad(this);
+
+        DontDestroyOnLoad(gameObject);
     }
 
-    // =========================
-    // Volume
-    // =========================
     public void ApplySavedVolume()
     {
         if (bgmSource != null)
@@ -92,6 +90,7 @@ public class AudioManager : MonoBehaviour
         if (PlayerPrefs.HasKey(SeKey))
             seVolume = PlayerPrefs.GetFloat(SeKey);
     }
+
     public void SetMasterVolume(float value)
     {
         masterVolume = Mathf.Clamp01(value);
@@ -113,9 +112,6 @@ public class AudioManager : MonoBehaviour
         SaveVolume();
     }
 
-    // =========================
-    // SE
-    // =========================
     private void PlayOneShot(AudioClip clip, float volumeScale = 1f)
     {
         if (clip == null || seSource == null) return;
@@ -138,12 +134,9 @@ public class AudioManager : MonoBehaviour
     // 既存コード互換
     public void PlayClick() => PlayButton();
     public void PlayDragStart() => PlayButton();
-    public void PlayDrop() => PlayBuff();
+    public void PlayDrop() => PlayButton();
     public void PlayCancel() => PlayButton();
 
-    // =========================
-    // BGM
-    // =========================
     public void PlayBgm(AudioClip clip, bool loop = true)
     {
         if (bgmSource == null || clip == null) return;
@@ -200,7 +193,7 @@ public class AudioManager : MonoBehaviour
 
         while (time < duration)
         {
-            time += Time.deltaTime;
+            time += Time.unscaledDeltaTime;
             float t = Mathf.Clamp01(time / duration);
             bgmSource.volume = Mathf.Lerp(startVolume, targetVolume, t);
             yield return null;

@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   effectId: heal_3_selfdamage_3
   type: 10
-  timing: 0
+  timing: 3
   valueA: 3
   valueF: 3
   refMode: 0
