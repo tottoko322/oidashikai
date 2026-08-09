@@ -16,4 +16,7 @@ public class CardData : ScriptableObject
 
     [Header("Art")]
     public Sprite artwork;
+
+    [Header("Description")]
+    public string description;
 }

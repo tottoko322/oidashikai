@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using Unity.VisualScripting;
 
 public class CardView : MonoBehaviour
 {
@@ -9,6 +10,7 @@ public class CardView : MonoBehaviour
     public TMP_Text costText;
     public TMP_Text atkText;
     public TMP_Text defText;
+    public TMP_Text description;
 
     public CardData Data { get; private set; }
 
@@ -20,5 +22,6 @@ public class CardView : MonoBehaviour
         if (costText) costText.text = data.cost.ToString();
         if (atkText) atkText.text = data.attack.ToString();
         if (defText) defText.text = data.defense.ToString();
+        if (description) description.text = data.description;
     }
 }

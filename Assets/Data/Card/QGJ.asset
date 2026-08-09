@@ -19,3 +19,4 @@ MonoBehaviour:
   defense: 3
   effect: {fileID: 11400000, guid: 17f6b05e8e2300549a84c9b9fa017a5a, type: 2}
   artwork: {fileID: -2976810630377029703, guid: c57a203e38c94c14fae802c099292889, type: 3}
+  description: "Qpic Game Jam\u306E\u7565\u79F0\u30024\u3064\u306E\u5F79\u8077\u306B\u5206\u304B\u308C\u3001\u30B2\u30FC\u30E0\u3092\u5236\u4F5C\u3059\u308B\u30A4\u30D9\u30F3\u30C8\u3002"

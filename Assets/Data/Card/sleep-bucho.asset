@@ -19,3 +19,4 @@ MonoBehaviour:
   defense: 2
   effect: {fileID: 11400000, guid: 1844414379709844f9d1a0465c37931b, type: 2}
   artwork: {fileID: 2513799804417702227, guid: 470935d50b8b90a4f8f2597859bf5c9f, type: 3}
+  description: "\u90E8\u9577\u306F\u7720\u308B\u3088\u3069\u3053\u3067\u3067\u3082\u3002"

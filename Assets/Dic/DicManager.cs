@@ -36,7 +36,7 @@ public class DicManager : MonoBehaviour
     {
         handle=Addressables.LoadAssetsAsync<CardData>(label, addressable =>
         {
-            Debug.Log("loaded : "+addressable.displayName);
+            Debug.Log("loaded : "+addressable.displayName+" "+addressable.description);
             addCard(addressable);
         });
         handle.Completed += (AsyncOperationHandle<IList<CardData>> obj) =>

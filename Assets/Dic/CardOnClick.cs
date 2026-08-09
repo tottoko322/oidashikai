@@ -12,7 +12,8 @@ public class CardOnClick : MonoBehaviour
         {
             CardView card = btn.GetComponent<CardView>();
             DicManager.ShowCards(card.art);
-            DicManager.ChangeText(card.atkText);
+            Debug.Log(card.description);
+            DicManager.ChangeText(card.description);
         }
     }
 }
