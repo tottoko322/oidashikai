@@ -1,3 +1,4 @@
+using System.Collections;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using TMPro;
@@ -15,34 +16,70 @@ public class WinLoseSystem : MonoBehaviour
     [Header("Option")]
     public bool stopTimeOnResult = true;
 
+    [Header("Result Timing")]
+    public float resultDelay = 0.6f;
+
     private bool finished = false;
 
     private void Start()
     {
-        if (resultPanel != null) resultPanel.SetActive(false);
-        if (titleButton != null) titleButton.SetActive(false);
+        if (resultPanel != null)
+            resultPanel.SetActive(false);
+
+        if (titleButton != null)
+            titleButton.SetActive(false);
+
         Time.timeScale = 1f;
         finished = false;
     }
 
     public void Win()
     {
-        if (finished) return;
+        if (finished)
+            return;
+
         finished = true;
 
-        AudioManager.I?.PlayYouWin();
-        Debug.Log("WIN");
-        ShowResult("WIN");
+        StartCoroutine(CoShowResult(true));
     }
 
     public void Lose()
     {
-        if (finished) return;
+        if (finished)
+            return;
+
         finished = true;
 
-        AudioManager.I?.PlayYouLose();
-        Debug.Log("LOSE");
-        ShowResult("LOSE");
+        StartCoroutine(CoShowResult(false));
+    }
+
+    private IEnumerator CoShowResult(bool isWin)
+    {
+        // HP0・撃破音
+        AudioManager.I?.PlayDead();
+
+        // BGMをフェードアウト
+        AudioManager.I?.FadeOutBgm();
+
+        // 少し間を置く
+        yield return new WaitForSecondsRealtime(resultDelay);
+
+        if (isWin)
+        {
+            AudioManager.I?.PlayYouWin();
+
+            Debug.Log("WIN");
+
+            ShowResult("WIN");
+        }
+        else
+        {
+            AudioManager.I?.PlayYouLose();
+
+            Debug.Log("LOSE");
+
+            ShowResult("LOSE");
+        }
     }
 
     private void ShowResult(string message)
@@ -62,7 +99,10 @@ public class WinLoseSystem : MonoBehaviour
 
     public void OnClickTitleButton()
     {
+        AudioManager.I?.PlayButton();
+
         Time.timeScale = 1f;
+
         SceneManager.LoadScene(titleSceneName);
     }
 }

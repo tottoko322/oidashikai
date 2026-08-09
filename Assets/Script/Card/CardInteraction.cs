@@ -53,7 +53,8 @@ public class CardInteraction : MonoBehaviour,
             return;
         }
 
-        if (popupUI != null && popupUI.IsOpen) popupUI.Close();
+        if (popupUI != null && popupUI.IsOpen)
+            popupUI.Close(false);
 
         dragging = true;
 

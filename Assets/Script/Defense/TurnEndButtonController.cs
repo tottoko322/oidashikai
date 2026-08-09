@@ -30,32 +30,65 @@ public class TurnEndButtonController : MonoBehaviour
 
     private void Refresh()
     {
-        var battle = BattleStateMachine.I;
+        BattleStateMachine battle = BattleStateMachine.I;
+
+        if (button == null)
+            return;
+
         if (battle == null)
         {
             button.interactable = false;
             return;
         }
 
-        // ★ 防御中は常に押せる
+        bool inputLocked =
+            InputLockManager.I != null &&
+            InputLockManager.I.IsLocked;
+
+        // ============================
+        // 防御選択中
+        // ============================
+
         if (battle.IsWaitingForDefense)
         {
-            button.interactable = true;
             label.text = "Skip";
+
+            // 防御待ちでもInputLock中なら押せない
+            button.interactable =
+                battle.BattleReady &&
+                !inputLocked;
+
             return;
         }
+
+        // ============================
+        // 通常時
+        // ============================
+
+        label.text = "Turn End";
 
         bool canPress =
             battle.BattleReady &&
             battle.turnSystem.Current == TurnOwner.Player &&
-            !(InputLockManager.I != null && InputLockManager.I.IsLocked);
+            !inputLocked;
 
         button.interactable = canPress;
-        label.text = "Turn End";
     }
 
     private void OnClick()
     {
-        BattleStateMachine.I?.OnTurnEndButtonPressed();
+        BattleStateMachine battle = BattleStateMachine.I;
+
+        if (battle == null)
+            return;
+
+        // ロック中のクリックは絶対に通さない
+        if (InputLockManager.I != null &&
+            InputLockManager.I.IsLocked)
+        {
+            return;
+        }
+
+        battle.OnTurnEndButtonPressed();
     }
 }

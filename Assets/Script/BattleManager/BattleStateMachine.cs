@@ -264,6 +264,8 @@ public class BattleStateMachine : MonoBehaviour
 
         if (turnSystem.Current == TurnOwner.Player)
         {
+            // ターン開始時点で即ロック
+            InputLockManager.I?.Lock();
 
             if (!firstTurnIntroSkipped)
             {
@@ -273,8 +275,7 @@ public class BattleStateMachine : MonoBehaviour
             {
                 firstTurnIntroSkipped = false;
             }
-
-            InputLockManager.I?.Lock();
+                
             AudioManager.I?.PlayTurnStart();
 
             turnBanner?.SetText("My Turn");
@@ -306,6 +307,8 @@ public class BattleStateMachine : MonoBehaviour
         }
         else
         {
+            // Enemy Turn開始時点で即ロック
+            InputLockManager.I?.Lock();
 
             if (!firstTurnIntroSkipped)
             {
@@ -315,8 +318,7 @@ public class BattleStateMachine : MonoBehaviour
             {
                 firstTurnIntroSkipped = false;
             }
-
-            InputLockManager.I?.Lock();
+    
             AudioManager.I?.PlayTurnStart();
 
             turnBanner?.SetText("Enemy Turn");
@@ -676,9 +678,16 @@ public class BattleStateMachine : MonoBehaviour
         if (!BattleReady) return;
         if (waitingForDiscardSelect) return;
 
-        // 防御待ち中は最優先でスキップ
+        // すでに入力ロック中なら何もしない
+        if (InputLockManager.I != null && InputLockManager.I.IsLocked)
+            return;
+
+        // 防御待ち中はSkip
         if (waitingForDefense)
         {
+            // クリックされた瞬間に即ロック
+            InputLockManager.I?.Lock();
+
             AudioManager.I?.PlayTurnEnd();
             SkipDefense();
             return;
@@ -686,11 +695,13 @@ public class BattleStateMachine : MonoBehaviour
 
         if (resolvingAction) return;
         if (turnSystem.Current != TurnOwner.Player) return;
-        if (InputLockManager.I != null && InputLockManager.I.IsLocked) return;
+
+        // Turn Endもクリックされた瞬間に即ロック
+        InputLockManager.I?.Lock();
 
         AudioManager.I?.PlayTurnEnd();
         StartCoroutine(CoEndPlayerTurn());
-    }
+    }    
 
     private IEnumerator CoEndPlayerTurn()
     {
@@ -838,6 +849,9 @@ public class BattleStateMachine : MonoBehaviour
         if (view == null) return;
         if (!handManager.Contains(view)) return;
 
+        // 選んだ瞬間に入力禁止
+        InputLockManager.I?.Lock();
+
         pendingDefenseCard = view;
         defenseSkipped = false;
 
@@ -849,9 +863,18 @@ public class BattleStateMachine : MonoBehaviour
     {
         Debug.Log("ドラッグ防御検出");
 
-        if (!waitingForDefense) return false;
+        if (!waitingForDefense)
+            return false;
+
+        if (view == null)
+            return false;
+
+        // ドロップ成立した瞬間にロック
+        InputLockManager.I?.Lock();
 
         pendingDefenseCard = view;
+        defenseSkipped = false;
+
         return true;
     }
 
@@ -859,7 +882,11 @@ public class BattleStateMachine : MonoBehaviour
     {
         Debug.Log("SkipDefense 呼ばれた");
 
-        if (!waitingForDefense) return;
+        if (!waitingForDefense)
+            return;
+
+        // 念のためここでもロック
+        InputLockManager.I?.Lock();
 
         defenseSkipped = true;
         pendingDefenseCard = null;
@@ -870,6 +897,9 @@ public class BattleStateMachine : MonoBehaviour
         if (!waitingForDiscardSelect) return;
         if (view == null) return;
         if (!handManager.Contains(view)) return;
+
+        // 捨て札を選んだ瞬間に入力禁止
+        InputLockManager.I?.Lock();
 
         selectedDiscardCard = view;
     }
