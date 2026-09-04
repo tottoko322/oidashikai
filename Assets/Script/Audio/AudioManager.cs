@@ -49,6 +49,14 @@ public class AudioManager : MonoBehaviour
         I = this;
     }
 
+    private void OnDestroy()
+    {
+        if (I == this)
+        {
+            I = null;
+        }
+    }
+
     private void Start()
     {
         LoadVolume();
@@ -59,7 +67,6 @@ public class AudioManager : MonoBehaviour
             PlayBgm(bgmClip, true);
         }
 
-        DontDestroyOnLoad(gameObject);
     }
 
     public void ApplySavedVolume()

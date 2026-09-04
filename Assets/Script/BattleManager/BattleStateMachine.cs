@@ -70,6 +70,7 @@ public class BattleStateMachine : MonoBehaviour
     private bool waitingForDefense;
     private bool waitingForDiscardSelect;
     private bool defenseSkipped;
+    private bool turnTransitioning;
 
     private CardView selectedDiscardCard;
 
@@ -187,6 +188,7 @@ public class BattleStateMachine : MonoBehaviour
         firstPlayerTurnStarted = false;
         pendingDefenseCard = null;
         defenseSkipped = false;
+        turnTransitioning = false;
 
         if (config == null || winLose == null || costManager == null || deckManager == null || handManager == null || cardDealAnimator == null)
         {
@@ -675,34 +677,58 @@ public class BattleStateMachine : MonoBehaviour
     {
         Debug.Log("[TurnEnd] Button pressed");
 
-        if (!BattleReady) return;
-        if (waitingForDiscardSelect) return;
-
-        // すでに入力ロック中なら何もしない
-        if (InputLockManager.I != null && InputLockManager.I.IsLocked)
+        if (!BattleReady)
             return;
 
-        // 防御待ち中はSkip
+        if (waitingForDiscardSelect)
+            return;
+
+        // ターン切り替え処理がすでに始まっていたら絶対に通さない
+        if (turnTransitioning)
+            return;
+
+        // ロック中も通さない
+        if (InputLockManager.I != null &&
+            InputLockManager.I.IsLocked)
+            return;
+
+        // =========================
+        // 防御待ち → Skip
+        // =========================
         if (waitingForDefense)
         {
-            // クリックされた瞬間に即ロック
+            // 最初の1回で即座に防御受付を終了
+            waitingForDefense = false;
+            defenseSkipped = true;
+            pendingDefenseCard = null;
+
             InputLockManager.I?.Lock();
 
             AudioManager.I?.PlayTurnEnd();
-            SkipDefense();
+
+            Debug.Log("[Battle] Defense skipped");
+
             return;
         }
 
-        if (resolvingAction) return;
-        if (turnSystem.Current != TurnOwner.Player) return;
+        // =========================
+        // 通常のTurn End
+        // =========================
+        if (resolvingAction)
+            return;
 
-        // Turn Endもクリックされた瞬間に即ロック
+        if (turnSystem.Current != TurnOwner.Player)
+            return;
+
+        // ここで即座に多重起動を禁止
+        turnTransitioning = true;
+
         InputLockManager.I?.Lock();
 
         AudioManager.I?.PlayTurnEnd();
-        StartCoroutine(CoEndPlayerTurn());
-    }    
 
+        StartCoroutine(CoEndPlayerTurn());
+    }
     private IEnumerator CoEndPlayerTurn()
     {
         InputLockManager.I?.Lock();
@@ -756,11 +782,18 @@ public class BattleStateMachine : MonoBehaviour
         yield return StartCoroutine(ShowCenterMessage("Turn End"));
 
         turnSystem.NextTurn();
-        yield return StartCoroutine(CoStartCurrentTurn());    
+
+        // 次のターンへ移ったので解除
+        turnTransitioning = false;
+
+        yield return StartCoroutine(CoStartCurrentTurn());
     }
 
     private IEnumerator CoEnemyTurn()
     {
+        // 敵ターン処理開始
+        turnTransitioning = true;
+
         int attack = Mathf.Max(0, enemyFixedDamage);
 
         CardView defenseCard = null;
@@ -840,7 +873,11 @@ public class BattleStateMachine : MonoBehaviour
 
         turnSystem.NextTurn();
         TurnCount++;
-        yield return StartCoroutine(CoStartCurrentTurn());    
+
+        // 敵ターン終了
+        turnTransitioning = false;
+
+        yield return StartCoroutine(CoStartCurrentTurn());
     }
 
     public void SelectDefenseCard(CardView view)
@@ -885,7 +922,9 @@ public class BattleStateMachine : MonoBehaviour
         if (!waitingForDefense)
             return;
 
-        // 念のためここでもロック
+        // 最初の1回を受け取った瞬間に受付終了
+        waitingForDefense = false;
+
         InputLockManager.I?.Lock();
 
         defenseSkipped = true;
