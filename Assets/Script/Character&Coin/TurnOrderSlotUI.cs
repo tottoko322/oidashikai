@@ -34,7 +34,7 @@ public class TurnOrderSlotUI : MonoBehaviour
         frame.sprite = artwork;
         frame.color = artwork != null ? Color.white : new Color(0.16f, 0.19f, 0.23f);
         stand.SetActive(artwork == null);
-        heading.text = "センコウ・コウコウをきめています";
+        heading.text = "せんこう・こうこうをきめています";
         resultText.text = "きめています...";
         resultText.color = new Color(0.65f, 0.85f, 0.83f);
         guide.color = new Color(0.3f, 0.85f, 0.74f, 0.13f);
@@ -57,10 +57,10 @@ public class TurnOrderSlotUI : MonoBehaviour
             if (!isActiveAndEnabled || !IsVisible) yield break;
             RenderReel(target);
             StoppedOnFirst = TurnOrderReel.IsFirstRow(target);
-            CenterLabel = StoppedOnFirst ? "センコウ" : "コウコウ";
+            CenterLabel = StoppedOnFirst ? "せんこう" : "こうこう";
             HasStopped = true;
             heading.text = "じゅんばんがきまりました";
-            resultText.text = playerFirst ? "あなたはセンコウです" : "あなたはコウコウです";
+            resultText.text = playerFirst ? "あなたはせんこうです" : "あなたはこうこうです";
             resultText.color = playerFirst ? new Color(0.5f, 1f, 0.8f) : new Color(1f, 0.8f, 0.45f);
             float hold = Mathf.Max(0f, resultHold);
             elapsed = 0f;
@@ -87,7 +87,7 @@ public class TurnOrderSlotUI : MonoBehaviour
             int index = center + i - 2;
             float y = (index - position) * RowHeight;
             rows[i].rectTransform.anchoredPosition = new Vector2(0f, y);
-            rows[i].text = TurnOrderReel.IsFirstRow(index) ? "センコウ" : "コウコウ";
+            rows[i].text = TurnOrderReel.IsFirstRow(index) ? "せんこう" : "こうこう";
             Color color = TurnOrderReel.IsFirstRow(index)
                 ? new Color(0.5f, 1f, 0.8f) : new Color(1f, 0.8f, 0.45f);
             color.a = Mathf.Lerp(1f, 0.2f, Mathf.Clamp01(Mathf.Abs(y) / (RowHeight * 1.5f)));

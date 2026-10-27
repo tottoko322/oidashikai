@@ -52,8 +52,8 @@ public class CpuCardRevealUI : MonoBehaviour
         if (root == null || card == null) yield break;
         artwork.sprite = card.artwork;
         label.text = $"CPUの{usage}\n{detail}";
-        label.color = usage == "コウゲキ" ? new Color(1f, 0.65f, 0.55f)
-            : usage == "ボウギョ" ? new Color(0.55f, 0.85f, 1f) : new Color(0.95f, 0.65f, 1f);
+        label.color = usage == "こうげき" ? new Color(1f, 0.65f, 0.55f)
+            : usage == "ぼうぎょ" ? new Color(0.55f, 0.85f, 1f) : new Color(0.95f, 0.65f, 1f);
         var parent = (RectTransform)root.parent;
         Vector2 start = origin != null ? (Vector2)parent.InverseTransformPoint(origin.position)
             - parent.rect.center : new Vector2(0f, 420f);
