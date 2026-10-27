@@ -143,11 +143,6 @@ public partial class BattleStateMachine : MonoBehaviour
         return false;
     }
 
-    private bool IsEffectCardBlocked()
-    {
-        return HasProgressCheckInHand();
-    }
-
     private IEnumerator Start()
     {
         ApplyCharacterSelection();
@@ -340,12 +335,6 @@ public partial class BattleStateMachine : MonoBehaviour
         if (zoneType != DropZoneType.Enemy && zoneType != DropZoneType.Effect) return false;
         if (zoneType == DropZoneType.Effect && !EnemyAI.CanUseEffect(view.Data, handManager.handViews.Count - (handManager.Contains(view) ? 1 : 0))) return false;
 
-        if (zoneType == DropZoneType.Effect && IsEffectCardBlocked())
-        {
-            Debug.Log("[Battle] Effect cards are blocked by 進捗確認.");
-            return false;
-        }
-
         if (!costManager.TryPay(view.Data.cost))
         {
             Debug.Log("[BattleStateMachine] Cost is not enough.");
@@ -481,7 +470,7 @@ public partial class BattleStateMachine : MonoBehaviour
                 return $"enemy max HP -{effect.valueA}";
 
             case EffectType.BlockEffectsAndSelfDamageWhileInHand:
-                return "block effects card";
+                return "このかーどはこうかとしてつかえません";
 
             case EffectType.None:
             default:

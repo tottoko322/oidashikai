@@ -138,8 +138,31 @@ public static class CpuBattleChecks
             var ctx = Context(new List<CardData> { cheap, lethal }); ctx.opponentHP = 5;
             var decision = EnemyAI.Decide(ctx, CpuDifficulty.Hard);
             Check(decision.card == lethal && decision.useEffect, "Hard prioritizes lethal effect damage");
-            ctx.effectsBlocked = true;
-            Check(!EnemyAI.Decide(ctx, CpuDifficulty.Hard).useEffect, "Hand restriction prevents effect choices");
+            var progress = Card(type: EffectType.BlockEffectsAndSelfDamageWhileInHand);
+            ctx.hand = new List<CardData> { cheap, lethal, progress };
+            decision = EnemyAI.Decide(ctx, CpuDifficulty.Hard);
+            Check(decision.card == lethal && decision.useEffect, "Progress Check does not block another CPU card's effect");
+            Check(!EnemyAI.CanUseEffect(progress, 3), "Progress Check itself cannot be played as an effect");
+            foreach (CpuDifficulty level in Enum.GetValues(typeof(CpuDifficulty)))
+                for (int i = 0; i < 10; i++)
+                {
+                    var action = EnemyAI.Decide(ctx, level);
+                    Check(action.card != progress || !action.useEffect, level + " never uses Progress Check as an effect " + i);
+                }
+            var playerWithProgress = Battle();
+            var kouza = AssetDatabase.LoadAssetAtPath<CardData>("Assets/Data/Card/kouza.asset");
+            Check(kouza != null, "The actual Kouza card asset loads");
+            var progressView = new GameObject("Progress").AddComponent<CardView>(); progressView.Bind(progress);
+            var kouzaView = new GameObject("Kouza").AddComponent<CardView>(); kouzaView.Bind(kouza);
+            playerWithProgress.handManager.handViews.Add(progressView);
+            playerWithProgress.handManager.handViews.Add(kouzaView);
+            playerWithProgress.enabled = false; playerWithProgress.gameObject.SetActive(true);
+            InputLockManager.I?.Unlock();
+            Check(!playerWithProgress.TryPlayCard(progressView, DropZoneType.Effect) && !playerWithProgress.PlayerActionUsed,
+                "Player cannot use Progress Check's effect and does not lose an action");
+            Check(playerWithProgress.TryPlayCard(kouzaView, DropZoneType.Effect),
+                "Player can use actual Kouza while holding Progress Check");
+            playerWithProgress.StopAllCoroutines(); playerWithProgress.gameObject.SetActive(false);
             var weak = Card(3, 1); var sufficient = Card(1, 2); var excessive = Card(5, 6);
             Check(EnemyAI.ChooseDefense(new List<CardData> { weak, sufficient, excessive }, 2, 1f, 5, CpuDifficulty.Hard) == sufficient,
                 "Hard saves excess defence and high attack cards");
