@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class EnemyAI : MonoBehaviour
+public partial class EnemyAI : MonoBehaviour
 {
     // 最小：後で本格化するための枠
     // 防御：最大防御、同値なら攻撃低い方
@@ -31,3 +31,4 @@ public class EnemyAI : MonoBehaviour
         return best;
     }
 }
+

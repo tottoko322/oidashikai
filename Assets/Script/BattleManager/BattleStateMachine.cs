@@ -2,7 +2,7 @@ using System.Collections;
 using UnityEngine;
 using TMPro;
 
-public class BattleStateMachine : MonoBehaviour
+public partial class BattleStateMachine : MonoBehaviour
 {
     public static BattleStateMachine I { get; private set; }
 
@@ -50,8 +50,7 @@ public class BattleStateMachine : MonoBehaviour
     public int playerMaxHP = 10;
     public int enemyMaxHP = 10;
 
-    [Header("Temporary Enemy AI")]
-    public int enemyFixedDamage = 1;
+    [Header("CPU Timing")]
     public float enemyThinkTime = 0.8f;
 
     [Header("Center Message")]
@@ -148,43 +147,10 @@ public class BattleStateMachine : MonoBehaviour
         return HasProgressCheckInHand();
     }
 
-    private void ReserveSelfDamageByTiming(EffectData effect, int selfDamage)
-    {
-        if (effect == null || selfDamage <= 0) return;
-
-        switch (effect.timing)
-        {
-            case EffectTiming.Immediate:
-                PlayerHP = Mathf.Max(0, PlayerHP - selfDamage);
-                RefreshHpUI();
-                playerHitVfx?.Play();
-                AudioManager.I?.PlayDamage();
-                Debug.Log($"[Battle] Self damage immediate: {selfDamage} / PlayerHP {PlayerHP}");
-                break;
-
-            case EffectTiming.TurnEndBeforeCurse:
-                pendingSelfDamageThisPlayerTurnEnd += selfDamage;
-                Debug.Log($"[Battle] Self damage reserved(this player turn end): {selfDamage}");
-                break;
-
-            case EffectTiming.NextPlayerTurnEnd:
-                pendingSelfDamageNextPlayerTurnEnd += selfDamage;
-                Debug.Log($"[Battle] Self damage reserved(next player turn end): {selfDamage}");
-                break;
-
-            case EffectTiming.TurnStart:
-            default:
-                // 今は自傷のTurnStart処理を作っていないので、
-                // 未対応タイミングは次の自分ターン終了時扱いにする
-                pendingSelfDamageNextPlayerTurnEnd += selfDamage;
-                Debug.Log($"[Battle] Self damage reserved(default next player turn end): {selfDamage}");
-                break;
-        }
-    }
-
     private IEnumerator Start()
     {
         initialEnemyMaxHP = enemyMaxHP;
+        initialPlayerMaxHP = playerMaxHP;
         // Include the panel even when its Awake has already hidden its root.
         if (characterEffectPanelUI == null)
         {
@@ -220,6 +186,8 @@ public class BattleStateMachine : MonoBehaviour
         if (SaveManager.I != null)
             config.useConfirm = SaveManager.I.GetConfirm(config.useConfirm);
 
+        handManager.config = config;
+
         PlayerHP = Mathf.Clamp(playerStartHP, 0, playerMaxHP);
         EnemyHP = Mathf.Clamp(enemyStartHP, 0, enemyMaxHP);
         RefreshHpUI();
@@ -252,12 +220,14 @@ public class BattleStateMachine : MonoBehaviour
         costManager.Init(config.startCost, config.maxCost);
 
         yield return cardDealAnimator.DealStartHand(config.startHandCount);
+        if (cardDealAnimator.LastDrawFailed) yield break;
+        if (!SetupCpu()) yield break;
         handLayout?.Rebuild();
         RefreshDeckUI();
 
         BattleReady = true;
 
-        yield return StartCoroutine(ShowCenterMessage("Battle Start!"));
+        yield return ShowCenterMessage("Battle Start!");
 
         if (playBgmAfterBattleStart)
         {
@@ -266,7 +236,7 @@ public class BattleStateMachine : MonoBehaviour
         }
 
         firstTurnIntroSkipped = true;
-        yield return StartCoroutine(CoStartCurrentTurn());    
+        yield return CoStartCurrentTurn();    
     }
 
     private IEnumerator CoStartCurrentTurn()
@@ -292,7 +262,7 @@ public class BattleStateMachine : MonoBehaviour
 
             if (!firstTurnIntroSkipped)
             {
-                yield return StartCoroutine(ShowCenterMessage("Your Turn"));
+                yield return ShowCenterMessage("Your Turn");
             }
             else
             {
@@ -322,6 +292,7 @@ public class BattleStateMachine : MonoBehaviour
             if (shouldDraw && cardDealAnimator != null)
             {
                 yield return cardDealAnimator.Draw(1);
+                if (!BattleReady) yield break;
             }
 
             RefreshDeckUI();
@@ -335,7 +306,7 @@ public class BattleStateMachine : MonoBehaviour
 
             if (!firstTurnIntroSkipped)
             {
-                yield return StartCoroutine(ShowCenterMessage("Enemy Turn"));
+                yield return ShowCenterMessage("Enemy Turn");
             }
             else
             {
@@ -347,7 +318,7 @@ public class BattleStateMachine : MonoBehaviour
             turnBanner?.SetText("Enemy Turn");
 
             yield return new WaitForSeconds(enemyThinkTime);
-            yield return StartCoroutine(CoEnemyTurn());
+            yield return CoEnemyTurn();
         }
     }
 
@@ -361,6 +332,9 @@ public class BattleStateMachine : MonoBehaviour
         if (turnSystem.Current != TurnOwner.Player) return false;
         if (InputLockManager.I != null && InputLockManager.I.IsLocked) return false;
         if (PlayerActionUsed) return false;
+
+        if (zoneType != DropZoneType.Enemy && zoneType != DropZoneType.Effect) return false;
+        if (zoneType == DropZoneType.Effect && !EnemyAI.CanUseEffect(view.Data, handManager.handViews.Count - (handManager.Contains(view) ? 1 : 0))) return false;
 
         if (zoneType == DropZoneType.Effect && IsEffectCardBlocked())
         {
@@ -429,19 +403,15 @@ public class BattleStateMachine : MonoBehaviour
             RefreshActiveEffectUI();
 
 
-            int damage = DamageCalculator.Calc(buffedAttack, 0);
-            EnemyHP = Mathf.Max(0, EnemyHP - damage);
-            RefreshHpUI();
-            enemyHitVfx?.Play();
-            AudioManager.I?.PlayDamage();
-
-            Debug.Log($"[Battle] Player attack: {card.displayName} / ATK {rawAttack} -> {buffedAttack} / Damage {damage} / EnemyHP {EnemyHP}");
+            int hpBefore = EnemyHP;
+            yield return CoDefendCpu(buffedAttack);
+            Debug.Log($"[Battle] Player attack: {card.displayName} / ATK {rawAttack} -> {buffedAttack} / Damage {hpBefore - EnemyHP} / EnemyHP {EnemyHP}");
             yield return new WaitForSeconds(0.35f);
         }
         // 効果
         else if (zoneType == DropZoneType.Effect)
         {
-            yield return StartCoroutine(CoApplyEffect(card));
+            yield return CoApplyEffect(card);
         }
 
         // 敵HPが0ならターンエンドせず勝利
@@ -463,7 +433,7 @@ public class BattleStateMachine : MonoBehaviour
         resolvingAction = false;
 
         // カード処理が終わった瞬間、自動でターンエンド
-        yield return StartCoroutine(CoEndPlayerTurn());
+        yield return CoEndPlayerTurn();
     }
 
     private string GetEffectPopupText(EffectData effect)
@@ -517,219 +487,7 @@ public class BattleStateMachine : MonoBehaviour
 
     private IEnumerator CoApplyEffect(CardData card)
     {
-
-        if (card == null || card.effect == null)
-            yield break;
-
-        var e = card.effect;
-
-            // ============================
-            // 効果内容ポップアップ
-            // ============================
-
-        string popupText = GetEffectPopupText(e);
-
-        if (effectPopupUI != null &&
-            !string.IsNullOrEmpty(popupText))
-        {
-            yield return StartCoroutine(
-                effectPopupUI.Show(popupText)
-            );
-        }
-
-    // ポップアップが消えてから実際の効果を発動
-        switch (e.type)
-        {
-            case EffectType.None:
-                yield break;
-
-            case EffectType.Draw:
-                if (effectSystem != null)
-                    yield return effectSystem.ApplyEffect(e);
-                handLayout?.Rebuild();
-                yield break;
-
-            case EffectType.Heal:
-                PlayerHP = Mathf.Min(playerMaxHP, PlayerHP + Mathf.Max(0, e.valueA));
-                AudioManager.I?.PlayHeal();
-                RefreshHpUI();
-                Debug.Log($"[Battle] Heal {e.valueA} / PlayerHP {PlayerHP}");
-                yield return new WaitForSeconds(0.2f);
-                yield break;
-
-            case EffectType.DealDamage:
-                EnemyHP = Mathf.Max(0, EnemyHP - Mathf.Max(0, e.valueA));
-                RefreshHpUI();
-                enemyHitVfx?.Play();
-                AudioManager.I?.PlayDamage();
-                Debug.Log($"[Battle] Effect damage {e.valueA} / EnemyHP {EnemyHP}");
-                yield return new WaitForSeconds(0.35f);
-                yield break;
-
-            case EffectType.AddCost:
-                costManager.Add(Mathf.Max(0, e.valueA));
-                AudioManager.I?.PlayBuff();
-                Debug.Log($"[Battle] Add cost {e.valueA} / CurrentCost {costManager.Current}");
-                yield return new WaitForSeconds(0.15f);
-                yield break;
-
-            case EffectType.MultiplyNextDamage:
-                pendingNextAttackMultiplier = Mathf.Max(1f, e.valueF);
-
-                RefreshActiveEffectUI();
-
-                AudioManager.I?.PlayBuff();
-                Debug.Log($"[Battle] Next attack multiplier = x{pendingNextAttackMultiplier}");
-                yield return new WaitForSeconds(0.15f);
-                yield break;
-
-            case EffectType.PierceDefense:
-                pendingNextDefenseMultiplier = Mathf.Max(1f, e.valueF);
-
-                RefreshActiveEffectUI();
-
-                AudioManager.I?.PlayBuff();
-                Debug.Log($"[Battle] Next defense multiplier = x{pendingNextDefenseMultiplier}");
-                yield return new WaitForSeconds(0.15f);
-                yield break;
-
-            case EffectType.DiscardAttackMinusOneDamage:
-                yield return StartCoroutine(CoDiscardAttackMinusOneDamage());
-                yield break;
-
-            case EffectType.DiscardDefenseMinusOneHeal:
-                yield return StartCoroutine(CoDiscardDefenseMinusOneHeal());
-                yield break;
-
-            case EffectType.HandCountMinusTwoDamage:
-                yield return StartCoroutine(CoHandCountMinusTwoDamage());
-                yield break;
-
-            case EffectType.HealAndSelfDamageNextTurnEnd:
-            {
-                int heal = Mathf.Max(0, e.valueA);
-                int selfDamage = Mathf.Max(0, Mathf.RoundToInt(e.valueF));
-
-                PlayerHP = Mathf.Min(playerMaxHP, PlayerHP + heal);
-                AudioManager.I?.PlayHeal();
-                RefreshHpUI();
-
-                ReserveSelfDamageByTiming(e, selfDamage);
-
-                RefreshActiveEffectUI();
-
-                Debug.Log($"[Battle] Heal {heal} / PlayerHP {PlayerHP} / SelfDamage {selfDamage} / Timing {e.timing}");
-                yield return new WaitForSeconds(0.25f);
-
-                if (PlayerHP <= 0)
-                {
-                    BattleReady = false;
-                    winLose.Lose();
-                }
-
-                yield break;
-            }
-
-            case EffectType.ReduceEnemyMaxHP:
-            {
-                int reduce = Mathf.Max(0, e.valueA);
-
-                enemyMaxHP = Mathf.Max(1, enemyMaxHP - reduce);
-                EnemyHP = Mathf.Min(EnemyHP, enemyMaxHP);
-                AudioManager.I?.PlayBuff();
-                RefreshHpUI();
-
-                Debug.Log($"[Battle] Enemy MaxHP -{reduce} / EnemyMaxHP {enemyMaxHP} / EnemyHP {EnemyHP}");
-                yield return new WaitForSeconds(0.25f);
-
-                if (EnemyHP <= 0)
-                {
-                    BattleReady = false;
-                    winLose.Win();
-                }
-                yield break;
-            }
-
-            default:
-                yield break;
-        }
-    }
-
-    private IEnumerator CoDiscardAttackMinusOneDamage()
-    {
-        if (handManager == null || handManager.handViews.Count <= 0)
-        {
-            Debug.Log("[Battle] No card to discard.");
-            yield break;
-        }
-
-        yield return StartCoroutine(CoWaitForDiscardSelection("すてるカードをえらんで"));
-
-        if (selectedDiscardCard == null || selectedDiscardCard.Data == null)
-            yield break;
-
-        int damage = Mathf.Max(0, selectedDiscardCard.Data.attack - 1);
-
-        yield return StartCoroutine(CoConsumeHandCard(selectedDiscardCard));
-
-        EnemyHP = Mathf.Max(0, EnemyHP - damage);
-        RefreshHpUI();
-        enemyHitVfx?.Play();
-        AudioManager.I?.PlayDamage();
-
-        Debug.Log($"[Battle] QGJ effect / Damage {damage} / EnemyHP {EnemyHP}");
-        yield return new WaitForSeconds(0.35f);
-
-        if (EnemyHP <= 0)
-        {
-            BattleReady = false;
-            winLose.Win();
-        }
-    }
-
-    private IEnumerator CoDiscardDefenseMinusOneHeal()
-    {
-        if (handManager == null || handManager.handViews.Count <= 0)
-        {
-            Debug.Log("[Battle] No card to discard.");
-            yield break;
-        }
-
-        yield return StartCoroutine(CoWaitForDiscardSelection("すてるカードをえらんで"));
-
-        if (selectedDiscardCard == null || selectedDiscardCard.Data == null)
-            yield break;
-
-        int heal = Mathf.Max(0, selectedDiscardCard.Data.defense - 1);
-
-        yield return StartCoroutine(CoConsumeHandCard(selectedDiscardCard));
-
-        PlayerHP = Mathf.Min(playerMaxHP, PlayerHP + heal);
-        AudioManager.I?.PlayHeal();
-        RefreshHpUI();
-
-        Debug.Log($"[Battle] 部室 effect / Heal {heal} / PlayerHP {PlayerHP}");
-        yield return new WaitForSeconds(0.25f);
-    }
-
-    private IEnumerator CoHandCountMinusTwoDamage()
-    {
-        int handCount = handManager != null ? handManager.handViews.Count : 0;
-        int damage = Mathf.Max(0, handCount - 2);
-
-        EnemyHP = Mathf.Max(0, EnemyHP - damage);
-        RefreshHpUI();
-        enemyHitVfx?.Play();
-        AudioManager.I?.PlayDamage();
-
-        Debug.Log($"[Battle] 講座 effect / Hand {handCount} / Damage {damage} / EnemyHP {EnemyHP}");
-        yield return new WaitForSeconds(0.35f);
-
-        if (EnemyHP <= 0)
-        {
-            BattleReady = false;
-            winLose.Win();
-        }
+        yield return CoApplyCardEffect(card, false);
     }
 
     private IEnumerator CoWaitForDiscardSelection(string message)
@@ -831,158 +589,20 @@ public class BattleStateMachine : MonoBehaviour
     }
     private IEnumerator CoEndPlayerTurn()
     {
+        if (!BattleReady) yield break;
         InputLockManager.I?.Lock();
-        yield return new WaitForSeconds(0.1f);
-
-        // 進捗確認：手札にある間、自分ターン終了時に1ダメージ
-        if (HasProgressCheckInHand())
-        {
-            PlayerHP = Mathf.Max(0, PlayerHP - 1);
-            RefreshHpUI();
-            playerHitVfx?.Play();
-            AudioManager.I?.PlayDamage();
-
-            Debug.Log($"[Battle] 進捗確認 self damage 1 / PlayerHP {PlayerHP}");
-            yield return new WaitForSeconds(0.35f);
-
-            if (PlayerHP <= 0)
-            {
-                BattleReady = false;
-                winLose.Lose();
-                yield break;
-            }
-        }
-
-        // 今回の自分ターン終了時に発動する予約分
-        if (pendingSelfDamageThisPlayerTurnEnd > 0)
-        {
-            int selfDamage = pendingSelfDamageThisPlayerTurnEnd;
-            pendingSelfDamageThisPlayerTurnEnd = 0;
-
-            RefreshActiveEffectUI();
-
-            PlayerHP = Mathf.Max(0, PlayerHP - selfDamage);
-            RefreshHpUI();
-            playerHitVfx?.Play();
-            AudioManager.I?.PlayDamage();
-
-            Debug.Log($"[Battle] Self damage at this player turn end: {selfDamage} / PlayerHP {PlayerHP}");
-            yield return new WaitForSeconds(0.35f);
-
-            if (PlayerHP <= 0)
-            {
-                BattleReady = false;
-                winLose.Lose();
-                yield break;
-            }
-        }
-
-        // 次の自分ターン終了時予約を、次回の終了判定用に移す
-        pendingSelfDamageThisPlayerTurnEnd = pendingSelfDamageNextPlayerTurnEnd;
-        pendingSelfDamageNextPlayerTurnEnd = 0;
-
-        RefreshActiveEffectUI();
-
-        yield return StartCoroutine(ShowCenterMessage("Turn End"));
-
+        turnTransitioning = true;
+        yield return CoEndSideEffects(false);
+        if (!BattleReady || CheckBattleEnded()) yield break;
+        yield return ShowCenterMessage("Turn End");
         turnSystem.NextTurn();
-
-        // 次のターンへ移ったので解除
         turnTransitioning = false;
-
-        yield return StartCoroutine(CoStartCurrentTurn());
+        yield return CoStartCurrentTurn();
     }
 
     private IEnumerator CoEnemyTurn()
     {
-        // 敵ターン処理開始
-        turnTransitioning = true;
-
-        int attack = Mathf.Max(0, enemyFixedDamage);
-
-        CardView defenseCard = null;
-        int defenseValue = 0;
-
-        if (handManager != null && handManager.handViews.Count > 0)
-        {
-            waitingForDefense = true;
-            pendingDefenseCard = null;
-            defenseSkipped = false;
-
-            InputLockManager.I?.Unlock();
-
-            if (defenseSelectUI != null)
-                defenseSelectUI.BeginSelection("defense or skip");
-
-            while (pendingDefenseCard == null && !defenseSkipped)
-                yield return null;
-
-            InputLockManager.I?.Lock();
-            waitingForDefense = false;
-
-            if (defenseSelectUI != null)
-                defenseSelectUI.EndSelection();
-
-            defenseCard = pendingDefenseCard;
-
-            if (defenseCard != null && defenseCard.Data != null)
-            {
-                int rawDefense = Mathf.Max(0, defenseCard.Data.defense);
-                defenseValue = Mathf.FloorToInt(rawDefense * pendingNextDefenseMultiplier);
-            }
-
-            pendingNextDefenseMultiplier = 1f;
-            RefreshActiveEffectUI();
-        }
-
-        int damage = DamageCalculator.Calc(attack, defenseValue);
-
-        if (defenseCard != null)
-        {
-            handManager.RemoveCard(defenseCard);
-            handLayout?.Rebuild();
-
-            var vanish = defenseCard.GetComponent<CardVanishVfx>();
-            if (vanish != null)
-            {
-                bool done = false;
-                vanish.Play(() =>
-                {
-                    Destroy(defenseCard.gameObject);
-                    done = true;
-                });
-                while (!done) yield return null;
-            }
-            else
-            {
-                Destroy(defenseCard.gameObject);
-            }
-        }
-
-        if (damage > 0)
-        {
-            PlayerHP = Mathf.Max(0, PlayerHP - damage);
-            RefreshHpUI();
-            playerHitVfx?.Play();
-            AudioManager.I?.PlayDamage();
-        }
-
-        if (PlayerHP <= 0)
-        {
-            BattleReady = false;
-            winLose.Lose();
-            yield break;
-        }
-
-        yield return StartCoroutine(ShowCenterMessage("Turn End"));
-
-        turnSystem.NextTurn();
-        TurnCount++;
-
-        // 敵ターン終了
-        turnTransitioning = false;
-
-        yield return StartCoroutine(CoStartCurrentTurn());
+        yield return CoEnemyAction();
     }
 
     public void SelectDefenseCard(CardView view)
@@ -1007,6 +627,9 @@ public class BattleStateMachine : MonoBehaviour
 
         if (!waitingForDefense)
             return false;
+
+        if (pendingDefenseCard != null || defenseSkipped || !BattleReady ||
+            (InputLockManager.I != null && InputLockManager.I.IsLocked)) return false;
 
         if (view == null)
             return false;
@@ -1039,6 +662,7 @@ public class BattleStateMachine : MonoBehaviour
     public void SelectDiscardCard(CardView view)
     {
         if (!waitingForDiscardSelect) return;
+        if (selectedDiscardCard != null || !BattleReady) return;
         if (view == null) return;
         if (!handManager.Contains(view)) return;
 
@@ -1063,42 +687,18 @@ public class BattleStateMachine : MonoBehaviour
 
     public string GetPlayerActiveEffectText(bool includeHandEffects = true)
     {
-        string text = "";
-
-        if (!Mathf.Approximately(pendingNextAttackMultiplier, 1f))
-        {
-            text += $"・つぎのコウゲキ ×{pendingNextAttackMultiplier}\n";
-        }
-
-        if (!Mathf.Approximately(pendingNextDefenseMultiplier, 1f))
-        {
-            text += $"・つぎのボウギョ ×{pendingNextDefenseMultiplier}\n";
-        }
-
-        if (pendingSelfDamageThisPlayerTurnEnd > 0)
-        {
-            text +=
-                $"・ターン終了時 {pendingSelfDamageThisPlayerTurnEnd}ダメージ\n";
-        }
-
-        if (pendingSelfDamageNextPlayerTurnEnd > 0)
-        {
-            text +=
-                $"・つぎのターン終了時 {pendingSelfDamageNextPlayerTurnEnd}ダメージ\n";
-        }
-
-        if (includeHandEffects && HasProgressCheckInHand())
-        {
-            text += "・進捗確認：手札にある間、効果カード使用不可／自分のターン終了時に1ダメージ\n";
-        }
-
-        return text.TrimEnd();
+        return StatusText(pendingNextAttackMultiplier, pendingNextDefenseMultiplier,
+            pendingSelfDamageThisPlayerTurnEnd, pendingSelfDamageNextPlayerTurnEnd,
+            includeHandEffects && HasProgressCheckInHand(),
+            Mathf.Max(0, initialPlayerMaxHP - playerMaxHP), playerMaxHP);
     }
 
-    public string GetEnemyActiveEffectText()
+    public string GetEnemyActiveEffectText(bool includeHandEffects = true)
     {
-        int reduction = Mathf.Max(0, initialEnemyMaxHP - enemyMaxHP);
-        return reduction > 0 ? $"・最大HP -{reduction}（現在の最大HP：{enemyMaxHP}）" : "";
+        return StatusText(enemyState.attackMultiplier, enemyState.defenseMultiplier,
+            enemyState.selfDamageThisTurnEnd, enemyState.selfDamageNextTurnEnd,
+            includeHandEffects && enemyState.HasHandRestriction(),
+            Mathf.Max(0, initialEnemyMaxHP - enemyMaxHP), enemyMaxHP);
     }
 
     private IEnumerator ShowCenterMessage(string message)
