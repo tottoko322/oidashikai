@@ -14,6 +14,11 @@ public class BattleEffectPopupUI : MonoBehaviour
 
     private void Awake()
     {
+        if (popupRoot != null)
+        {
+            foreach (var graphic in popupRoot.GetComponentsInChildren<UnityEngine.UI.Graphic>(true))
+                graphic.raycastTarget = false;
+        }
         HideImmediate();
     }
 

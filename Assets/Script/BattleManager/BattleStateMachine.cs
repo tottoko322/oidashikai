@@ -30,6 +30,7 @@ public class BattleStateMachine : MonoBehaviour
     public TMP_Text playerHpText;
     public TMP_Text enemyHpText;
     public BattleEffectPopupUI effectPopupUI;
+    public CharacterEffectPanelUI characterEffectPanelUI;
 
     [Header("Extra UI")]
     public TMP_Text gameStartText;
@@ -87,6 +88,7 @@ public class BattleStateMachine : MonoBehaviour
     private float pendingNextDefenseMultiplier = 1f;
 
     private bool firstPlayerTurnStarted = false;
+    private int initialEnemyMaxHP;
     private CardView pendingDefenseCard;
 
     private void Awake()
@@ -182,6 +184,23 @@ public class BattleStateMachine : MonoBehaviour
 
     private IEnumerator Start()
     {
+        initialEnemyMaxHP = enemyMaxHP;
+        // Include the panel even when its Awake has already hidden its root.
+        if (characterEffectPanelUI == null)
+        {
+            foreach (var panel in FindObjectsByType<CharacterEffectPanelUI>(
+                FindObjectsInactive.Include))
+            {
+                if (panel.gameObject.scene == gameObject.scene)
+                {
+                    characterEffectPanelUI = panel;
+                    break;
+                }
+            }
+        }
+        characterEffectPanelUI?.Initialize(this);
+        RefreshActiveEffectUI();
+
         BattleReady = false;
         PlayerActionUsed = false;
         resolvingAction = false;
@@ -842,8 +861,6 @@ public class BattleStateMachine : MonoBehaviour
 
             RefreshActiveEffectUI();
 
-            pendingSelfDamageThisPlayerTurnEnd = 0;
-
             PlayerHP = Mathf.Max(0, PlayerHP - selfDamage);
             RefreshHpUI();
             playerHitVfx?.Play();
@@ -1041,9 +1058,11 @@ public class BattleStateMachine : MonoBehaviour
     }
     private void RefreshActiveEffectUI()
     {
-        if (playerActiveEffectDisplay == null)
-            return;
+        playerActiveEffectDisplay?.SetEffects(GetPlayerActiveEffectText(false));
+    }
 
+    public string GetPlayerActiveEffectText(bool includeHandEffects = true)
+    {
         string text = "";
 
         if (!Mathf.Approximately(pendingNextAttackMultiplier, 1f))
@@ -1068,9 +1087,18 @@ public class BattleStateMachine : MonoBehaviour
                 $"・つぎのターン終了時 {pendingSelfDamageNextPlayerTurnEnd}ダメージ\n";
         }
 
-        text = text.TrimEnd();
+        if (includeHandEffects && HasProgressCheckInHand())
+        {
+            text += "・進捗確認：手札にある間、効果カード使用不可／自分のターン終了時に1ダメージ\n";
+        }
 
-        playerActiveEffectDisplay.SetEffects(text);
+        return text.TrimEnd();
+    }
+
+    public string GetEnemyActiveEffectText()
+    {
+        int reduction = Mathf.Max(0, initialEnemyMaxHP - enemyMaxHP);
+        return reduction > 0 ? $"・最大HP -{reduction}（現在の最大HP：{enemyMaxHP}）" : "";
     }
 
     private IEnumerator ShowCenterMessage(string message)
