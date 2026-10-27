@@ -36,3 +36,5 @@ AudioPromptChecks.csを隔離プロジェクトのAssets/Editorへコピーし�
 リポジトリ内で`python Tools/Validation/audit_game_fonts.py`を実行すると、各ゲームシーンとカードPrefabのFont Asset・共有マテリアル、TMPの既定フォントを読み取り専用で確認できます。
 
 UnityではGameFontChecks.csを隔離プロジェクトのAssets/Editorへコピーし、executeMethodに`GameFontChecks.Run`を指定します。フォント本体と.meta、共通フォントに変更したTMP Settings.assetも検証用プロジェクトへコピーしてください。Resources内のTMP Settingsは重複させず、変更後の既定フォントが読み込まれる状態にします。結果はfont-checks-result.txtに記録します。
+
+小さいCPUカードのクリックによる詳細の開閉、閉じても防御待ちを維持すること、詳細を読んでいる間は通常カードの表示時間が停止することもMenuMusicRevealChecksで確認します。

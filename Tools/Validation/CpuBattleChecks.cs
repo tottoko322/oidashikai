@@ -252,7 +252,9 @@ public static class CpuBattleChecks
             Drain(reveal.Show(cheap, "こうげき", "ATK 2"));
             var root = canvas.transform.Find("CpuCardReveal");
             Check(root != null && !root.gameObject.activeSelf, "Reveal returns and hides after its animation");
-            Check(!root.GetComponent<CanvasGroup>().blocksRaycasts, "Reveal never intercepts board input");
+            Check(root.Find("Artwork").GetComponent<UnityEngine.UI.Button>() != null &&
+                !root.Find("Usage").GetComponent<Image>().raycastTarget,
+                "Only the compact artwork accepts inspection clicks");
             Check(root.GetComponentInChildren<TMP_Text>(true).text.Contains("こうげき"), "Reveal identifies how the CPU used the card");
             System.IO.File.WriteAllText("cpu-checks-result.txt", "PASS " + checks);
             Debug.Log("ALL CPU CHECKS PASSED: " + checks);
