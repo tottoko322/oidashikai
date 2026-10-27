@@ -9,7 +9,15 @@ public class CharacterSelectManager : MonoBehaviour
 
     private void Start()
     {
+        if (characters == null || characters.Length == 0 || carousel == null)
+        {
+            Debug.LogError("[CharacterSelect] Characters or carousel are missing.");
+            return;
+        }
         carousel.Init(characters.Length);
+        var previous = SelectedCharacterContext.I != null ? SelectedCharacterContext.I.selected : null;
+        for (int i = 0; i < characters.Length; i++)
+            if (previous != null && characters[i] == previous) { carousel.Select(i); break; }
         Apply();
     }
 
@@ -18,19 +26,28 @@ public class CharacterSelectManager : MonoBehaviour
 
     public void OnConfirm()
     {
-        // 相談スクリプト：SelectedCharacterContext
-        SelectedCharacterContext.I.selected = characters[carousel.Index];
+        if (!ConfirmSelection()) return;
+        flow?.GoBattle();
+    }
 
-        //if (ModeContext.I.mode == GameMode.DistributedDeckBattle) flow.GoBattle();
-        //else flow.GoDeckBuild();
-        //直結(デッキビルドなし)
-        flow.GoBattle();
+    public bool ConfirmSelection()
+    {
+        if (carousel == null || characters == null || characters.Length == 0 ||
+            carousel.Index >= characters.Length || characters[carousel.Index] == null) return false;
+        var player = characters[carousel.Index];
+        CharacterData enemy = null;
+        foreach (var character in characters)
+            if (character != null && character != player) { enemy = character; break; }
+        SelectedCharacterContext.Ensure().Select(player, enemy);
+        return true;
     }
 
     public void OnBack() => flow.GoTitle();
 
     private void Apply()
     {
-        ui.Set(characters[carousel.Index]);
+        if (ui != null && carousel != null && characters != null && characters.Length > 0)
+            ui.Set(characters[carousel.Index]);
     }
 }
+

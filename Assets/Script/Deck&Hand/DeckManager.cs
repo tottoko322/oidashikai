@@ -128,6 +128,26 @@ public class DeckManager : MonoBehaviour
         return ok;
     }
 
+    public bool SetupForBattle(DeckDefinition fallback)
+    {
+        // A completed constructed deck is independent of the selected portrait.
+        if (ModeContext.I != null && ModeContext.I.mode == GameMode.DeckBuildBattle &&
+            DeckRuntimeContext.I != null && DeckRuntimeContext.I.builtDeck.Count > 0)
+        {
+            runtimeDeck.Clear();
+            index = 0;
+            runtimeDeck.AddRange(DeckRuntimeContext.I.builtDeck);
+            Shuffle(runtimeDeck);
+            return true;
+        }
+        var selected = SelectedCharacterContext.I != null ? SelectedCharacterContext.I.selected : null;
+        if (selected != null && selected.distributedDeck != null)
+            return SetupFromDefinition(selected.distributedDeck);
+
+        // Allow Battle to be opened directly in the editor with its existing deck.
+        return SetupFromDefinition(forcedDeckDefinition != null ? forcedDeckDefinition : fallback);
+    }
+
     public bool TryDraw(out CardData card)
     {
         if (Remaining <= 0)
@@ -150,3 +170,4 @@ public class DeckManager : MonoBehaviour
         }
     }
 }
+

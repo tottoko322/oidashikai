@@ -10,8 +10,10 @@ public class CharacterSelectUI : MonoBehaviour
 
     public void Set(CharacterData data)
     {
-        portrait.sprite = data.portrait;
-        shadow.sprite=data.portrait;
-        nameText.text = data.displayName;
+        if (data == null) return;
+        if (portrait != null) portrait.sprite = data.portrait;
+        if (shadow != null) shadow.sprite = data.portrait;
+        if (nameText != null) nameText.text = data.displayName;
     }
 }
+
