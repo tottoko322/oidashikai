@@ -41,11 +41,18 @@ public class CardInteraction : MonoBehaviour,
 
         if (dragging) return;
 
+        if (BattleStateMachine.I != null && BattleStateMachine.I.IsWaitingForDiscardSelect)
+        {
+            BattleStateMachine.I.SelectDiscardCard(view);
+            return;
+        }
+
         if (popupUI == null) return;
         popupUI.Toggle(view);
     }
     public void OnBeginDrag(PointerEventData eventData)
     {
+        if (BattleStateMachine.I != null && BattleStateMachine.I.IsWaitingForDiscardSelect) return;
         if (InputLockManager.I != null && InputLockManager.I.IsLocked)
         {
             // ロック中はドラッグ開始しない（音だけ）
@@ -231,3 +238,4 @@ public class CardInteraction : MonoBehaviour,
         );
     }
 }
+

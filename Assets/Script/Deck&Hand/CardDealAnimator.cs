@@ -10,9 +10,11 @@ public class CardDealAnimator : MonoBehaviour
 
     [Header("Timing (simple version)")]
     public float interval = 0.08f;
+    public bool LastDrawFailed { get; private set; }
 
     public IEnumerator DealStartHand(int count)
     {
+        LastDrawFailed = false;
         for (int i = 0; i < count; i++)
         {
             if (!TryDrawOne()) yield break;
@@ -23,6 +25,7 @@ public class CardDealAnimator : MonoBehaviour
 
     public IEnumerator Draw(int count)
     {
+        LastDrawFailed = false;
         for (int i = 0; i < count; i++)
         {
             if (!TryDrawOne()) yield break;
@@ -37,8 +40,8 @@ public class CardDealAnimator : MonoBehaviour
 
         if (!deck.TryDraw(out var c))
         {
-            // 本番は WinLoseSystem に通知
-            Debug.LogError("Deck empty on draw => Lose");
+            LastDrawFailed = true;
+            BattleStateMachine.I?.NotifyDeckEmpty(false);
             return false;
         }
 
@@ -53,3 +56,4 @@ public class CardDealAnimator : MonoBehaviour
         return true;
     }
 }
+
