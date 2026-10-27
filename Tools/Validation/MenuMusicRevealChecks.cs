@@ -128,9 +128,30 @@ public static class MenuMusicRevealChecks
                 (skip ? "Skip" : "Defense") + " returns the card and resolves damage once");
         }
         float holdStarted = Time.realtimeSinceStartup;
-        yield return reveal.Show(attackCard, "こうか", "draw");
+        yield return InspectTimed(reveal.Show(attackCard, "こうか", "draw"), reveal);
         Check(Time.realtimeSinceStartup - holdStarted >= 1.5f && !reveal.IsVisible,
             "Non-attack cards remain visible for the longer hold and then return");
+    }
+    static IEnumerator InspectTimed(IEnumerator animation, CpuCardRevealUI reveal)
+    {
+        var stack = new Stack<IEnumerator>(); stack.Push(animation);
+        float openedAt = -1f; bool closed = false;
+        while (stack.Count > 0)
+        {
+            if (!stack.Peek().MoveNext()) { (stack.Pop() as IDisposable)?.Dispose(); continue; }
+            if (stack.Peek().Current is IEnumerator nested) { stack.Push(nested); continue; }
+            if (openedAt < 0f && reveal.IsVisible)
+            {
+                reveal.OpenDetails(); openedAt = Time.realtimeSinceStartup;
+            }
+            if (!closed && openedAt >= 0f && Time.realtimeSinceStartup - openedAt > 1.7f)
+            {
+                Check(reveal.IsVisible && reveal.IsDetailOpen, "Reading details pauses the regular card timeout");
+                reveal.CloseDetails(); closed = true;
+            }
+            yield return stack.Peek().Current;
+        }
+        Check(closed && !reveal.IsDetailOpen, "The regular card resumes its timer and cleans up details");
     }
     static IEnumerator DriveChoice(IEnumerator animation, BattleStateMachine battle, CpuCardRevealUI reveal, CardView card, bool skip)
     {
@@ -149,6 +170,13 @@ public static class MenuMusicRevealChecks
                     Check(reveal.IsVisible && battle.PlayerHP == 10, "Attack card and damage remain pending until a choice");
                     var text = reveal.GetComponent<Canvas>().GetComponentInChildren<TMP_Text>(true);
                     Check(text.text.Contains("ATK 3"), "The actual incoming attack value remains visible");
+                    Check(reveal.transform.Find("CpuCardReveal").localScale.x == 0.7f,
+                        "The waiting attack card uses the compact scale");
+                    reveal.OpenDetails();
+                    Check(reveal.IsDetailOpen, "Clicking the compact card opens a large detail view");
+                    reveal.CloseDetails();
+                    Check(!reveal.IsDetailOpen && reveal.IsVisible && battle.IsWaitingForDefense,
+                        "Closing details preserves the pending defense choice and compact card");
                     if (skip) battle.SkipDefense(); else battle.SelectDefenseCard(card);
                     Check(reveal.IsVisible, "Choosing starts a return animation rather than hiding instantly");
                     chosen = true;
