@@ -47,6 +47,8 @@ public class AudioManager : MonoBehaviour
         }
 
         I = this;
+        LoadVolume();
+        ApplySavedVolume();
     }
 
     private void OnDestroy()
@@ -83,6 +85,9 @@ public class AudioManager : MonoBehaviour
         PlayerPrefs.SetFloat(MasterKey, masterVolume);
         PlayerPrefs.SetFloat(BgmKey, bgmVolume);
         PlayerPrefs.SetFloat(SeKey, seVolume);
+        // Keep the older settings UI keys in sync with the audio settings.
+        PlayerPrefs.SetFloat("qpic_bgm", bgmVolume);
+        PlayerPrefs.SetFloat("qpic_se", seVolume);
         PlayerPrefs.Save();
     }
 
@@ -91,11 +96,11 @@ public class AudioManager : MonoBehaviour
         if (PlayerPrefs.HasKey(MasterKey))
             masterVolume = PlayerPrefs.GetFloat(MasterKey);
 
-        if (PlayerPrefs.HasKey(BgmKey))
-            bgmVolume = PlayerPrefs.GetFloat(BgmKey);
+        bgmVolume = Mathf.Clamp01(PlayerPrefs.GetFloat(BgmKey,
+            PlayerPrefs.GetFloat("qpic_bgm", bgmVolume)));
 
-        if (PlayerPrefs.HasKey(SeKey))
-            seVolume = PlayerPrefs.GetFloat(SeKey);
+        seVolume = Mathf.Clamp01(PlayerPrefs.GetFloat(SeKey,
+            PlayerPrefs.GetFloat("qpic_se", seVolume)));
     }
 
     public void SetMasterVolume(float value)

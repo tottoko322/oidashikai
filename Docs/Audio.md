@@ -1,0 +1,11 @@
+# BGMと音量設定
+
+タイトルのdigital.mp3と対戦のLAST BATTLE.wavは、それぞれのシーンのAudioManager.bgmClipを使用し、Startでループ再生します。曲やシーン内の参照は変更していません。
+
+音量はMASTER_VOLUME・BGM_VOLUME・SE_VOLUMEを基準とし、以前のqpic_bgm・qpic_seも読み取り互換と同期書き込みを行います。SaveManagerとAudioManagerが異なる設定を参照しないようにしています。AudioManagerはAwakeでも保存音量を読み込み、設定画面を初めて開く前から値を利用できます。
+
+設定画面は開くたびに現在の音量を反映します。スライダーとトグルの初期値はSetValueWithoutNotify / SetIsOnWithoutNotifyで設定し、初期表示が保存や音量変更のコールバックを呼ばないようにしています。意図的に保存した音量0はコードで強制解除しません。
+
+無音の診断時には、このゲームのEditor用BGM_VOLUMEとqpic_bgmが両方0、マスター音量は1でした。依頼に合わせてその環境のBGM設定2項目だけを70%へ戻しています。ほかの環境で音量0が保存されている場合は、設定画面のBGMスライダーで調整してください。
+
+Tools/Validation/AudioPromptChecks.csは生成したAudioClipで再生状態・音量同期・初期表示の無通知処理と防御案内を検証します。実際の音源の聴取確認は元のプロジェクトで行ってください。

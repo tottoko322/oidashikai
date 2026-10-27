@@ -23,7 +23,7 @@ public class DefenseSelectUI : MonoBehaviour
         }
     }
 
-    public void BeginSelection(string msg = "defense or skip")
+    public void BeginSelection(string msg = "ぼうぎょするか、すきっぷをえらんでください")
     {
         waiting = true;
 
@@ -31,7 +31,11 @@ public class DefenseSelectUI : MonoBehaviour
             root.SetActive(true);
 
         if (message != null)
-            message.text = msg;
+        {
+            message.enabled = true;
+            message.text = string.IsNullOrWhiteSpace(msg)
+                ? "ぼうぎょするか、すきっぷをえらんでください" : msg;
+        }
     }
 
     public void EndSelection()

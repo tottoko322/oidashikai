@@ -29,6 +29,8 @@ TurnOrderSlotChecks.csを隔離プロジェクトのAssets/Editorへコピーし
 
 ## フォントの統一
 
+AudioPromptChecks.csを隔離プロジェクトのAssets/Editorへコピーし、executeMethodに`AudioPromptChecks.Run`を指定すると、BGM再生開始、音量保存の互換性と同期、設定画面の無通知初期化、防御の操作案内を検証します。音源は生成した検証用クリップを使い、結果はaudio-prompt-checks-result.txtへ記録します。検証前の音量設定は終了時に復元します。
+
 リポジトリ内で`python Tools/Validation/audit_game_fonts.py`を実行すると、各ゲームシーンとカードPrefabのFont Asset・共有マテリアル、TMPの既定フォントを読み取り専用で確認できます。
 
 UnityではGameFontChecks.csを隔離プロジェクトのAssets/Editorへコピーし、executeMethodに`GameFontChecks.Run`を指定します。フォント本体と.meta、共通フォントに変更したTMP Settings.assetも検証用プロジェクトへコピーしてください。Resources内のTMP Settingsは重複させず、変更後の既定フォントが読み込まれる状態にします。結果はfont-checks-result.txtに記録します。

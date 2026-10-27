@@ -14,11 +14,12 @@ public class SaveManager : MonoBehaviour
         I = this;
         DontDestroyOnLoad(gameObject);
     }
-    public float GetBgm(float def = 0.8f) => PlayerPrefs.GetFloat(KEY_BGM, def);
-    public float GetSe(float def = 0.8f) => PlayerPrefs.GetFloat(KEY_SE, def);
+    public float GetBgm(float def = 0.8f) => PlayerPrefs.GetFloat("BGM_VOLUME", PlayerPrefs.GetFloat(KEY_BGM, def));
+    public float GetSe(float def = 0.8f) => PlayerPrefs.GetFloat("SE_VOLUME", PlayerPrefs.GetFloat(KEY_SE, def));
     public bool GetConfirm(bool def = false) => PlayerPrefs.GetInt(KEY_CONFIRM, def ? 1 : 0) == 1;
 
-    public void SetBgm(float v) { PlayerPrefs.SetFloat(KEY_BGM, Mathf.Clamp01(v)); PlayerPrefs.Save(); }
-    public void SetSe(float v) { PlayerPrefs.SetFloat(KEY_SE, Mathf.Clamp01(v)); PlayerPrefs.Save(); }
+    public void SetBgm(float v) { PlayerPrefs.SetFloat(KEY_BGM, Mathf.Clamp01(v)); PlayerPrefs.SetFloat("BGM_VOLUME", Mathf.Clamp01(v)); PlayerPrefs.Save(); }
+    public void SetSe(float v) { PlayerPrefs.SetFloat(KEY_SE, Mathf.Clamp01(v)); PlayerPrefs.SetFloat("SE_VOLUME", Mathf.Clamp01(v)); PlayerPrefs.Save(); }
     public void SetConfirm(bool on) { PlayerPrefs.SetInt(KEY_CONFIRM, on ? 1 : 0); PlayerPrefs.Save(); }
 }
+
