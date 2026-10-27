@@ -11,6 +11,9 @@ public class CpuCardRevealUI : MonoBehaviour
     private TMP_Text label;
     private CpuBattleConfig settings;
     private RectTransform origin;
+    private Vector2 returnPosition;
+    private float shownScale;
+    public bool IsVisible => root != null && root.gameObject.activeSelf;
 
     public void Initialize(Transform canvas, TMP_FontAsset font, RectTransform enemyOrigin, CpuBattleConfig config)
     {
@@ -47,7 +50,7 @@ public class CpuCardRevealUI : MonoBehaviour
         root.gameObject.SetActive(false);
     }
 
-    public IEnumerator Show(CardData card, string usage, string detail = "")
+    public IEnumerator Show(CardData card, string usage, string detail = "", IEnumerator whileVisible = null)
     {
         if (root == null || card == null) yield break;
         artwork.sprite = card.artwork;
@@ -59,17 +62,27 @@ public class CpuCardRevealUI : MonoBehaviour
             - parent.rect.center : new Vector2(0f, 420f);
         Vector2 target = settings != null ? settings.revealPosition : new Vector2(-350f, 30f);
         float scale = settings != null ? Mathf.Max(0.1f, settings.revealScale) : 1.4f;
+        returnPosition = start;
+        shownScale = scale;
         root.SetAsLastSibling();
         root.gameObject.SetActive(true);
         try
         {
             yield return Animate(start, target, 0.15f, scale, 0f, 1f,
                 settings != null ? settings.enterDuration : 0.16f);
-            yield return new WaitForSeconds(settings != null ? Mathf.Max(0f, settings.holdDuration) : 0.45f);
-            yield return Animate(target, start, scale, 0.1f, 1f, 0f,
-                settings != null ? settings.returnDuration : 0.18f);
+            if (whileVisible != null) yield return whileVisible;
+            else yield return new WaitForSeconds(settings != null ? Mathf.Max(0f, settings.holdDuration) : 1.5f);
+            yield return ReturnToOrigin();
         }
         finally { if (root != null) root.gameObject.SetActive(false); }
+    }
+
+    public IEnumerator ReturnToOrigin()
+    {
+        if (!IsVisible) yield break;
+        yield return Animate(root.anchoredPosition, returnPosition, shownScale, 0.1f, 1f, 0f,
+            settings != null ? settings.returnDuration : 0.18f);
+        if (root != null) root.gameObject.SetActive(false);
     }
 
     private IEnumerator Animate(Vector2 from, Vector2 to, float fromScale, float toScale,

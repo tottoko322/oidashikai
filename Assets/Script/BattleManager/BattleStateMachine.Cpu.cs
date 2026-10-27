@@ -120,12 +120,13 @@ public partial class BattleStateMachine
         effectsBlocked = enemyState.HasHandRestriction()
     };
 
-    private IEnumerator RevealCpuCard(CardData card, string usage, string detail = "")
+    private IEnumerator RevealCpuCard(CardData card, string usage, string detail = "", IEnumerator whileVisible = null)
     {
         characterEffectPanelUI?.Close();
         if (handManager != null && handManager.popupUI != null && handManager.popupUI.IsOpen)
             handManager.popupUI.Close(false);
-        if (cpuCardRevealUI != null) yield return cpuCardRevealUI.Show(card, usage, detail);
+        if (cpuCardRevealUI != null) yield return cpuCardRevealUI.Show(card, usage, detail, whileVisible);
+        else if (whileVisible != null) yield return whileVisible;
     }
 
     private IEnumerator CoEnemyAction()
@@ -151,8 +152,10 @@ public partial class BattleStateMachine
                 int attack = Mathf.FloorToInt(Mathf.Max(0, action.card.attack) * enemyState.attackMultiplier);
                 enemyState.attackMultiplier = 1f;
                 RefreshCpuUI();
-                yield return RevealCpuCard(action.card, "こうげき", $"ATK {attack}");
-                yield return CoDefendPlayer(attack);
+                bool canChooseDefense = attack > 0 && handManager.handViews.Count > 0;
+                yield return RevealCpuCard(action.card, "こうげき", $"ATK {attack}",
+                    canChooseDefense ? CoDefendPlayer(attack) : null);
+                if (!canChooseDefense) yield return CoDefendPlayer(attack);
             }
         }
         if (CheckBattleEnded()) yield break;
@@ -177,6 +180,8 @@ public partial class BattleStateMachine
             waitingForDefense = false;
             defenseSelectUI?.EndSelection();
         }
+        if (cpuCardRevealUI != null && cpuCardRevealUI.IsVisible)
+            yield return cpuCardRevealUI.ReturnToOrigin();
         if (!BattleReady) yield break;
         int defense = 0;
         if (pendingDefenseCard != null && pendingDefenseCard.Data != null)

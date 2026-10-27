@@ -29,6 +29,8 @@ TurnOrderSlotChecks.csを隔離プロジェクトのAssets/Editorへコピーし
 
 ## フォントの統一
 
+MenuMusicRevealChecks.csを隔離プロジェクトのAssets/Editorへコピーし、executeMethodに`MenuMusicRevealChecks.Run`を指定すると、シーンを破棄・生成するBGM継続検証と、実際のフレームでカードを保持する検証を実行します。メニュー間の継続、同曲への復帰と二重再生防止、戦闘曲との切り替え、攻撃値の保持、防御/スキップ選択後の戻りとダメージ計算、通常カードの表示時間を確認します。結果はmusic-reveal-checks-result.txtへ記録します。
+
 AudioPromptChecks.csを隔離プロジェクトのAssets/Editorへコピーし、executeMethodに`AudioPromptChecks.Run`を指定すると、BGM再生開始、音量保存の互換性と同期、設定画面の無通知初期化、防御の操作案内を検証します。音源は生成した検証用クリップを使い、結果はaudio-prompt-checks-result.txtへ記録します。検証前の音量設定は終了時に復元します。
 
 リポジトリ内で`python Tools/Validation/audit_game_fonts.py`を実行すると、各ゲームシーンとカードPrefabのFont Asset・共有マテリアル、TMPの既定フォントを読み取り専用で確認できます。
