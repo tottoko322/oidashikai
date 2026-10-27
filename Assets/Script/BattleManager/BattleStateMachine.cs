@@ -26,8 +26,10 @@ public class BattleStateMachine : MonoBehaviour
     public TurnBannerController turnBanner;
     public TurnEndButtonController turnEndButton;
     public DefenseSelectUI defenseSelectUI;
+    public ActiveEffectDisplay playerActiveEffectDisplay;
     public TMP_Text playerHpText;
     public TMP_Text enemyHpText;
+    public BattleEffectPopupUI effectPopupUI;
 
     [Header("Extra UI")]
     public TMP_Text gameStartText;
@@ -400,7 +402,13 @@ public class BattleStateMachine : MonoBehaviour
         {
             int rawAttack = Mathf.Max(0, card.attack);
             int buffedAttack = Mathf.FloorToInt(rawAttack * pendingNextAttackMultiplier);
+
+            // 攻撃倍率を消費
             pendingNextAttackMultiplier = 1f;
+
+            // 継続効果の表示を更新
+            RefreshActiveEffectUI();
+
 
             int damage = DamageCalculator.Calc(buffedAttack, 0);
             EnemyHP = Mathf.Max(0, EnemyHP - damage);
@@ -439,13 +447,78 @@ public class BattleStateMachine : MonoBehaviour
         yield return StartCoroutine(CoEndPlayerTurn());
     }
 
+    private string GetEffectPopupText(EffectData effect)
+    {
+        if (effect == null)
+            return "";
+
+        switch (effect.type)
+        {
+            case EffectType.Draw:
+                return $"{effect.valueA}　draw";
+
+            case EffectType.Heal:
+                return $"HP {effect.valueA} heal";
+
+            case EffectType.DealDamage:
+                return $"{effect.valueA} damage";
+
+            case EffectType.AddCost:
+                return $"cost {effect.valueA} heal";
+
+            case EffectType.MultiplyNextDamage:
+                return $"next attack ×{effect.valueF}";
+
+            case EffectType.PierceDefense:
+                return $"next defense ×{effect.valueF}";
+
+            case EffectType.DiscardAttackMinusOneDamage:
+                return "one discard and damage";
+
+            case EffectType.DiscardDefenseMinusOneHeal:
+                return "one discard and heal";
+
+            case EffectType.HandCountMinusTwoDamage:
+                return "hand count -2 and damage";
+
+            case EffectType.HealAndSelfDamageNextTurnEnd:
+                return $"HP {effect.valueA} heal";
+
+            case EffectType.ReduceEnemyMaxHP:
+                return $"enemy max HP -{effect.valueA}";
+
+            case EffectType.BlockEffectsAndSelfDamageWhileInHand:
+                return "block effects card";
+
+            case EffectType.None:
+            default:
+                return "";
+        }
+    }
 
     private IEnumerator CoApplyEffect(CardData card)
     {
-        if (card == null || card.effect == null) yield break;
+
+        if (card == null || card.effect == null)
+            yield break;
 
         var e = card.effect;
 
+            // ============================
+            // 効果内容ポップアップ
+            // ============================
+
+        string popupText = GetEffectPopupText(e);
+
+        if (effectPopupUI != null &&
+            !string.IsNullOrEmpty(popupText))
+        {
+            yield return StartCoroutine(
+                effectPopupUI.Show(popupText)
+            );
+        }
+
+    // ポップアップが消えてから実際の効果を発動
         switch (e.type)
         {
             case EffectType.None:
@@ -483,6 +556,9 @@ public class BattleStateMachine : MonoBehaviour
 
             case EffectType.MultiplyNextDamage:
                 pendingNextAttackMultiplier = Mathf.Max(1f, e.valueF);
+
+                RefreshActiveEffectUI();
+
                 AudioManager.I?.PlayBuff();
                 Debug.Log($"[Battle] Next attack multiplier = x{pendingNextAttackMultiplier}");
                 yield return new WaitForSeconds(0.15f);
@@ -490,6 +566,9 @@ public class BattleStateMachine : MonoBehaviour
 
             case EffectType.PierceDefense:
                 pendingNextDefenseMultiplier = Mathf.Max(1f, e.valueF);
+
+                RefreshActiveEffectUI();
+
                 AudioManager.I?.PlayBuff();
                 Debug.Log($"[Battle] Next defense multiplier = x{pendingNextDefenseMultiplier}");
                 yield return new WaitForSeconds(0.15f);
@@ -517,6 +596,8 @@ public class BattleStateMachine : MonoBehaviour
                 RefreshHpUI();
 
                 ReserveSelfDamageByTiming(e, selfDamage);
+
+                RefreshActiveEffectUI();
 
                 Debug.Log($"[Battle] Heal {heal} / PlayerHP {PlayerHP} / SelfDamage {selfDamage} / Timing {e.timing}");
                 yield return new WaitForSeconds(0.25f);
@@ -759,6 +840,10 @@ public class BattleStateMachine : MonoBehaviour
             int selfDamage = pendingSelfDamageThisPlayerTurnEnd;
             pendingSelfDamageThisPlayerTurnEnd = 0;
 
+            RefreshActiveEffectUI();
+
+            pendingSelfDamageThisPlayerTurnEnd = 0;
+
             PlayerHP = Mathf.Max(0, PlayerHP - selfDamage);
             RefreshHpUI();
             playerHitVfx?.Play();
@@ -778,6 +863,8 @@ public class BattleStateMachine : MonoBehaviour
         // 次の自分ターン終了時予約を、次回の終了判定用に移す
         pendingSelfDamageThisPlayerTurnEnd = pendingSelfDamageNextPlayerTurnEnd;
         pendingSelfDamageNextPlayerTurnEnd = 0;
+
+        RefreshActiveEffectUI();
 
         yield return StartCoroutine(ShowCenterMessage("Turn End"));
 
@@ -828,6 +915,7 @@ public class BattleStateMachine : MonoBehaviour
             }
 
             pendingNextDefenseMultiplier = 1f;
+            RefreshActiveEffectUI();
         }
 
         int damage = DamageCalculator.Calc(attack, defenseValue);
@@ -950,6 +1038,39 @@ public class BattleStateMachine : MonoBehaviour
 
         if (enemyHpText != null)
             enemyHpText.text = $"{EnemyHP}";
+    }
+    private void RefreshActiveEffectUI()
+    {
+        if (playerActiveEffectDisplay == null)
+            return;
+
+        string text = "";
+
+        if (!Mathf.Approximately(pendingNextAttackMultiplier, 1f))
+        {
+            text += $"・つぎのコウゲキ ×{pendingNextAttackMultiplier}\n";
+        }
+
+        if (!Mathf.Approximately(pendingNextDefenseMultiplier, 1f))
+        {
+            text += $"・つぎのボウギョ ×{pendingNextDefenseMultiplier}\n";
+        }
+
+        if (pendingSelfDamageThisPlayerTurnEnd > 0)
+        {
+            text +=
+                $"・ターン終了時 {pendingSelfDamageThisPlayerTurnEnd}ダメージ\n";
+        }
+
+        if (pendingSelfDamageNextPlayerTurnEnd > 0)
+        {
+            text +=
+                $"・つぎのターン終了時 {pendingSelfDamageNextPlayerTurnEnd}ダメージ\n";
+        }
+
+        text = text.TrimEnd();
+
+        playerActiveEffectDisplay.SetEffects(text);
     }
 
     private IEnumerator ShowCenterMessage(string message)
