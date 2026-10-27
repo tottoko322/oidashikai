@@ -54,15 +54,34 @@ public partial class BattleStateMachine
                 enemyHitVfx != null ? enemyHitVfx.targetRect : null, cpuConfig);
         }
         if (enemyInfoText == null)
-            enemyInfoText = CreateCpuText(canvas.transform, "CpuResources", font, new Vector2(420f, 420f), new Vector2(500f, 100f));
-        if (enemyActiveEffectDisplay == null)
         {
-            var text = CreateCpuText(canvas.transform, "CpuActiveEffects", font, new Vector2(-350f, 250f), new Vector2(400f, 130f));
-            enemyActiveEffectDisplay = text.gameObject.AddComponent<ActiveEffectDisplay>();
-            enemyActiveEffectDisplay.root = text.gameObject;
-            enemyActiveEffectDisplay.effectText = text;
+            enemyInfoText = deckCountText != null
+                ? Instantiate(deckCountText, deckCountText.transform.parent)
+                : CreateCpuText(canvas.transform, "CpuDeckCount", font, Vector2.zero, new Vector2(220f, 60f));
+            enemyInfoText.name = "CpuDeckCount";
         }
+        PositionCpuDeckCount();
+        enemyActiveEffectDisplay?.Clear();
     }
+
+    private void PositionCpuDeckCount()
+    {
+        if (enemyInfoText == null || enemyHpText == null) return;
+        var rect = enemyInfoText.rectTransform;
+        var hp = enemyHpText.rectTransform;
+        Vector2 size = deckCountText != null ? deckCountText.rectTransform.rect.size : rect.rect.size;
+        rect.SetParent(hp.parent, false);
+        rect.anchorMin = hp.anchorMin;
+        rect.anchorMax = hp.anchorMax;
+        rect.pivot = new Vector2(0f, 0.5f);
+        rect.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, size.x);
+        rect.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, size.y);
+        rect.anchoredPosition = hp.anchoredPosition + new Vector2(hp.rect.xMax * hp.localScale.x + 24f,
+            hp.rect.center.y * hp.localScale.y);
+        enemyInfoText.raycastTarget = false;
+    }
+
+    private void LateUpdate() => PositionCpuDeckCount();
 
     private static TMP_Text CreateCpuText(Transform parent, string name, TMP_FontAsset font, Vector2 position, Vector2 size)
     {
@@ -82,11 +101,9 @@ public partial class BattleStateMachine
     {
         if (enemyInfoText != null)
         {
-            string difficulty = cpuDifficulty == CpuDifficulty.Easy ? "やさしい"
-                : cpuDifficulty == CpuDifficulty.Hard ? "むずかしい" : "ふつう";
-            enemyInfoText.text = $"CPU（{difficulty}）\nやまふだ {EnemyDeckRemaining}  てふだ {EnemyHandCount}  こすと {EnemyCost}/{enemyState.MaxCost}";
+            enemyInfoText.text = $"やまふだ {EnemyDeckRemaining}";
         }
-        enemyActiveEffectDisplay?.SetEffects(GetEnemyActiveEffectText(false));
+        enemyActiveEffectDisplay?.Clear();
     }
 
     private CpuDecisionContext CpuContext() => new CpuDecisionContext
@@ -103,7 +120,6 @@ public partial class BattleStateMachine
         characterEffectPanelUI?.Close();
         if (handManager != null && handManager.popupUI != null && handManager.popupUI.IsOpen)
             handManager.popupUI.Close(false);
-        ShowEnemyAction($"CPUの{usage}: {card.displayName} {detail}");
         if (cpuCardRevealUI != null) yield return cpuCardRevealUI.Show(card, usage, detail);
     }
 
@@ -134,7 +150,6 @@ public partial class BattleStateMachine
                 yield return CoDefendPlayer(attack);
             }
         }
-        else ShowEnemyAction("CPUはなにもせずたーんおわり");
         if (CheckBattleEnded()) yield break;
         yield return CoEndSideEffects(true);
         if (!BattleReady || CheckBattleEnded()) yield break;
@@ -150,8 +165,7 @@ public partial class BattleStateMachine
         if (attack > 0 && handManager.handViews.Count > 0)
         {
             waitingForDefense = true;
-            defenseSelectUI?.BeginSelection($"CPUのこうげき {attack}: ぼうぎょかすきっぷ");
-            turnBanner?.SetText($"CPUのこうげき {attack}");
+            defenseSelectUI?.BeginSelection("");
             InputLockManager.I?.Unlock();
             while (pendingDefenseCard == null && !defenseSkipped && BattleReady) yield return null;
             InputLockManager.I?.Lock();

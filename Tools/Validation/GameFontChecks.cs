@@ -81,13 +81,45 @@ public static class GameFontChecks
             var battle = battleObject.AddComponent<BattleStateMachine>();
             var hp = new GameObject("HP", typeof(RectTransform)); hp.transform.SetParent(canvas.transform, false);
             battle.playerHpText = hp.AddComponent<TextMeshProUGUI>(); battle.playerHpText.font = other;
+            var enemyHp = new GameObject("EnemyHP", typeof(RectTransform));
+            enemyHp.transform.SetParent(canvas.transform, false);
+            battle.enemyHpText = enemyHp.AddComponent<TextMeshProUGUI>();
+            battle.enemyHpText.rectTransform.sizeDelta = new Vector2(100f, 80f);
+            battle.enemyHpText.rectTransform.anchoredPosition = new Vector2(300f, 200f);
+            battle.deckCountText = text;
+            text.rectTransform.sizeDelta = new Vector2(240f, 60f);
+            text.text = "やまふだ 13";
             typeof(BattleStateMachine).GetMethod("SetupCpuUI", Private).Invoke(battle, null);
             SameFont(battle.enemyInfoText, "CPU resources");
+            typeof(BattleStateMachine).GetMethod("RefreshCpuUI", Private).Invoke(battle, null);
+            Check(battle.enemyInfoText.text == "やまふだ 0", "CPU resources contain only the deck count");
+            Check(battle.enemyInfoText.fontSize == text.fontSize && battle.enemyInfoText.color == text.color &&
+                battle.enemyInfoText.alignment == text.alignment && battle.enemyInfoText.rectTransform.rect.size == text.rectTransform.rect.size,
+                "CPU deck label inherits the player deck label styling and dimensions");
+            Check(text.text == "やまふだ 13", "CPU refresh preserves the player deck label");
+            var deckCorners = new Vector3[4]; var hpCorners = new Vector3[4];
+            battle.enemyInfoText.rectTransform.GetWorldCorners(deckCorners);
+            battle.enemyHpText.rectTransform.GetWorldCorners(hpCorners);
+            Check(deckCorners[0].x > hpCorners[3].x, "CPU deck label sits to the right of HP without overlap");
+            Check(Mathf.Approximately((deckCorners[0].y + deckCorners[1].y) * 0.5f,
+                (hpCorners[0].y + hpCorners[1].y) * 0.5f), "CPU deck label is vertically centred on HP");
+            battle.enemyActionText = new GameObject("LegacyAction").AddComponent<TextMeshProUGUI>();
+            typeof(BattleStateMachine).GetMethod("ShowEnemyAction", Private).Invoke(battle, new object[] { "CPU action" });
+            Check(battle.enemyActionText.text == "" && !battle.enemyActionText.enabled,
+                "Legacy CPU action text stays hidden");
+            var legacyRoot = new GameObject("LegacyEffects");
+            battle.playerActiveEffectDisplay = legacyRoot.AddComponent<ActiveEffectDisplay>();
+            battle.playerActiveEffectDisplay.root = legacyRoot;
+            battle.playerActiveEffectDisplay.effectText = legacyRoot.AddComponent<TextMeshProUGUI>();
+            typeof(BattleStateMachine).GetField("pendingNextAttackMultiplier", Private).SetValue(battle, 2f);
+            typeof(BattleStateMachine).GetMethod("RefreshActiveEffectUI", Private).Invoke(battle, null);
+            Check(!legacyRoot.activeSelf && battle.GetPlayerActiveEffectText().Contains("x2"),
+                "Hiding the permanent effect panel preserves character effect details");
             string status = (string)typeof(BattleStateMachine).GetMethod("StatusText", BindingFlags.Static | BindingFlags.NonPublic)
                 .Invoke(null, new object[] { 2f, 2f, 1, 2, true, 3, 20 });
             Check(font.HasCharacters(status.Replace("\n", "").Replace(" ", "")), "Every active-effect status glyph is present");
             Check(!System.Text.RegularExpressions.Regex.IsMatch(status, "[一-龯]"), "Status details use kana wording");
-            SameFont(battle.enemyActiveEffectDisplay.effectText, "CPU effects");
+            Check(battle.enemyActiveEffectDisplay == null, "No permanent CPU effect label is generated");
 
             var monitor = new GameObject("Monitor").AddComponent<TurnOrderSlotUI>();
             var animation = monitor.Play(true, 1f, 1f, 14, null, other);
