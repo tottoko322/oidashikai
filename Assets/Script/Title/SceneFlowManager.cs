@@ -5,6 +5,8 @@ public class SceneFlowManager : MonoBehaviour
 {
     private static string pendingScene;
 
+    private void Start() => BrandIntroUI.EnsureForScene(gameObject.scene);
+
     public void GoTitle() => Navigate("title");
     public void GoRules() => Navigate("Rule");
     // The existing Start button calls this method directly in the title scene.
