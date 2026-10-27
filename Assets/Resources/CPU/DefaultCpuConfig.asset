@@ -17,7 +17,7 @@ MonoBehaviour:
   normalDeck: {fileID: 0}
   hardDeck: {fileID: 0}
   enterDuration: 0.16
-  holdDuration: 0.45
+  holdDuration: 1.5
   returnDuration: 0.18
   revealPosition: {x: -350, y: 30}
   revealScale: 1.4

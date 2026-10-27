@@ -40,13 +40,30 @@ public class AudioManager : MonoBehaviour
 
     private void Awake()
     {
+        // The scene stores BGM on a separate object. Persist both sources with
+        // their manager, so menu scenes without an AudioManager keep playing.
+        transform.SetParent(null);
+        if (bgmSource != null && bgmSource.transform != transform)
+            bgmSource.transform.SetParent(transform, true);
+        if (seSource != null && seSource.transform != transform)
+            seSource.transform.SetParent(transform, true);
         if (I != null && I != this)
         {
-            Destroy(gameObject);
-            return;
+            if (I.bgmClip == bgmClip)
+            {
+                // Returning to the same menu track must not restart it.
+                if (bgmSource != null) bgmSource.Stop();
+                if (seSource != null) seSource.Stop();
+                Destroy(gameObject);
+                return;
+            }
+            // Battle and title have different clips and sound setups.
+            if (I.bgmSource != null) I.bgmSource.Stop();
+            Destroy(I.gameObject);
         }
 
         I = this;
+        DontDestroyOnLoad(gameObject);
         LoadVolume();
         ApplySavedVolume();
     }
