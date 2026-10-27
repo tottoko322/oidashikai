@@ -26,14 +26,40 @@ public class BrandIntroUI : MonoBehaviour
     private static void ResetSession() { played = false; SceneManager.sceneLoaded -= SceneLoaded; }
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
     private static void Bind() { SceneManager.sceneLoaded -= SceneLoaded; SceneManager.sceneLoaded += SceneLoaded; }
+    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
+    private static void CheckInitialScene()
+    {
+        // Also cover entering Play directly with an already-open title scene.
+        for (int n=0;n<SceneManager.sceneCount;n++) SceneLoaded(SceneManager.GetSceneAt(n),LoadSceneMode.Single);
+    }
     private static void SceneLoaded(Scene scene, LoadSceneMode mode)
     {
         if (played || !string.Equals(scene.name, "title", StringComparison.OrdinalIgnoreCase)) return;
-        played = true;
+        Create(scene);
+    }
+
+    private static BrandIntroUI Create(Scene scene)
+    {
         var host = new GameObject("QpicImpressionIntro", typeof(RectTransform));
         SceneManager.MoveGameObjectToScene(host, scene);
         var intro = host.AddComponent<BrandIntroUI>();
-        if (!intro.Build()) Destroy(host);
+        if (!intro.Build()) { Destroy(host); return null; }
+        played = true;
+        return intro;
+    }
+
+    public static bool Replay()
+    {
+        if (!Application.isPlaying) return false;
+        var scene=SceneManager.GetActiveScene();
+        if (!string.Equals(scene.name,"title",StringComparison.OrdinalIgnoreCase))
+        { Debug.LogWarning("[BrandIntro] Open the title scene to preview the intro."); return false; }
+        foreach(var intro in FindObjectsByType<BrandIntroUI>(FindObjectsInactive.Include,FindObjectsSortMode.None))
+        {
+            if (intro.gameObject.scene!=scene || !intro.IsBuilt) continue;
+            intro.elapsed=0; intro.gameObject.SetActive(true); intro.RenderAt(0); played=true; return true;
+        }
+        return Create(scene)!=null;
     }
 
     public bool Build()
