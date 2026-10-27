@@ -71,5 +71,19 @@ public static class BrandIntroChecks
         Check(UnityEngine.Object.FindObjectsByType<BrandIntroUI>(FindObjectsSortMode.None).Length==1,"First title entry creates the intro");
         handler.Invoke(null,new object[]{title,LoadSceneMode.Single});
         Check(UnityEngine.Object.FindObjectsByType<BrandIntroUI>(FindObjectsSortMode.None).Length==1,"Returning to title does not replay or duplicate it");
+        SceneManager.SetActiveScene(title);
+        var current=UnityEngine.Object.FindAnyObjectByType<BrandIntroUI>();
+        typeof(BrandIntroUI).GetField("elapsed",Private).SetValue(current,2.5f);
+        Check(BrandIntroUI.Replay() && (float)typeof(BrandIntroUI).GetField("elapsed",Private).GetValue(current)==0,
+            "Manual replay restarts the existing intro from the beginning");
+        Check(UnityEngine.Object.FindObjectsByType<BrandIntroUI>(FindObjectsSortMode.None).Length==1,
+            "Manual replay does not stack overlays");
+        UnityEngine.Object.DestroyImmediate(current.gameObject);
+        Check(BrandIntroUI.Replay(),"Manual replay also works after the first intro has finished");
+        UnityEngine.Object.DestroyImmediate(UnityEngine.Object.FindAnyObjectByType<BrandIntroUI>().gameObject);
+        typeof(BrandIntroUI).GetMethod("ResetSession",staticFlags).Invoke(null,null);
+        typeof(BrandIntroUI).GetMethod("CheckInitialScene",staticFlags).Invoke(null,null);
+        Check(UnityEngine.Object.FindObjectsByType<BrandIntroUI>(FindObjectsSortMode.None).Length==1,
+            "Already-loaded title is detected by the initial-scene fallback");
     }
 }
