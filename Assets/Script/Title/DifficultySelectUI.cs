@@ -10,7 +10,6 @@ public class DifficultySelectUI : MonoBehaviour
     private readonly Button[] options = new Button[3];
     private Button continueButton;
     private GameObject previousSelection;
-    private TMP_FontAsset font;
     public CpuDifficulty Selected => selected;
 
     public static DifficultySelectUI Open(SceneFlowManager owner)
@@ -42,24 +41,16 @@ public class DifficultySelectUI : MonoBehaviour
         scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
         scaler.referenceResolution = new Vector2(1280f, 720f);
         scaler.matchWidthOrHeight = 0.5f;
-        foreach (var text in FindObjectsByType<TMP_Text>(FindObjectsInactive.Include))
-        {
-            if (text.gameObject.scene != owner.gameObject.scene || text.font == null) continue;
-            if (font == null) font = text.font;
-            if (text.font.name.Contains("Complete")) { font = text.font; break; }
-        }
-        if (font == null && TMP_Settings.instance != null) font = TMP_Settings.defaultFontAsset;
-
         var backdrop = Image("Backdrop", transform, new Color(0.03f, 0.02f, 0.06f, 0.9f));
         backdrop.rectTransform.anchorMin = Vector2.zero;
         backdrop.rectTransform.anchorMax = Vector2.one;
         backdrop.rectTransform.sizeDelta = Vector2.zero;
         var panel = Image("Panel", transform, new Color(0.13f, 0.09f, 0.19f, 1f));
         panel.rectTransform.sizeDelta = new Vector2(760f, 620f);
-        Label("Heading", panel.transform, "難易度を選んでください", new Vector2(0f, 246f), new Vector2(700f, 60f), 36f);
+        Label("Heading", panel.transform, "むずかしさをえらんでください", new Vector2(0f, 246f), new Vector2(700f, 60f), 36f);
 
         string[] names = { "やさしい", "ふつう", "むずかしい" };
-        string[] descriptions = { "気軽に対戦したい方向け", "攻撃・回復・効果を考えて行動します", "カードの組み合わせや温存も考えます" };
+        string[] descriptions = { "きがるにあそびたいひとむけ", "コウゲキ・カイフク・コウカをかんがえます", "カードのくみあわせや、のこしかたもかんがえます" };
         for (int i = 0; i < 3; i++)
         {
             int index = i;
@@ -69,9 +60,9 @@ public class DifficultySelectUI : MonoBehaviour
             button.onClick.AddListener(() => Select((CpuDifficulty)index));
             options[i] = button;
         }
-        var back = MakeButton("Back", panel.transform, "戻る", new Vector2(-235f, -242f), new Vector2(170f, 64f));
+        var back = MakeButton("Back", panel.transform, "もどる", new Vector2(-235f, -242f), new Vector2(170f, 64f));
         back.onClick.AddListener(Cancel);
-        continueButton = MakeButton("Continue", panel.transform, "キャラクター選択へ",
+        continueButton = MakeButton("Continue", panel.transform, "キャラクターをえらぶ",
             new Vector2(110f, -242f), new Vector2(420f, 64f));
         continueButton.onClick.AddListener(Confirm);
         for (int i = 0; i < options.Length; i++)
@@ -147,7 +138,7 @@ public class DifficultySelectUI : MonoBehaviour
         var go = new GameObject(name, typeof(RectTransform));
         go.transform.SetParent(parent, false);
         var text = go.AddComponent<TextMeshProUGUI>();
-        text.font = font; text.text = value;
+        GameFonts.Apply(text); text.text = value;
         text.fontSize = fontSize; text.alignment = TextAlignmentOptions.Center;
         text.raycastTarget = false;
         text.rectTransform.sizeDelta = size;

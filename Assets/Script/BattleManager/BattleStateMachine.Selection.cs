@@ -5,8 +5,8 @@ public partial class BattleStateMachine
 {
     public CharacterData PlayerCharacter { get; private set; }
     public CharacterData EnemyCharacter { get; private set; }
-    public string PlayerCharacterName => PlayerCharacter != null ? PlayerCharacter.displayName : "自分";
-    public string EnemyCharacterName => EnemyCharacter != null ? EnemyCharacter.displayName : "相手";
+    public string PlayerCharacterName => PlayerCharacter != null ? PlayerCharacter.displayName : "じぶん";
+    public string EnemyCharacterName => EnemyCharacter != null ? EnemyCharacter.displayName : "あいて";
 
     public void ApplyCharacterSelection()
     {

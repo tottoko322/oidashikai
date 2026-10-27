@@ -1,0 +1,110 @@
+using System;
+using System.Reflection;
+using TMPro;
+using UnityEditor;
+using UnityEngine;
+using UnityEngine.UI;
+
+[InitializeOnLoad]
+public static class GameFontChecks
+{
+    static int checks;
+    const BindingFlags Private = BindingFlags.Instance | BindingFlags.NonPublic;
+    static GameFontChecks()
+    {
+        EditorApplication.playModeStateChanged += state =>
+        {
+            if (state == PlayModeStateChange.EnteredPlayMode && SessionState.GetBool("FontChecks", false))
+            {
+                SessionState.SetBool("FontChecks", false); RunChecks();
+            }
+        };
+    }
+    public static void Run() { SessionState.SetBool("FontChecks", true); EditorApplication.EnterPlaymode(); }
+    static void Check(bool condition, string message)
+    {
+        if (!condition) throw new Exception(message);
+        checks++; Debug.Log("FONT PASS: " + message);
+    }
+    static void SameFont(TMP_Text text, string name)
+    {
+        string visible = System.Text.RegularExpressions.Regex.Replace(text.text ?? "", "<[^>]*>", "");
+        Check(GameFonts.Default.HasCharacters(visible.Replace("\n", "").Replace("\r", "")), name + " has every glyph in the Complete atlas");
+        Check(text.font == GameFonts.Default, name + " uses the shared Complete font");
+        Check(text.fontSharedMaterial == GameFonts.Default.material, name + " uses the matching atlas material");
+    }
+    static void RunChecks()
+    {
+        try
+        {
+            var font = GameFonts.Default;
+            Check(font != null && font.name == "JikiTourai SDF_Complete", "TMP default resolves the exact requested asset");
+            string path = AssetDatabase.GetAssetPath(font);
+            Check(AssetDatabase.AssetPathToGUID(path) == "8fcd8a3c408b6c74cad3e00b42088372", "Shared asset GUID matches JikiTourai Complete");
+            Check(font.material != null && font.material.shader != null && font.material.mainTexture != null, "Complete font has a shader and atlas");
+            Check(font.HasCharacters("センコウコウコウあなたはセンコウですじゅんばんがきまりましたむずかしさをえらんでくださいやさしいふつうむずかしいキャラクターをえらぶもどる"),
+                "Complete font includes Japanese menu and monitor characters");
+            Check(font.HasCharacters("CPU HP ATK DEF TURN ORDER 0123456789"), "Complete font includes spaces, battle labels and numbers");
+            int glyphs = font.glyphTable.Count, characters = font.characterTable.Count;
+            Check(GameFonts.Default == font && font.glyphTable.Count == glyphs && font.characterTable.Count == characters,
+                "Repeated font access does not duplicate the space glyph");
+            var text = new GameObject("RuntimeText", typeof(RectTransform)).AddComponent<TextMeshProUGUI>();
+            Check(text.font == font, "New TMP objects inherit the Complete default");
+            text.fontSize = 31f; text.color = Color.magenta; text.alignment = TextAlignmentOptions.TopLeft;
+            var other = Resources.Load<TMP_FontAsset>("Fonts & Materials/LiberationSans SDF");
+            Check(other != null && other != font, "Validation has an alternate font to test replacement");
+            text.font = other; text.fontSharedMaterial = other.material;
+            GameFonts.Apply(text); SameFont(text, "Explicitly repaired text");
+            Check(text.fontSize == 31f && text.color == Color.magenta && text.alignment == TextAlignmentOptions.TopLeft,
+                "Font replacement preserves size, colour and alignment");
+            GameFonts.Apply(null);
+
+            var flowObject = new GameObject("Flow"); flowObject.SetActive(false);
+            var menu = DifficultySelectUI.Open(flowObject.AddComponent<SceneFlowManager>());
+            var menuLabels = menu.GetComponentsInChildren<TMP_Text>(true);
+            Check(menuLabels.Length >= 6, "Difficulty dialog creates its labels");
+            foreach (var label in menuLabels) SameFont(label, "Difficulty/" + label.transform.parent.name);
+            menu.Cancel();
+
+            var canvas = new GameObject("CpuCanvas", typeof(RectTransform), typeof(Canvas));
+            text.transform.SetParent(canvas.transform, false);
+            text.text = "CPU HP 012";
+            text.ForceMeshUpdate(true, true);
+            Check(text.textInfo.characterCount == text.text.Length &&
+                text.textInfo.characterInfo[text.textInfo.characterCount - 1].character == '2',
+                "Text after spaces reaches the generated mesh");
+            var reveal = canvas.AddComponent<CpuCardRevealUI>();
+            reveal.Initialize(canvas.transform, other, null, null);
+            SameFont(canvas.transform.Find("CpuCardReveal").GetComponentInChildren<TMP_Text>(true), "CPU card usage");
+
+            var battleObject = new GameObject("Battle"); battleObject.SetActive(false);
+            var battle = battleObject.AddComponent<BattleStateMachine>();
+            var hp = new GameObject("HP", typeof(RectTransform)); hp.transform.SetParent(canvas.transform, false);
+            battle.playerHpText = hp.AddComponent<TextMeshProUGUI>(); battle.playerHpText.font = other;
+            typeof(BattleStateMachine).GetMethod("SetupCpuUI", Private).Invoke(battle, null);
+            SameFont(battle.enemyInfoText, "CPU resources");
+            string status = (string)typeof(BattleStateMachine).GetMethod("StatusText", BindingFlags.Static | BindingFlags.NonPublic)
+                .Invoke(null, new object[] { 2f, 2f, 1, 2, true, 3, 20 });
+            Check(font.HasCharacters(status.Replace("\n", "").Replace(" ", "")), "Every active-effect status glyph is present");
+            Check(!System.Text.RegularExpressions.Regex.IsMatch(status, "[一-龯]"), "Status details use kana wording");
+            SameFont(battle.enemyActiveEffectDisplay.effectText, "CPU effects");
+
+            var monitor = new GameObject("Monitor").AddComponent<TurnOrderSlotUI>();
+            var animation = monitor.Play(true, 1f, 1f, 14, null, other);
+            Check(animation.MoveNext(), "Monitor creates its scrolling labels");
+            var root = (GameObject)typeof(TurnOrderSlotUI).GetField("root", Private).GetValue(monitor);
+            var monitorLabels = root.GetComponentsInChildren<TMP_Text>(true);
+            Check(monitorLabels.Length >= 8, "Monitor has title, reel and result text");
+            foreach (var label in monitorLabels) SameFont(label, "Monitor/" + label.name);
+            ((IDisposable)animation).Dispose();
+            System.IO.File.WriteAllText("font-checks-result.txt", "PASS " + checks);
+            Debug.Log("ALL FONT CHECKS PASSED: " + checks);
+            EditorApplication.Exit(0);
+        }
+        catch (Exception e)
+        {
+            System.IO.File.WriteAllText("font-checks-result.txt", e.ToString());
+            Debug.LogException(e); EditorApplication.Exit(1);
+        }
+    }
+}

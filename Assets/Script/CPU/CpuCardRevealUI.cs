@@ -38,7 +38,7 @@ public class CpuCardRevealUI : MonoBehaviour
         var textObject = new GameObject("Text", typeof(RectTransform));
         textObject.transform.SetParent(titleRect, false);
         label = textObject.AddComponent<TextMeshProUGUI>();
-        label.font = font;
+        GameFonts.Apply(label);
         label.fontSize = 28f;
         label.alignment = TextAlignmentOptions.Center;
         label.raycastTarget = false;
@@ -52,8 +52,8 @@ public class CpuCardRevealUI : MonoBehaviour
         if (root == null || card == null) yield break;
         artwork.sprite = card.artwork;
         label.text = $"CPUの{usage}\n{detail}";
-        label.color = usage == "攻撃" ? new Color(1f, 0.65f, 0.55f)
-            : usage == "防御" ? new Color(0.55f, 0.85f, 1f) : new Color(0.95f, 0.65f, 1f);
+        label.color = usage == "コウゲキ" ? new Color(1f, 0.65f, 0.55f)
+            : usage == "ボウギョ" ? new Color(0.55f, 0.85f, 1f) : new Color(0.95f, 0.65f, 1f);
         var parent = (RectTransform)root.parent;
         Vector2 start = origin != null ? (Vector2)parent.InverseTransformPoint(origin.position)
             - parent.rect.center : new Vector2(0f, 420f);

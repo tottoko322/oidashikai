@@ -25,7 +25,7 @@ public class CardSelectUI : MonoBehaviour
         IsFinished = false;
 
         if (root) root.SetActive(true);
-        if (title) title.text = rule.isOptional ? "カードを選択（キャンセル可）" : "カードを選択（必須）";
+        if (title) title.text = rule.isOptional ? "カードをえらぶ(キャンセルOK)" : "カードをえらんでください";
 
         if (cancelButton) cancelButton.gameObject.SetActive(rule.isOptional);
         UpdateConfirmInteractable();
@@ -71,3 +71,4 @@ public class CardSelectUI : MonoBehaviour
         confirmButton.interactable = selected.Count >= rule.minSelect;
     }
 }
+

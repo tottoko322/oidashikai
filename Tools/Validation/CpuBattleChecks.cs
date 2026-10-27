@@ -177,11 +177,11 @@ public static class CpuBattleChecks
             Check(a.EnemyHP == 3 && s.selfDamageThisTurnEnd == 0, "Reserved damage fires once on the next own turn");
             var restriction = Card(type: EffectType.BlockEffectsAndSelfDamageWhileInHand);
             s.hand.Add(restriction);
-            Check(a.GetEnemyActiveEffectText().Contains("進捗確認"), "CPU restriction appears in character details");
+            Check(a.GetEnemyActiveEffectText().Contains("シンチョクカクニン"), "CPU restriction appears in character details");
             Drain((IEnumerator)Invoke(a, "CoEndSideEffects", true));
             Check(a.EnemyHP == 2, "CPU hand restriction deals end-turn damage");
             s.hand.Clear();
-            Check(!a.GetEnemyActiveEffectText().Contains("進捗確認"), "CPU details remove expired restrictions");
+            Check(!a.GetEnemyActiveEffectText().Contains("シンチョクカクニン"), "CPU details remove expired restrictions");
             a = Battle(); s = (EnemyBattleState)Get(a, "enemyState");
             var draw = Card(type: EffectType.Draw, amount: 2);
             a.deckManager.SetupFromDefinition(Deck());
@@ -249,11 +249,11 @@ public static class CpuBattleChecks
             var reveal = canvas.AddComponent<CpuCardRevealUI>();
             var revealConfig = ScriptableObject.CreateInstance<CpuBattleConfig>();
             reveal.Initialize(canvas.transform, null, null, revealConfig);
-            Drain(reveal.Show(cheap, "攻撃", "ATK 2"));
+            Drain(reveal.Show(cheap, "コウゲキ", "ATK 2"));
             var root = canvas.transform.Find("CpuCardReveal");
             Check(root != null && !root.gameObject.activeSelf, "Reveal returns and hides after its animation");
             Check(!root.GetComponent<CanvasGroup>().blocksRaycasts, "Reveal never intercepts board input");
-            Check(root.GetComponentInChildren<TMP_Text>(true).text.Contains("攻撃"), "Reveal identifies how the CPU used the card");
+            Check(root.GetComponentInChildren<TMP_Text>(true).text.Contains("コウゲキ"), "Reveal identifies how the CPU used the card");
             System.IO.File.WriteAllText("cpu-checks-result.txt", "PASS " + checks);
             Debug.Log("ALL CPU CHECKS PASSED: " + checks);
             EditorApplication.Exit(0);
