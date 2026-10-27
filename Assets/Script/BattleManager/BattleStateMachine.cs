@@ -112,7 +112,8 @@ public partial class BattleStateMachine : MonoBehaviour
     {
         if (enemyActionText != null)
         {
-            enemyActionText.text = message;
+            enemyActionText.text = "";
+            enemyActionText.enabled = false;
         }
     }
 
@@ -685,7 +686,7 @@ public partial class BattleStateMachine : MonoBehaviour
     }
     private void RefreshActiveEffectUI()
     {
-        playerActiveEffectDisplay?.SetEffects(GetPlayerActiveEffectText(false));
+        playerActiveEffectDisplay?.Clear();
     }
 
     public string GetPlayerActiveEffectText(bool includeHandEffects = true)
