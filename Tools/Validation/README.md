@@ -29,6 +29,8 @@ TurnOrderSlotChecks.csを隔離プロジェクトのAssets/Editorへコピーし
 
 ## フォントの統一
 
+BrandIntroChecks.csを隔離プロジェクトのAssets/Editorへコピーし、Resources/BrandIntroの素材とBrandIntroUI.csも導入して`BrandIntroChecks.Run`を実行すると、ロゴ素材・スキャン・フェード・初回限定・スキップ・入力復帰を検証します。結果はbrand-checks-result.txtへ記録します。シェーダーの見え方はGraphicsを有効にした描画でも確認してください。
+
 MenuMusicRevealChecks.csを隔離プロジェクトのAssets/Editorへコピーし、executeMethodに`MenuMusicRevealChecks.Run`を指定すると、シーンを破棄・生成するBGM継続検証と、実際のフレームでカードを保持する検証を実行します。メニュー間の継続、同曲への復帰と二重再生防止、戦闘曲との切り替え、攻撃値の保持、防御/スキップ選択後の戻りとダメージ計算、通常カードの表示時間を確認します。結果はmusic-reveal-checks-result.txtへ記録します。
 
 AudioPromptChecks.csを隔離プロジェクトのAssets/Editorへコピーし、executeMethodに`AudioPromptChecks.Run`を指定すると、BGM再生開始、音量保存の互換性と同期、設定画面の無通知初期化、防御の操作案内を検証します。音源は生成した検証用クリップを使い、結果はaudio-prompt-checks-result.txtへ記録します。検証前の音量設定は終了時に復元します。
