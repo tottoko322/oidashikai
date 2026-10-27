@@ -33,7 +33,16 @@ public class CardPopupUI : MonoBehaviour
         current = v;
 
         if (root)
+        {
             root.SetActive(true);
+            root.transform.SetAsLastSibling();
+            // Hand inspection must remain above CPU thumbnails and guidance.
+            var canvas = root.GetComponent<Canvas>();
+            if (canvas == null) canvas = root.AddComponent<Canvas>();
+            canvas.overrideSorting = true;
+            canvas.sortingOrder = 32500;
+            if (root.GetComponent<GraphicRaycaster>() == null) root.AddComponent<GraphicRaycaster>();
+        }
 
         if (art)
             art.sprite = v.Data.artwork;
