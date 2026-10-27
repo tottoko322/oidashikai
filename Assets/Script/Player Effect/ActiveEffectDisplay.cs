@@ -7,6 +7,14 @@ public class ActiveEffectDisplay : MonoBehaviour
     public GameObject root;
     public TMP_Text effectText;
 
+    private void Awake()
+    {
+        // The compact status is informational; clicks must reach the portrait.
+        foreach (var graphic in GetComponentsInChildren<UnityEngine.UI.Graphic>(true))
+            graphic.raycastTarget = false;
+        Clear();
+    }
+
     public void SetEffects(string text)
     {
         if (root == null || effectText == null)
@@ -16,8 +24,7 @@ public class ActiveEffectDisplay : MonoBehaviour
 
         root.SetActive(hasEffect);
 
-        if (hasEffect)
-            effectText.text = text;
+        effectText.text = hasEffect ? text : "";
     }
 
     public void Clear()
