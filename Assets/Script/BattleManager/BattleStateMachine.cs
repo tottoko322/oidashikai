@@ -197,9 +197,11 @@ public partial class BattleStateMachine : MonoBehaviour
         ShowEnemyAction("");
 
         bool playerFirst = true;
+        InputLockManager.I?.Lock();
         if (coinToss != null)
         {
             yield return coinToss.Play();
+            if (!coinToss.ResultReady) yield break;
             playerFirst = coinToss.PlayerFirst;
         }
         turnSystem.SetFirst(playerFirst ? TurnOwner.Player : TurnOwner.Enemy);
