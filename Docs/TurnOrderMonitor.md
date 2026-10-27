@@ -31,4 +31,4 @@ BattleシーンのCoinTossControllerで次を調整できます。
 
 画面の位置や大きさを合わせる場合は、CoinTossControllerと同じGameObjectへTurnOrderSlotUIを追加してください。既存コンポーネントを自動で見つけて使います。Monitor Size、Screen Size、Screen Offset、Fade Durationを調整できます。新たなシーンやCanvasの追加は不要です。
 
-日本語テキストには既存シーンのフォントを使い、Complete版があれば優先します。フレームのサイズは初期値860×500、内部画面700×280、画面位置は中央から上へ30です。
+日本語テキストはゲーム共通のJikiTourai SDF_Completeを使用します。フレームのサイズは初期値860×500、内部画面700×280、画面位置は中央から上へ30です。

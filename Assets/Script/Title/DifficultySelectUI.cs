@@ -10,7 +10,8 @@ public class DifficultySelectUI : MonoBehaviour
     private readonly Button[] options = new Button[3];
     private Button continueButton;
     private GameObject previousSelection;
-    private TMP_FontAsset font;
+    private static readonly Color IdleColor = new Color(0.20f, 0.42f, 0.65f, 1f);
+    private static readonly Color ChosenColor = new Color(0.02f, 0.67f, 0.79f, 1f);
     public CpuDifficulty Selected => selected;
 
     public static DifficultySelectUI Open(SceneFlowManager owner)
@@ -42,24 +43,28 @@ public class DifficultySelectUI : MonoBehaviour
         scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
         scaler.referenceResolution = new Vector2(1280f, 720f);
         scaler.matchWidthOrHeight = 0.5f;
-        foreach (var text in FindObjectsByType<TMP_Text>(FindObjectsInactive.Include))
-        {
-            if (text.gameObject.scene != owner.gameObject.scene || text.font == null) continue;
-            if (font == null) font = text.font;
-            if (text.font.name.Contains("Complete")) { font = text.font; break; }
-        }
-        if (font == null && TMP_Settings.instance != null) font = TMP_Settings.defaultFontAsset;
-
-        var backdrop = Image("Backdrop", transform, new Color(0.03f, 0.02f, 0.06f, 0.9f));
+        var backdrop = Image("Backdrop", transform, new Color(0.04f, 0.14f, 0.25f, 0.38f));
         backdrop.rectTransform.anchorMin = Vector2.zero;
         backdrop.rectTransform.anchorMax = Vector2.one;
         backdrop.rectTransform.sizeDelta = Vector2.zero;
-        var panel = Image("Panel", transform, new Color(0.13f, 0.09f, 0.19f, 1f));
+        var panel = Image("Panel", transform, new Color(0.12f, 0.27f, 0.44f, 0.98f));
         panel.rectTransform.sizeDelta = new Vector2(760f, 620f);
-        Label("Heading", panel.transform, "難易度を選んでください", new Vector2(0f, 246f), new Vector2(700f, 60f), 36f);
+        var outline = panel.gameObject.AddComponent<Outline>();
+        outline.effectColor = new Color(0.36f, 0.91f, 1f, 0.85f);
+        outline.effectDistance = new Vector2(2f, -2f);
+        // A faint data grid and cyan rails echo the title's electronic space.
+        for (int x = -320; x <= 320; x += 80)
+            Decoration("GridV" + x, panel.transform, new Vector2(x, 0f), new Vector2(1f, 600f),
+                new Color(0.52f, 0.88f, 1f, 0.07f));
+        for (int y = -280; y <= 280; y += 80)
+            Decoration("GridH" + y, panel.transform, new Vector2(0f, y), new Vector2(740f, 1f),
+                new Color(0.52f, 0.88f, 1f, 0.07f));
+        Decoration("TopRail", panel.transform, new Vector2(0f, 298f), new Vector2(680f, 3f),
+            new Color(0.36f, 0.91f, 1f, 1f));
+        Label("Heading", panel.transform, "むずかしさをえらんでください", new Vector2(0f, 246f), new Vector2(700f, 60f), 36f);
 
         string[] names = { "やさしい", "ふつう", "むずかしい" };
-        string[] descriptions = { "気軽に対戦したい方向け", "攻撃・回復・効果を考えて行動します", "カードの組み合わせや温存も考えます" };
+        string[] descriptions = { "きがるにあそびたいひとむけ", "こうげき・かいふく・こうかをかんがえます", "かーどのくみあわせや、のこしかたもかんがえます" };
         for (int i = 0; i < 3; i++)
         {
             int index = i;
@@ -69,9 +74,9 @@ public class DifficultySelectUI : MonoBehaviour
             button.onClick.AddListener(() => Select((CpuDifficulty)index));
             options[i] = button;
         }
-        var back = MakeButton("Back", panel.transform, "戻る", new Vector2(-235f, -242f), new Vector2(170f, 64f));
+        var back = MakeButton("Back", panel.transform, "もどる", new Vector2(-235f, -242f), new Vector2(170f, 64f));
         back.onClick.AddListener(Cancel);
-        continueButton = MakeButton("Continue", panel.transform, "キャラクター選択へ",
+        continueButton = MakeButton("Continue", panel.transform, "きゃらくたーをえらぶ",
             new Vector2(110f, -242f), new Vector2(420f, 64f));
         continueButton.onClick.AddListener(Confirm);
         for (int i = 0; i < options.Length; i++)
@@ -106,7 +111,9 @@ public class DifficultySelectUI : MonoBehaviour
         {
             if (options[i] == null) continue;
             options[i].GetComponent<Image>().color = i == (int)selected
-                ? new Color(0.5f, 0.23f, 0.65f, 1f) : new Color(0.23f, 0.19f, 0.31f, 1f);
+                ? ChosenColor : IdleColor;
+            var marker = options[i].transform.Find("SelectionRail");
+            if (marker != null) marker.gameObject.SetActive(i == (int)selected);
         }
         if (EventSystem.current != null && options[(int)selected] != null)
             EventSystem.current.SetSelectedGameObject(options[(int)selected].gameObject);
@@ -147,7 +154,7 @@ public class DifficultySelectUI : MonoBehaviour
         var go = new GameObject(name, typeof(RectTransform));
         go.transform.SetParent(parent, false);
         var text = go.AddComponent<TextMeshProUGUI>();
-        text.font = font; text.text = value;
+        GameFonts.Apply(text); text.text = value;
         text.fontSize = fontSize; text.alignment = TextAlignmentOptions.Center;
         text.raycastTarget = false;
         text.rectTransform.sizeDelta = size;
@@ -155,13 +162,29 @@ public class DifficultySelectUI : MonoBehaviour
         return text;
     }
 
+    private static void Decoration(string name, Transform parent, Vector2 position, Vector2 size, Color color)
+    {
+        var image = Image(name, parent, color);
+        image.rectTransform.anchoredPosition = position;
+        image.rectTransform.sizeDelta = size;
+        image.raycastTarget = false;
+    }
+
     private Button MakeButton(string name, Transform parent, string text, Vector2 position, Vector2 size)
     {
-        var background = Image(name, parent, new Color(0.25f, 0.2f, 0.34f, 1f));
+        var background = Image(name, parent, IdleColor);
         background.rectTransform.anchoredPosition = position;
         background.rectTransform.sizeDelta = size;
         var button = background.gameObject.AddComponent<Button>();
         button.targetGraphic = background;
+        var colors = button.colors;
+        colors.highlightedColor = new Color(0.82f, 0.96f, 1f, 1f);
+        colors.pressedColor = new Color(0.65f, 0.85f, 0.96f, 1f);
+        colors.selectedColor = Color.white;
+        button.colors = colors;
+        if (name.StartsWith("Difficulty"))
+            Decoration("SelectionRail", background.transform, new Vector2(-size.x * 0.5f + 5f, 0f),
+                new Vector2(5f, size.y - 14f), new Color(0.77f, 1f, 1f, 1f));
         Label("Label", background.transform, text, Vector2.zero, size - new Vector2(20f, 8f), 28f);
         return button;
     }

@@ -26,3 +26,9 @@ SelectionFlowSpyは実際のシーンロードを記録へ置き換える検証�
 TurnOrderSlotChecks.csを隔離プロジェクトのAssets/Editorへコピーし、executeMethodに`TurnOrderSlotChecks.Run`を指定してください。標準のuGUIパッケージとTMP Essential Resourcesを導入した環境を使います。この検証はUnityのコルーチンを実際のフレームで進めます。
 
 停止した文字とターン順の一致、各キャラクターの先攻条件、抽選が1回であること、二重再生、中断後の後始末、時間停止中の進行、画像の差し替え、入力ロック、初期配札より先に演出を完了することを確認し、slot-checks-result.txtへ結果を記録します。最終的な見た目とテンポは元のBattleシーンでも確認してください。
+
+## フォントの統一
+
+リポジトリ内で`python Tools/Validation/audit_game_fonts.py`を実行すると、各ゲームシーンとカードPrefabのFont Asset・共有マテリアル、TMPの既定フォントを読み取り専用で確認できます。
+
+UnityではGameFontChecks.csを隔離プロジェクトのAssets/Editorへコピーし、executeMethodに`GameFontChecks.Run`を指定します。フォント本体と.meta、共通フォントに変更したTMP Settings.assetも検証用プロジェクトへコピーしてください。Resources内のTMP Settingsは重複させず、変更後の既定フォントが読み込まれる状態にします。結果はfont-checks-result.txtに記録します。

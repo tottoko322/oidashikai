@@ -46,8 +46,7 @@ public partial class BattleStateMachine
     {
         var canvas = playerHpText != null ? playerHpText.canvas : null;
         if (canvas == null) return;
-        TMP_FontAsset font = characterEffectPanelUI != null && characterEffectPanelUI.effectListText != null
-            ? characterEffectPanelUI.effectListText.font : playerHpText.font;
+        TMP_FontAsset font = GameFonts.Default;
         if (cpuCardRevealUI == null)
         {
             cpuCardRevealUI = gameObject.AddComponent<CpuCardRevealUI>();
@@ -70,7 +69,7 @@ public partial class BattleStateMachine
         var go = new GameObject(name, typeof(RectTransform));
         go.transform.SetParent(parent, false);
         var text = go.AddComponent<TextMeshProUGUI>();
-        text.font = font; text.fontSize = 26f; text.enableAutoSizing = true;
+        GameFonts.Apply(text); text.fontSize = 26f; text.enableAutoSizing = true;
         text.fontSizeMin = 16f; text.fontSizeMax = 26f;
         text.alignment = TextAlignmentOptions.Center;
         text.raycastTarget = false;
@@ -85,7 +84,7 @@ public partial class BattleStateMachine
         {
             string difficulty = cpuDifficulty == CpuDifficulty.Easy ? "やさしい"
                 : cpuDifficulty == CpuDifficulty.Hard ? "むずかしい" : "ふつう";
-            enemyInfoText.text = $"CPU（{difficulty}）\n山札 {EnemyDeckRemaining}  手札 {EnemyHandCount}  コスト {EnemyCost}/{enemyState.MaxCost}";
+            enemyInfoText.text = $"CPU（{difficulty}）\nやまふだ {EnemyDeckRemaining}  てふだ {EnemyHandCount}  こすと {EnemyCost}/{enemyState.MaxCost}";
         }
         enemyActiveEffectDisplay?.SetEffects(GetEnemyActiveEffectText(false));
     }
@@ -104,7 +103,7 @@ public partial class BattleStateMachine
         characterEffectPanelUI?.Close();
         if (handManager != null && handManager.popupUI != null && handManager.popupUI.IsOpen)
             handManager.popupUI.Close(false);
-        ShowEnemyAction($"CPUの{usage}：{card.displayName} {detail}");
+        ShowEnemyAction($"CPUの{usage}: {card.displayName} {detail}");
         if (cpuCardRevealUI != null) yield return cpuCardRevealUI.Show(card, usage, detail);
     }
 
@@ -123,7 +122,7 @@ public partial class BattleStateMachine
             RefreshCpuUI();
             if (action.useEffect)
             {
-                yield return RevealCpuCard(action.card, "効果", GetEffectPopupText(action.card.effect));
+                yield return RevealCpuCard(action.card, "こうか", GetEffectPopupText(action.card.effect));
                 yield return CoApplyCardEffect(action.card, true);
             }
             else
@@ -131,11 +130,11 @@ public partial class BattleStateMachine
                 int attack = Mathf.FloorToInt(Mathf.Max(0, action.card.attack) * enemyState.attackMultiplier);
                 enemyState.attackMultiplier = 1f;
                 RefreshCpuUI();
-                yield return RevealCpuCard(action.card, "攻撃", $"ATK {attack}");
+                yield return RevealCpuCard(action.card, "こうげき", $"ATK {attack}");
                 yield return CoDefendPlayer(attack);
             }
         }
-        else ShowEnemyAction("CPUは何もせずターン終了");
+        else ShowEnemyAction("CPUはなにもせずたーんおわり");
         if (CheckBattleEnded()) yield break;
         yield return CoEndSideEffects(true);
         if (!BattleReady || CheckBattleEnded()) yield break;
@@ -151,8 +150,8 @@ public partial class BattleStateMachine
         if (attack > 0 && handManager.handViews.Count > 0)
         {
             waitingForDefense = true;
-            defenseSelectUI?.BeginSelection($"CPUの攻撃 {attack}：防御かスキップ");
-            turnBanner?.SetText($"CPUの攻撃 {attack}");
+            defenseSelectUI?.BeginSelection($"CPUのこうげき {attack}: ぼうぎょかすきっぷ");
+            turnBanner?.SetText($"CPUのこうげき {attack}");
             InputLockManager.I?.Unlock();
             while (pendingDefenseCard == null && !defenseSkipped && BattleReady) yield return null;
             InputLockManager.I?.Lock();
@@ -182,7 +181,7 @@ public partial class BattleStateMachine
             defense = Mathf.FloorToInt(Mathf.Max(0, card.defense) * enemyState.defenseMultiplier);
             enemyState.defenseMultiplier = 1f;
             RefreshCpuUI();
-            yield return RevealCpuCard(card, "防御", $"DEF {defense}");
+            yield return RevealCpuCard(card, "ぼうぎょ", $"DEF {defense}");
         }
         ApplyDamage(true, DamageCalculator.Calc(attack, defense));
         yield return new WaitForSeconds(0.2f);
@@ -277,7 +276,7 @@ public partial class BattleStateMachine
         var effect = card.effect;
         string text = GetEffectPopupText(effect);
         if (effectPopupUI != null && !string.IsNullOrEmpty(text))
-            yield return effectPopupUI.Show((enemy ? "CPU：" : "") + text);
+            yield return effectPopupUI.Show((enemy ? "CPU: " : "") + text);
         int amount = Mathf.Max(0, effect.valueA);
         switch (effect.type)
         {
@@ -311,12 +310,12 @@ public partial class BattleStateMachine
                     if (discarded != null)
                     {
                         enemyState.hand.Remove(discarded);
-                        yield return RevealCpuCard(discarded, "捨て札", "効果の対象");
+                        yield return RevealCpuCard(discarded, "すてふだ", "こうかのたいしょう");
                     }
                 }
                 else if (handManager.handViews.Count > 0)
                 {
-                    yield return CoWaitForDiscardSelection("すてるカードをクリック");
+                    yield return CoWaitForDiscardSelection("すてるかーどをくりっく");
                     if (selectedDiscardCard != null)
                     {
                         discarded = selectedDiscardCard.Data;
@@ -349,12 +348,12 @@ public partial class BattleStateMachine
         bool blocked, int reduction, int maxHP)
     {
         string text = "";
-        if (!Mathf.Approximately(attack, 1f)) text += $"・つぎのコウゲキ ×{attack}\n";
-        if (!Mathf.Approximately(defense, 1f)) text += $"・つぎのボウギョ ×{defense}\n";
-        if (currentDamage > 0) text += $"・自分のターン終了時 {currentDamage}ダメージ\n";
-        if (nextDamage > 0) text += $"・つぎの自分のターン終了時 {nextDamage}ダメージ\n";
-        if (blocked) text += "・進捗確認：手札にある間、効果カード使用不可／自分のターン終了時に1ダメージ\n";
-        if (reduction > 0) text += $"・最大HP -{reduction}（現在の最大HP：{maxHP}）\n";
+        if (!Mathf.Approximately(attack, 1f)) text += $"・つぎのこうげき x{attack}\n";
+        if (!Mathf.Approximately(defense, 1f)) text += $"・つぎのぼうぎょ x{defense}\n";
+        if (currentDamage > 0) text += $"・じぶんのたーんおわりに {currentDamage}だめーじ\n";
+        if (nextDamage > 0) text += $"・つぎのじぶんのたーんおわりに {nextDamage}だめーじ\n";
+        if (blocked) text += "・しんちょくかくにん: てふだにあるあいだ、こうかかーどはつかえません/じぶんのたーんおわりに1だめーじ\n";
+        if (reduction > 0) text += $"・さいだいHP -{reduction}(いまのさいだいHP: {maxHP})\n";
         return text.TrimEnd();
     }
 }

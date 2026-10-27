@@ -18,7 +18,6 @@ public class TurnOrderSlotUI : MonoBehaviour
     private TMP_Text heading, resultText;
     private readonly TMP_Text[] rows = new TMP_Text[5];
     private const float RowHeight = 96f;
-    private TMP_FontAsset font;
 
     public bool IsVisible => root != null && root.activeSelf;
     public bool Completed { get; private set; }
@@ -35,8 +34,8 @@ public class TurnOrderSlotUI : MonoBehaviour
         frame.sprite = artwork;
         frame.color = artwork != null ? Color.white : new Color(0.16f, 0.19f, 0.23f);
         stand.SetActive(artwork == null);
-        heading.text = "先攻・後攻を決めています";
-        resultText.text = "抽選中…";
+        heading.text = "せんこう・こうこうをきめています";
+        resultText.text = "きめています...";
         resultText.color = new Color(0.65f, 0.85f, 0.83f);
         guide.color = new Color(0.3f, 0.85f, 0.74f, 0.13f);
         opacity.alpha = 0f;
@@ -58,10 +57,10 @@ public class TurnOrderSlotUI : MonoBehaviour
             if (!isActiveAndEnabled || !IsVisible) yield break;
             RenderReel(target);
             StoppedOnFirst = TurnOrderReel.IsFirstRow(target);
-            CenterLabel = StoppedOnFirst ? "先攻" : "後攻";
+            CenterLabel = StoppedOnFirst ? "せんこう" : "こうこう";
             HasStopped = true;
-            heading.text = "順番が決まりました";
-            resultText.text = playerFirst ? "あなたは先攻です" : "あなたは後攻です";
+            heading.text = "じゅんばんがきまりました";
+            resultText.text = playerFirst ? "あなたはせんこうです" : "あなたはこうこうです";
             resultText.color = playerFirst ? new Color(0.5f, 1f, 0.8f) : new Color(1f, 0.8f, 0.45f);
             float hold = Mathf.Max(0f, resultHold);
             elapsed = 0f;
@@ -88,7 +87,7 @@ public class TurnOrderSlotUI : MonoBehaviour
             int index = center + i - 2;
             float y = (index - position) * RowHeight;
             rows[i].rectTransform.anchoredPosition = new Vector2(0f, y);
-            rows[i].text = TurnOrderReel.IsFirstRow(index) ? "先攻" : "後攻";
+            rows[i].text = TurnOrderReel.IsFirstRow(index) ? "せんこう" : "こうこう";
             Color color = TurnOrderReel.IsFirstRow(index)
                 ? new Color(0.5f, 1f, 0.8f) : new Color(1f, 0.8f, 0.45f);
             color.a = Mathf.Lerp(1f, 0.2f, Mathf.Clamp01(Mathf.Abs(y) / (RowHeight * 1.5f)));
@@ -112,14 +111,6 @@ public class TurnOrderSlotUI : MonoBehaviour
 
     private void Build(TMP_FontAsset preferredFont)
     {
-        font = preferredFont;
-        foreach (var text in FindObjectsByType<TMP_Text>(FindObjectsInactive.Include))
-        {
-            if (text.gameObject.scene != gameObject.scene || text.font == null) continue;
-            if (font == null) font = text.font;
-            if (text.font.name.Contains("Complete")) { font = text.font; break; }
-        }
-        if (font == null && TMP_Settings.instance != null) font = TMP_Settings.defaultFontAsset;
         root = new GameObject("TurnOrderMonitor", typeof(RectTransform), typeof(Canvas),
             typeof(CanvasScaler), typeof(GraphicRaycaster), typeof(CanvasGroup));
         UnityEngine.SceneManagement.SceneManager.MoveGameObjectToScene(root, gameObject.scene);
@@ -153,7 +144,7 @@ public class TurnOrderSlotUI : MonoBehaviour
         Label("RightMarker", frame.transform, "<", screenOffset + new Vector2(screenSize.x * 0.5f + 28f, 0f), new Vector2(40f, 70f), 40f);
         heading = Label("Heading", frame.transform, "", new Vector2(0f, 210f), new Vector2(780f, 48f), 32f);
         resultText = Label("Result", frame.transform, "", new Vector2(0f, -174f), new Vector2(780f, 58f), 38f);
-        Label("Brand", frame.transform, "TURN ORDER", new Vector2(-280f, -220f), new Vector2(230f, 24f), 16f);
+        Label("Brand", frame.transform, "TURN ORDER", new Vector2(-240f, -220f), new Vector2(310f, 36f), 16f);
         powerLight = Box("PowerLight", frame.transform, new Vector2(370f, -218f), new Vector2(12f, 12f), new Color(0.4f, 1f, 0.65f));
         stand = new GameObject("PlaceholderStand", typeof(RectTransform));
         stand.transform.SetParent(frame.transform, false);
@@ -179,7 +170,7 @@ public class TurnOrderSlotUI : MonoBehaviour
         var go = new GameObject(name, typeof(RectTransform));
         go.transform.SetParent(parent, false);
         var label = go.AddComponent<TextMeshProUGUI>();
-        label.font = font;
+        GameFonts.Apply(label);
         label.text = text;
         label.fontSize = fontSize;
         label.alignment = TextAlignmentOptions.Center;

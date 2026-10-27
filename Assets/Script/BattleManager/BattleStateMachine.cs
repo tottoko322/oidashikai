@@ -447,7 +447,7 @@ public partial class BattleStateMachine : MonoBehaviour
         switch (effect.type)
         {
             case EffectType.Draw:
-                return $"{effect.valueA}　draw";
+                return $"{effect.valueA} draw";
 
             case EffectType.Heal:
                 return $"HP {effect.valueA} heal";
@@ -459,10 +459,10 @@ public partial class BattleStateMachine : MonoBehaviour
                 return $"cost {effect.valueA} heal";
 
             case EffectType.MultiplyNextDamage:
-                return $"next attack ×{effect.valueF}";
+                return $"next attack x{effect.valueF}";
 
             case EffectType.PierceDefense:
-                return $"next defense ×{effect.valueF}";
+                return $"next defense x{effect.valueF}";
 
             case EffectType.DiscardAttackMinusOneDamage:
                 return "one discard and damage";

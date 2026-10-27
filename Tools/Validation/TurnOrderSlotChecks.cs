@@ -156,7 +156,7 @@ public static class TurnOrderSlotChecks
                     "Completed intro publishes its result once");
                 Check(controller.slotUI.HasStopped && controller.slotUI.StoppedOnFirst == expectedFirst,
                     "The visual stop and battle turn order agree");
-                Check(controller.slotUI.CenterLabel == (expectedFirst ? "先攻" : "後攻"), "The centered result text is correct");
+                Check(controller.slotUI.CenterLabel == (expectedFirst ? "せんこう" : "こうこう"), "The centered result text is correct");
                 Check(!controller.slotUI.IsVisible && !inputLock.IsLocked, "Finished standalone intro hides and releases its input lock");
                 Check(!controller.ui.gameObject.activeSelf, "The legacy coin UI stays hidden");
                 Check(UnityEngine.Random.value == nextRandom, "Animation and duplicates do not reroll or consume random draws");
