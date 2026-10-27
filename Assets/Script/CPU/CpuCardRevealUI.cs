@@ -14,6 +14,7 @@ public class CpuCardRevealUI : MonoBehaviour
     private Vector2 returnPosition;
     private float shownScale;
     private bool returning;
+    private bool positioned;
     private GameObject details;
     private RectTransform detailCanvas, detailCard, detailHint;
     public bool IsDetailOpen => details != null && details.activeSelf;
@@ -63,6 +64,7 @@ public class CpuCardRevealUI : MonoBehaviour
     {
         if (root == null || card == null) yield break;
         returning = false;
+        positioned = false;
         artwork.sprite = card.artwork;
         label.text = $"CPUの{usage}\n{detail}\n<size=18>くりっくでくわしく</size>";
         label.color = usage == "こうげき" ? new Color(1f, 0.65f, 0.55f)
@@ -70,8 +72,8 @@ public class CpuCardRevealUI : MonoBehaviour
         var parent = (RectTransform)root.parent;
         Vector2 start = origin != null ? (Vector2)parent.InverseTransformPoint(origin.position)
             - parent.rect.center : new Vector2(0f, 420f);
-        Vector2 target = settings != null ? settings.revealPosition : new Vector2(-350f, 80f);
         float scale = settings != null ? Mathf.Max(0.1f, settings.revealScale) : 0.7f;
+        Vector2 target = RevealPosition(parent, scale);
         returnPosition = start;
         shownScale = scale;
         root.SetAsLastSibling();
@@ -80,6 +82,7 @@ public class CpuCardRevealUI : MonoBehaviour
         {
             yield return Animate(start, target, 0.15f, scale, 0f, 1f,
                 settings != null ? settings.enterDuration : 0.16f);
+            positioned = true;
             if (whileVisible != null) yield return whileVisible;
             else
             {
@@ -93,6 +96,28 @@ public class CpuCardRevealUI : MonoBehaviour
             yield return ReturnToOrigin();
         }
         finally { CloseDetails(); if (root != null) root.gameObject.SetActive(false); }
+    }
+
+    private Vector2 RevealPosition(RectTransform parent, float scale)
+    {
+        Vector2 position = settings != null ? settings.revealPosition : new Vector2(-500f, 300f);
+        if (origin != null)
+        {
+            var corners = new Vector3[4]; origin.GetWorldCorners(corners);
+            float left = float.MaxValue, bottom = float.MaxValue, top = float.MinValue;
+            foreach (var corner in corners)
+            {
+                var local = parent.InverseTransformPoint(corner);
+                left = Mathf.Min(left, local.x); bottom = Mathf.Min(bottom, local.y); top = Mathf.Max(top, local.y);
+            }
+            position = new Vector2(left - root.rect.width * scale * 0.5f - 24f, (bottom + top) * 0.5f);
+        }
+        // Keep both the card and its usage header inside the canvas.
+        float halfWidth = 180f * scale;
+        position.x = Mathf.Clamp(position.x, parent.rect.xMin + halfWidth + 20f, parent.rect.xMax - halfWidth - 20f);
+        position.y = Mathf.Clamp(position.y, parent.rect.yMin + 210f * scale + 20f,
+            parent.rect.yMax - 288f * scale - 20f);
+        return position;
     }
 
     public IEnumerator ReturnToOrigin()
@@ -156,6 +181,8 @@ public class CpuCardRevealUI : MonoBehaviour
 
     private void Update()
     {
+        if (positioned && IsVisible && !returning)
+            root.anchoredPosition = RevealPosition((RectTransform)root.parent, shownScale);
         if (!IsDetailOpen) return;
         FitDetails();
         if (Input.GetKeyDown(KeyCode.Escape)) CloseDetails();

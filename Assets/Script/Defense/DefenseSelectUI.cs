@@ -20,9 +20,8 @@ public class DefenseSelectUI : MonoBehaviour
         promptPanel = new GameObject("DefensePrompt", typeof(RectTransform), typeof(Image));
         var rect = promptPanel.GetComponent<RectTransform>(); rect.SetParent(canvas.transform, false);
         float width = ((RectTransform)canvas.transform).rect.width;
-        float height = ((RectTransform)canvas.transform).rect.height;
         rect.sizeDelta = new Vector2(Mathf.Min(660f, width * 0.65f), 76f);
-        rect.anchoredPosition = new Vector2(0f, -height * 0.18f);
+        rect.anchoredPosition = Vector2.zero;
         var image = promptPanel.GetComponent<Image>(); image.color = new Color(0.05f, 0.22f, 0.35f, 0.97f); image.raycastTarget = false;
         message.rectTransform.SetParent(rect, false);
         message.rectTransform.anchorMin = Vector2.zero; message.rectTransform.anchorMax = Vector2.one;

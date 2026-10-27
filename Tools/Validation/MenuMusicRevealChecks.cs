@@ -103,10 +103,15 @@ public static class MenuMusicRevealChecks
             "Returning from battle starts title music");
 
         var canvas = new GameObject("RevealCanvas", typeof(RectTransform), typeof(Canvas));
+        canvas.GetComponent<Canvas>().renderMode = RenderMode.WorldSpace;
+        ((RectTransform)canvas.transform).sizeDelta = new Vector2(1920f, 1080f);
         var reveal = canvas.AddComponent<CpuCardRevealUI>();
         var config = ScriptableObject.CreateInstance<CpuBattleConfig>();
         config.enterDuration = 0.01f; config.returnDuration = 0.08f;
-        reveal.Initialize(canvas.transform, GameFonts.Default, null, config);
+        var portrait = new GameObject("EnemyPortrait", typeof(RectTransform)).GetComponent<RectTransform>();
+        portrait.SetParent(canvas.transform, false); portrait.sizeDelta = new Vector2(400f, 400f);
+        portrait.anchoredPosition = new Vector2(0f, 300f);
+        reveal.Initialize(canvas.transform, GameFonts.Default, portrait, config);
         Check(config.holdDuration == 1.5f, "Regular card hold defaults to 1.5 seconds");
         var attackCard = ScriptableObject.CreateInstance<CardData>(); attackCard.attack = 3;
         foreach (bool skip in new[] { true, false })
@@ -168,10 +173,23 @@ public static class MenuMusicRevealChecks
                 if (Time.realtimeSinceStartup - waitingSince >= 0.2f)
                 {
                     Check(reveal.IsVisible && battle.PlayerHP == 10, "Attack card and damage remain pending until a choice");
-                    var text = reveal.GetComponent<Canvas>().GetComponentInChildren<TMP_Text>(true);
+                    var text = reveal.transform.Find("CpuCardReveal/Usage/Text").GetComponent<TMP_Text>();
                     Check(text.text.Contains("ATK 3"), "The actual incoming attack value remains visible");
                     Check(reveal.transform.Find("CpuCardReveal").localScale.x == 0.7f,
                         "The waiting attack card uses the compact scale");
+                    var cpuRect = (RectTransform)reveal.transform.Find("CpuCardReveal");
+                    var cpuCorners = new Vector3[4]; cpuRect.GetWorldCorners(cpuCorners);
+                    var portraitCorners = new Vector3[4];
+                    ((RectTransform)reveal.transform.Find("EnemyPortrait")).GetWorldCorners(portraitCorners);
+                    Check(cpuCorners[3].x < portraitCorners[0].x, "CPU card is beside the character on the left");
+                    var popup = new GameObject("HandPopupFixture").AddComponent<CardPopupUI>();
+                    popup.root = new GameObject("HandPopup", typeof(RectTransform));
+                    popup.root.transform.SetParent(reveal.transform, false);
+                    popup.Open(card);
+                    Check(popup.root.GetComponent<Canvas>().overrideSorting &&
+                        popup.root.GetComponent<Canvas>().sortingOrder > 32000,
+                        "Hand inspection stays above CPU cards, detail overlays and guidance");
+                    popup.Close(false);
                     reveal.OpenDetails();
                     Check(reveal.IsDetailOpen, "Clicking the compact card opens a large detail view");
                     reveal.CloseDetails();
