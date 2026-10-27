@@ -19,6 +19,7 @@ public class BrandIntroUI : MonoBehaviour
     private Material qMaterial, iMaterial;
     private Sprite qSprite, iSprite;
     private float elapsed;
+    private bool clockStarted;
     private GameObject previousSelection;
     public bool IsBuilt => opacity != null;
 
@@ -33,6 +34,11 @@ public class BrandIntroUI : MonoBehaviour
         for (int n=0;n<SceneManager.sceneCount;n++) SceneLoaded(SceneManager.GetSceneAt(n),LoadSceneMode.Single);
     }
     private static void SceneLoaded(Scene scene, LoadSceneMode mode)
+    {
+        EnsureForScene(scene);
+    }
+
+    public static void EnsureForScene(Scene scene)
     {
         if (played || !string.Equals(scene.name, "title", StringComparison.OrdinalIgnoreCase)) return;
         Create(scene);
@@ -57,7 +63,7 @@ public class BrandIntroUI : MonoBehaviour
         foreach(var intro in FindObjectsByType<BrandIntroUI>(FindObjectsInactive.Include,FindObjectsSortMode.None))
         {
             if (intro.gameObject.scene!=scene || !intro.IsBuilt) continue;
-            intro.elapsed=0; intro.gameObject.SetActive(true); intro.RenderAt(0); played=true; return true;
+            intro.elapsed=0; intro.clockStarted=false; intro.gameObject.SetActive(true); intro.RenderAt(0); played=true; return true;
         }
         return Create(scene)!=null;
     }
@@ -162,9 +168,18 @@ public class BrandIntroUI : MonoBehaviour
     private void Update()
     {
         if (!IsBuilt) return;
-        elapsed+=Time.unscaledDeltaTime; RenderAt(elapsed);
+        if (!AdvanceClock(Time.unscaledDeltaTime)) return;
         if (elapsed>=Duration) Destroy(gameObject);
         else if (Input.GetMouseButtonDown(0)||Input.GetKeyDown(KeyCode.Space)||Input.GetKeyDown(KeyCode.Escape)) Skip();
+    }
+    private bool AdvanceClock(float delta)
+    {
+        // Asset/shader loading can make the first unscaled delta longer than
+        // the entire intro. Let its first frame appear before starting time.
+        if (!clockStarted) { clockStarted=true; elapsed=0; RenderAt(0); return false; }
+        elapsed+=Mathf.Clamp(delta,0f,0.1f);
+        RenderAt(elapsed);
+        return true;
     }
     public void Skip() { if (elapsed>0.7f) Destroy(gameObject); }
     private void OnDestroy()

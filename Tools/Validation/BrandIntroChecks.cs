@@ -44,6 +44,13 @@ public static class BrandIntroChecks
         var selected=new GameObject("TitleButton",typeof(RectTransform),typeof(Button));events.SetSelectedGameObject(selected);
         var host=new GameObject("Intro",typeof(RectTransform));var intro=host.AddComponent<BrandIntroUI>();
         Check(intro.Build()&&intro.IsBuilt,"Provided logos and shader load and build");
+        var advance=typeof(BrandIntroUI).GetMethod("AdvanceClock",Private);
+        Check(!(bool)advance.Invoke(intro,new object[]{10f}) &&
+            (float)typeof(BrandIntroUI).GetField("elapsed",Private).GetValue(intro)==0,
+            "A ten-second startup delta does not consume the intro before its first frame");
+        advance.Invoke(intro,new object[]{10f});
+        Check((float)typeof(BrandIntroUI).GetField("elapsed",Private).GetValue(intro)<=0.1f,
+            "A long loading frame cannot jump to the end or make skipping immediately eligible");
         Check(events.currentSelectedGameObject==null,"Intro clears keyboard focus from title buttons");
         Check(host.GetComponent<Canvas>().sortingOrder>32500,"Intro covers title UI");
         Check(host.transform.Find("Backdrop").GetComponent<Image>().raycastTarget,"Intro blocks clicks on the title underneath");
@@ -85,5 +92,15 @@ public static class BrandIntroChecks
         typeof(BrandIntroUI).GetMethod("CheckInitialScene",staticFlags).Invoke(null,null);
         Check(UnityEngine.Object.FindObjectsByType<BrandIntroUI>(FindObjectsSortMode.None).Length==1,
             "Already-loaded title is detected by the initial-scene fallback");
+        UnityEngine.Object.DestroyImmediate(UnityEngine.Object.FindAnyObjectByType<BrandIntroUI>().gameObject);
+        typeof(BrandIntroUI).GetMethod("ResetSession",staticFlags).Invoke(null,null);
+        var flow=new GameObject("TitleFlow").AddComponent<SceneFlowManager>();
+        SceneManager.MoveGameObjectToScene(flow.gameObject,title);
+        typeof(SceneFlowManager).GetMethod("Start",Private).Invoke(flow,null);
+        Check(UnityEngine.Object.FindObjectsByType<BrandIntroUI>(FindObjectsSortMode.None).Length==1,
+            "Normal title Start creates the intro without relying on runtime scene callbacks");
+        typeof(SceneFlowManager).GetMethod("Start",Private).Invoke(flow,null);
+        Check(UnityEngine.Object.FindObjectsByType<BrandIntroUI>(FindObjectsSortMode.None).Length==1,
+            "Title Start and runtime callbacks do not duplicate the intro");
     }
 }
