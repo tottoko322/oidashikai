@@ -15,7 +15,6 @@ public sealed class CpuDecisionContext
     public int cost, maxCost, hp, maxHP, opponentHP, opponentMaxHP, deckRemaining;
     public int maxHand = 8;
     public float attackMultiplier = 1f, defenseMultiplier = 1f;
-    public bool effectsBlocked;
 }
 
 public partial class EnemyAI
@@ -28,7 +27,7 @@ public partial class EnemyAI
         {
             if (card == null || Mathf.Max(0, card.cost) > state.cost) continue;
             actions.Add(new CpuAction(card, false));
-            if (!state.effectsBlocked && CanUseEffect(card, state.hand.Count - 1))
+            if (CanUseEffect(card, state.hand.Count - 1))
                 actions.Add(new CpuAction(card, true));
         }
         if (actions.Count == 0) return default;
@@ -45,6 +44,7 @@ public partial class EnemyAI
 
     public static bool CanUseEffect(CardData card, int remainingHand)
     {
+        // This is per-card eligibility; Progress Check never blocks other cards.
         if (card == null || card.effect == null || card.effect.type == EffectType.None ||
             card.effect.type == EffectType.BlockEffectsAndSelfDamageWhileInHand) return false;
         var type = card.effect.type;

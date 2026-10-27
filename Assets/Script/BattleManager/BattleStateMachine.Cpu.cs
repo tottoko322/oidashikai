@@ -116,8 +116,7 @@ public partial class BattleStateMachine
         hand = enemyState.hand, cost = enemyState.Cost, maxCost = enemyState.MaxCost,
         hp = EnemyHP, maxHP = enemyMaxHP, opponentHP = PlayerHP, opponentMaxHP = playerMaxHP,
         deckRemaining = enemyState.Remaining, maxHand = enemyState.MaxHand,
-        attackMultiplier = enemyState.attackMultiplier, defenseMultiplier = enemyState.defenseMultiplier,
-        effectsBlocked = enemyState.HasHandRestriction()
+        attackMultiplier = enemyState.attackMultiplier, defenseMultiplier = enemyState.defenseMultiplier
     };
 
     private IEnumerator RevealCpuCard(CardData card, string usage, string detail = "", IEnumerator whileVisible = null)
@@ -369,14 +368,14 @@ public partial class BattleStateMachine
     }
 
     private static string StatusText(float attack, float defense, int currentDamage, int nextDamage,
-        bool blocked, int reduction, int maxHP)
+        bool hasProgressCheck, int reduction, int maxHP)
     {
         string text = "";
         if (!Mathf.Approximately(attack, 1f)) text += $"・つぎのこうげき x{attack}\n";
         if (!Mathf.Approximately(defense, 1f)) text += $"・つぎのぼうぎょ x{defense}\n";
         if (currentDamage > 0) text += $"・じぶんのたーんおわりに {currentDamage}だめーじ\n";
         if (nextDamage > 0) text += $"・つぎのじぶんのたーんおわりに {nextDamage}だめーじ\n";
-        if (blocked) text += "・しんちょくかくにん: てふだにあるあいだ、こうかかーどはつかえません/じぶんのたーんおわりに1だめーじ\n";
+        if (hasProgressCheck) text += "・しんちょくかくにん: このかーどはこうかとしてつかえません/じぶんのたーんおわりに1だめーじ\n";
         if (reduction > 0) text += $"・さいだいHP -{reduction}(いまのさいだいHP: {maxHP})\n";
         return text.TrimEnd();
     }
