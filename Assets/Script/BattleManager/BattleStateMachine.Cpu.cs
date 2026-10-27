@@ -76,8 +76,13 @@ public partial class BattleStateMachine
         rect.pivot = new Vector2(0f, 0.5f);
         rect.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, size.x);
         rect.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, size.y);
-        rect.anchoredPosition = hp.anchoredPosition + new Vector2(hp.rect.xMax * hp.localScale.x + 24f,
-            hp.rect.center.y * hp.localScale.y);
+        // HP's text rectangle can be much wider than its visible digits.
+        enemyHpText.ForceMeshUpdate();
+        var bounds = enemyHpText.textBounds;
+        Vector3 edge = enemyHpText.textInfo.characterCount > 0
+            ? new Vector3(bounds.max.x, bounds.center.y, 0f)
+            : new Vector3(hp.rect.xMax, hp.rect.center.y, 0f);
+        rect.position = hp.TransformPoint(edge + new Vector3(24f, 0f, 0f));
         enemyInfoText.raycastTarget = false;
     }
 
@@ -165,7 +170,7 @@ public partial class BattleStateMachine
         if (attack > 0 && handManager.handViews.Count > 0)
         {
             waitingForDefense = true;
-            defenseSelectUI?.BeginSelection("");
+            defenseSelectUI?.BeginSelection();
             InputLockManager.I?.Unlock();
             while (pendingDefenseCard == null && !defenseSkipped && BattleReady) yield return null;
             InputLockManager.I?.Lock();

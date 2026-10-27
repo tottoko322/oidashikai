@@ -103,6 +103,14 @@ public static class GameFontChecks
             Check(deckCorners[0].x > hpCorners[3].x, "CPU deck label sits to the right of HP without overlap");
             Check(Mathf.Approximately((deckCorners[0].y + deckCorners[1].y) * 0.5f,
                 (hpCorners[0].y + hpCorners[1].y) * 0.5f), "CPU deck label is vertically centred on HP");
+            battle.enemyHpText.text = "9";
+            GameFonts.Apply(battle.enemyHpText);
+            battle.enemyHpText.rectTransform.sizeDelta = new Vector2(600f, 80f);
+            typeof(BattleStateMachine).GetMethod("PositionCpuDeckCount", Private).Invoke(battle, null);
+            Vector3 digitEdge = battle.enemyHpText.rectTransform.TransformPoint(new Vector3(
+                battle.enemyHpText.textBounds.max.x, battle.enemyHpText.textBounds.center.y, 0f));
+            Check(Mathf.Approximately(battle.enemyInfoText.rectTransform.position.x - digitEdge.x, 24f),
+                "A wide HP rectangle does not push the deck label beyond the visible digits");
             battle.enemyActionText = new GameObject("LegacyAction").AddComponent<TextMeshProUGUI>();
             typeof(BattleStateMachine).GetMethod("ShowEnemyAction", Private).Invoke(battle, new object[] { "CPU action" });
             Check(battle.enemyActionText.text == "" && !battle.enemyActionText.enabled,

@@ -16,15 +16,20 @@ public class SettingsModalUI : MonoBehaviour
     }
     private void Start()
     {
-        if (SaveManager.I != null)
-        {
-            if (bgmSlider) bgmSlider.value = SaveManager.I.GetBgm();
-            if (seSlider) seSlider.value = SaveManager.I.GetSe();
-            if (confirmToggle) confirmToggle.isOn = SaveManager.I.GetConfirm(config != null && config.useConfirm);
-        }
+        RefreshValues();
     }
 
-    public void Open() { if (root) root.SetActive(true); }
+    private void RefreshValues()
+    {
+        if (bgmSlider) bgmSlider.SetValueWithoutNotify(AudioManager.I != null
+            ? AudioManager.I.bgmVolume : PlayerPrefs.GetFloat("BGM_VOLUME", PlayerPrefs.GetFloat("qpic_bgm", 0.7f)));
+        if (seSlider) seSlider.SetValueWithoutNotify(AudioManager.I != null
+            ? AudioManager.I.seVolume : PlayerPrefs.GetFloat("SE_VOLUME", PlayerPrefs.GetFloat("qpic_se", 1f)));
+        if (confirmToggle) confirmToggle.SetIsOnWithoutNotify(SaveManager.I != null
+            ? SaveManager.I.GetConfirm(config != null && config.useConfirm) : config != null && config.useConfirm);
+    }
+
+    public void Open() { RefreshValues(); if (root) root.SetActive(true); }
     public void Close() { if (root) root.SetActive(false); }
 
     public void OnBgmChanged()
@@ -47,3 +52,4 @@ public class SettingsModalUI : MonoBehaviour
         if (config != null) config.useConfirm = on;
     }
 }
+
