@@ -4,7 +4,8 @@ CPUはプレイヤーと同じGameConfigを使います。初期手札、手札�
 
 ## 設定
 
-- BattleStateMachineのCPU欄で、Cpu DifficultyをEasy / Normal / Hardに変更します。初期値はNormalです。難易度選択メニューは今回の変更には含まれません。
+- タイトルのスタートから「やさしい / ふつう / むずかしい」を選び、「キャラクター選択へ」で進みます。選択は保存され、次回の対戦にも反映されます。
+- タイトルでまだ難易度を選んでいない場合は、BattleStateMachineのCPU欄のCpu Difficultyを使用します。Inspectorの初期値はNormalです。
 - Enemy Deck Definitionを指定すると、その固定デッキを使います。
 - 未指定なら、Assets/Resources/CPU/DefaultCpuConfig.assetの難易度別デッキ、次にDefault Deckを使います。付属デッキは現在のGameConfigに合わせた20枚、各カード2枚以下です。デッキ上限を変えた場合はCPUデッキも調整してください。
 - デッキの枚数・同名上限が不正ならConsoleに設定エラーを表示し、対戦を開始しません。

@@ -17,9 +17,12 @@ public class CarouselController : MonoBehaviour
         return Index;
     }
 
+    public void Select(int index) => Index = Mathf.Clamp(index, 0, Count - 1);
+
     public int Next()
     {
         Index = (Index + 1) % Count;
         return Index;
     }
 }
+

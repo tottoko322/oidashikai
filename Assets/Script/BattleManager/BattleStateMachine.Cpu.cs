@@ -6,6 +6,7 @@ using UnityEngine;
 public partial class BattleStateMachine
 {
     [Header("CPU")]
+    [Tooltip("タイトルで難易度を選ぶと保存した値が優先されます。未選択時はこの値を使用します。")]
     public CpuDifficulty cpuDifficulty = CpuDifficulty.Normal;
     public CpuBattleConfig cpuConfig;
     public DeckDefinition enemyDeckDefinition;
@@ -22,6 +23,8 @@ public partial class BattleStateMachine
 
     private bool SetupCpu()
     {
+        if (BattlePreferences.HasDifficulty)
+            cpuDifficulty = BattlePreferences.GetDifficulty(cpuDifficulty);
         if (cpuConfig == null) cpuConfig = Resources.Load<CpuBattleConfig>("CPU/DefaultCpuConfig");
         var definition = enemyDeckDefinition != null ? enemyDeckDefinition
             : cpuConfig != null ? cpuConfig.DeckFor(cpuDifficulty) : null;

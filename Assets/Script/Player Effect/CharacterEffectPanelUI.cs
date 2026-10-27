@@ -135,7 +135,7 @@ public class CharacterEffectPanelUI : MonoBehaviour
 
     private void RefreshDetails()
     {
-        Show(showingEnemy ? "相手" : "自分", showingEnemy
+        Show(showingEnemy ? battle.EnemyCharacterName : battle.PlayerCharacterName, showingEnemy
             ? battle.GetEnemyActiveEffectText()
             : battle.GetPlayerActiveEffectText());
     }

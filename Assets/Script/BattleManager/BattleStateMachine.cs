@@ -149,6 +149,7 @@ public partial class BattleStateMachine : MonoBehaviour
 
     private IEnumerator Start()
     {
+        ApplyCharacterSelection();
         initialEnemyMaxHP = enemyMaxHP;
         initialPlayerMaxHP = playerMaxHP;
         // Include the panel even when its Awake has already hidden its root.
@@ -196,9 +197,11 @@ public partial class BattleStateMachine : MonoBehaviour
         ShowEnemyAction("");
 
         bool playerFirst = true;
+        InputLockManager.I?.Lock();
         if (coinToss != null)
         {
             yield return coinToss.Play();
+            if (!coinToss.ResultReady) yield break;
             playerFirst = coinToss.PlayerFirst;
         }
         turnSystem.SetFirst(playerFirst ? TurnOwner.Player : TurnOwner.Enemy);
@@ -206,7 +209,7 @@ public partial class BattleStateMachine : MonoBehaviour
         handManager.ClearHand();
         handLayout?.Rebuild();
 
-        bool deckOk = deckManager.SetupFromDefinition(deckDefinition);
+        bool deckOk = deckManager.SetupForBattle(deckDefinition);
         if (!deckOk)
         {
             Debug.LogError("[BattleStateMachine] Deck setup failed. Check deckDefinition entries.");
