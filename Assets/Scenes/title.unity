@@ -2933,7 +2933,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   bgmSource: {fileID: 210819254}
   seSource: {fileID: 1449337701}
-  bgmClip: {fileID: 8300000, guid: 4d11c61dfc30d9c47a880f8b6edd565e, type: 3}
+  bgmClip: {fileID: 8300000, guid: 3f72451e6d6b41cba166f0db4b0227f5, type: 3}
   buffClip: {fileID: 8300000, guid: 46eed0f38d4085042bda7268a6271f08, type: 3}
   buttonClip: {fileID: 8300000, guid: 635e527b9488ee6499b2f578cd05d2ea, type: 3}
   damageClip: {fileID: 8300000, guid: a137f7465d06495428ad67f2ad4cc1bf, type: 3}
@@ -4254,3 +4254,4 @@ SceneRoots:
   - {fileID: 1449337702}
   - {fileID: 1941174058}
   - {fileID: 477601294}
+

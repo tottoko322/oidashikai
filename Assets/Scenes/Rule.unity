@@ -1591,8 +1591,12 @@ MonoBehaviour:
   descImage: {fileID: 1312834116}
   image1: {fileID: 21300000, guid: 3bedd987d11a5f74daba374a0ba145cc, type: 3}
   image2: {fileID: 21300000, guid: e4c5fe277c4872749a49ed8f37f62a56, type: 3}
-  image3: {fileID: 0}
-  image4: {fileID: 0}
+  image3: {fileID: 21300000, guid: c9bbfc908693d124b82fc25de22310d5, type: 3}
+  image4: {fileID: 21300000, guid: e35b2dd337884d44c8761f6a669d2720, type: 3}
+  additionalPages:
+  - {fileID: 21300000, guid: 18dbb6cf712d455eb87fe7b3e739b328, type: 3}
+  - {fileID: 21300000, guid: 96b3650fa424468a94362dc8afbf38ff, type: 3}
+  - {fileID: 21300000, guid: 54e9b27567ed4a209fa5ca6d8d0dbb18, type: 3}
   counter: {fileID: 160287298}
 --- !u!4 &1062390844
 Transform:
@@ -2691,4 +2695,5 @@ SceneRoots:
   - {fileID: 1350329890}
   - {fileID: 1062390844}
   - {fileID: 1787283234}
+
 
