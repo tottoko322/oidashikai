@@ -152,7 +152,7 @@ public partial class BattleStateMachine
                 enemyState.attackMultiplier = 1f;
                 RefreshCpuUI();
                 bool canChooseDefense = attack > 0 && handManager.handViews.Count > 0;
-                yield return RevealCpuCard(action.card, "こうげき", $"ATK {attack}",
+                yield return RevealCpuCard(action.card, "コウゲキ", $"ATK {attack}",
                     canChooseDefense ? CoDefendPlayer(attack) : null);
                 if (!canChooseDefense) yield return CoDefendPlayer(attack);
             }
@@ -204,7 +204,7 @@ public partial class BattleStateMachine
             defense = Mathf.FloorToInt(Mathf.Max(0, card.defense) * enemyState.defenseMultiplier);
             enemyState.defenseMultiplier = 1f;
             RefreshCpuUI();
-            yield return RevealCpuCard(card, "ぼうぎょ", $"DEF {defense}");
+            yield return RevealCpuCard(card, "ボウギョ", $"DEF {defense}");
         }
         ApplyDamage(true, DamageCalculator.Calc(attack, defense));
         yield return new WaitForSeconds(0.2f);
@@ -338,7 +338,7 @@ public partial class BattleStateMachine
                 }
                 else if (handManager.handViews.Count > 0)
                 {
-                    yield return CoWaitForDiscardSelection("すてるかーどをくりっく");
+                    yield return CoWaitForDiscardSelection("すてるカードをクリック");
                     if (selectedDiscardCard != null)
                     {
                         discarded = selectedDiscardCard.Data;
@@ -371,12 +371,13 @@ public partial class BattleStateMachine
         bool hasProgressCheck, int reduction, int maxHP)
     {
         string text = "";
-        if (!Mathf.Approximately(attack, 1f)) text += $"・つぎのこうげき x{attack}\n";
-        if (!Mathf.Approximately(defense, 1f)) text += $"・つぎのぼうぎょ x{defense}\n";
+        if (!Mathf.Approximately(attack, 1f)) text += $"・つぎのコウゲキ x{attack}\n";
+        if (!Mathf.Approximately(defense, 1f)) text += $"・つぎのボウギョ x{defense}\n";
         if (currentDamage > 0) text += $"・じぶんのたーんおわりに {currentDamage}だめーじ\n";
         if (nextDamage > 0) text += $"・つぎのじぶんのたーんおわりに {nextDamage}だめーじ\n";
-        if (hasProgressCheck) text += "・しんちょくかくにん: このかーどはこうかとしてつかえません/じぶんのたーんおわりに1だめーじ\n";
+        if (hasProgressCheck) text += "・しんちょくかくにん: このカードはこうかとしてつかえません/じぶんのたーんおわりに1だめーじ\n";
         if (reduction > 0) text += $"・さいだいHP -{reduction}(いまのさいだいHP: {maxHP})\n";
         return text.TrimEnd();
     }
 }
+

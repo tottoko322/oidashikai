@@ -14,6 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   cardId: 0
   displayName: kyokukai
+  encyclopediaDescription: "\u5c40\u4f1a\n\n\u9031\u306b1\u5ea6\u3001\u307b\u3068\u3093\u3069\u306e\u5834\u5408\u91d1\u66dc\u306b\u884c\u308f\u308c\u308b\u96c6\u4f1a\u3002\u305f\u3044\u3066\u3044\u3059\u3050\u7d42\u308f\u308b\u3002"
   cost: 0
   attack: 1
   defense: 1

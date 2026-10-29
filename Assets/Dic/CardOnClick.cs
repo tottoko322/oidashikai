@@ -1,5 +1,4 @@
 
-using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -12,7 +11,8 @@ public class CardOnClick : MonoBehaviour
         {
             CardView card = btn.GetComponent<CardView>();
             DicManager.ShowCards(card.art);
-            DicManager.ChangeText(card.atkText);
+            DicManager.ShowDescription(card.Data);
         }
     }
 }
+

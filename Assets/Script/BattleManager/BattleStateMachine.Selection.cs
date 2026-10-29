@@ -3,6 +3,8 @@ using UnityEngine.UI;
 
 public partial class BattleStateMachine
 {
+    [Header("Opponent portrait frame")]
+    public RectTransform enemyPortraitFrame;
     public CharacterData PlayerCharacter { get; private set; }
     public CharacterData EnemyCharacter { get; private set; }
     public string PlayerCharacterName => PlayerCharacter != null ? PlayerCharacter.displayName : "じぶん";
@@ -15,6 +17,7 @@ public partial class BattleStateMachine
         EnemyCharacter = context != null ? context.opponent : null;
         ApplyPortrait(playerHitVfx != null ? playerHitVfx.targetImage : null, PlayerCharacter);
         ApplyPortrait(enemyHitVfx != null ? enemyHitVfx.targetImage : null, EnemyCharacter);
+        PortraitFrameMask.Enclose(enemyHitVfx, enemyPortraitFrame);
     }
 
     private static void ApplyPortrait(Image image, CharacterData data)
@@ -24,3 +27,4 @@ public partial class BattleStateMachine
         image.preserveAspect = true;
     }
 }
+

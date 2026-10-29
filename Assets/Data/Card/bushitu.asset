@@ -14,8 +14,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   cardId: 7
   displayName: bushitu
+  encyclopediaDescription: "\u90e8\u5ba4\n\n\u8ab2\u5916\u6d3b\u52d5\u65bd\u8a2d1\u306b\u3042\u308bQpic\u306e\u90e8\u5ba4\u3002\u90e8\u5ba4\u4fc2\u3067\u3059\u3089\u77e5\u3089\u306a\u3044\u3082\u306e\u3082\u7720\u3063\u3066\u3044\u308b\u2026"
   cost: 0
   attack: 1
   defense: 2
   effect: {fileID: 11400000, guid: f2dc6a145b8226f439e6c3ca3d0e34fa, type: 2}
-  artwork: {fileID: 266619339678775945, guid: d1725cf364af91642a8d36183a2070b0, type: 3}
+  artwork: {fileID: 21300000, guid: aa1e461494aecce4aaf2acdad541478c, type: 3}

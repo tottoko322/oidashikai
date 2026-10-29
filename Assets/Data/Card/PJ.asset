@@ -14,6 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   cardId: 1
   displayName: PJ
+  encyclopediaDescription: "PJ\n\nPlanning Jam\u3002\u4f5c\u308b\u30b2\u30fc\u30e0\u306e\u69cb\u60f3\u3092\u7acb\u3066\u308b\u3002"
   cost: 0
   attack: 1
   defense: 2

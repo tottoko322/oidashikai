@@ -42,7 +42,7 @@ public static class GameFontChecks
             string path = AssetDatabase.GetAssetPath(font);
             Check(AssetDatabase.AssetPathToGUID(path) == "8fcd8a3c408b6c74cad3e00b42088372", "Shared asset GUID matches JikiTourai Complete");
             Check(font.material != null && font.material.shader != null && font.material.mainTexture != null, "Complete font has a shader and atlas");
-            Check(font.HasCharacters("せんこうこうこうあなたはせんこうですじゅんばんがきまりましたむずかしさをえらんでくださいやさしいふつうむずかしいきゃらくたーをえらぶもどる"),
+            Check(font.HasCharacters("せんこうこうこうあなたはせんこうですじゅんばんがきまりましたむずかしさをえらんでくださいやさしいふつうむずかしいキャラクターをえらぶもどる"),
                 "Complete font includes Japanese menu and monitor characters");
             Check(font.HasCharacters("CPU HP ATK DEF TURN ORDER 0123456789"), "Complete font includes spaces, battle labels and numbers");
             int glyphs = font.glyphTable.Count, characters = font.characterTable.Count;
@@ -148,3 +148,4 @@ public static class GameFontChecks
         }
     }
 }
+

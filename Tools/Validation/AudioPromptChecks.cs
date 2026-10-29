@@ -77,8 +77,8 @@ public static class AudioPromptChecks
             defense.message = new GameObject("Prompt", typeof(RectTransform)).AddComponent<TextMeshProUGUI>();
             GameFonts.Apply(defense.message); defense.message.enabled = false;
             defense.BeginSelection();
-            Check(defense.root.activeSelf && defense.message.enabled && defense.message.text.Contains("ぼうぎょ") &&
-                defense.message.text.Contains("すきっぷ"), "Defense waiting shows the next available actions");
+            Check(defense.root.activeSelf && defense.message.enabled && defense.message.text.Contains("ボウギョ") &&
+                defense.message.text.Contains("スキップ"), "Defense waiting shows the next available actions");
             Check(GameFonts.Default.HasCharacters(defense.message.text), "The action prompt has every glyph in JikiTourai");
             defense.BeginSelection("");
             Check(!string.IsNullOrWhiteSpace(defense.message.text), "An empty caller prompt cannot hide the action guidance");
@@ -102,3 +102,4 @@ public static class AudioPromptChecks
         EditorApplication.Exit(exitCode);
     }
 }
+

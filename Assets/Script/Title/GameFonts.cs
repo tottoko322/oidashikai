@@ -6,12 +6,45 @@ using UnityEngine.TextCore;
 // Use this for runtime-created labels as well, including their atlas material.
 public static class GameFonts
 {
+    private static TMP_FontAsset japanese;
+
+    // Keep the existing display face; use the supplied Japanese font for prose
+    // and as a fallback for characters missing from JikiTourai's static atlas.
+    public static TMP_FontAsset Japanese
+    {
+        get
+        {
+            if (japanese != null) return japanese;
+            var source = Resources.Load<Font>("Fonts/WDXLLubrifontJPN-Regular");
+            if (source == null) return null;
+            japanese = TMP_FontAsset.CreateFontAsset(source, 90, 9,
+                UnityEngine.TextCore.LowLevel.GlyphRenderMode.SDFAA, 2048, 2048,
+                AtlasPopulationMode.Dynamic, true);
+            japanese.name = "WDXL Lubrifont JP N Runtime SDF";
+            return japanese;
+        }
+    }
+
+    public static void ApplyJapanese(TMP_Text text)
+    {
+        var font = Japanese;
+        if (text == null || font == null) return;
+        text.font = font;
+        text.fontSharedMaterial = font.material;
+    }
     public static TMP_FontAsset Default
     {
         get
         {
             var font = TMP_Settings.instance != null ? TMP_Settings.defaultFontAsset : null;
             EnsureSpace(font);
+            if (font != null && Japanese != null)
+            {
+                if (font.fallbackFontAssetTable == null)
+                    font.fallbackFontAssetTable = new System.Collections.Generic.List<TMP_FontAsset>();
+                if (!font.fallbackFontAssetTable.Contains(Japanese))
+                    font.fallbackFontAssetTable.Add(Japanese);
+            }
             return font;
         }
     }
@@ -42,3 +75,4 @@ public static class GameFonts
         text.fontSharedMaterial = font.material;
     }
 }
+

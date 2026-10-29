@@ -14,6 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   cardId: 6
   displayName: haishin
+  encyclopediaDescription: "\u914d\u4fe1\n\n\u90e8\u9577\u304c\u5b9a\u671f\u7684\u306b\u884c\u3046\u914d\u4fe1\u3002\u30b2\u30fc\u30e0\u914d\u4fe1\u304c\u591a\u3044\u3002"
   cost: 0
   attack: 1
   defense: 1
