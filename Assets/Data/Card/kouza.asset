@@ -14,8 +14,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   cardId: 8
   displayName: kouza
+  encyclopediaDescription: "\u8b1b\u5ea7\n\n\u5404\u5f79\u8077\u306e\u5148\u8f29\u304c\u76f4\u63a5\u6559\u3048\u3066\u304f\u308c\u308b\u305d\u306e\u5f79\u8077\u306b\u3064\u3044\u3066\u306e\u8b1b\u5ea7\u30024~5\u6708\u306b\u304b\u3051\u3066\u884c\u308f\u308c\u308b\u3002"
   cost: 0
   attack: 0
   defense: 3
   effect: {fileID: 11400000, guid: 3d231024703d4d1479aa6d871eb0782e, type: 2}
-  artwork: {fileID: -7838481687316633269, guid: 1e4c1bd24379ed141b27214a274b9d17, type: 3}
+  artwork: {fileID: 21300000, guid: 1e4c1bd24379ed141b27214a274b9d17, type: 3}

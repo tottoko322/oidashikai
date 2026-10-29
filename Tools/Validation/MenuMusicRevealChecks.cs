@@ -128,7 +128,7 @@ public static class MenuMusicRevealChecks
             typeof(BattleStateMachine).GetField("<EnemyHP>k__BackingField", Private).SetValue(battle, 10);
             typeof(BattleStateMachine).GetField("<BattleReady>k__BackingField", Private).SetValue(battle, true);
             var defense = (IEnumerator)typeof(BattleStateMachine).GetMethod("CoDefendPlayer", Private).Invoke(battle, new object[] { 3 });
-            yield return DriveChoice(reveal.Show(attackCard, "こうげき", "ATK 3", defense), battle, reveal, view, skip);
+            yield return DriveChoice(reveal.Show(attackCard, "コウゲキ", "ATK 3", defense), battle, reveal, view, skip);
             Check(!reveal.IsVisible && battle.PlayerHP == (skip ? 7 : 8),
                 (skip ? "Skip" : "Defense") + " returns the card and resolves damage once");
         }
@@ -206,3 +206,4 @@ public static class MenuMusicRevealChecks
         Check(chosen, "Attack presentation accepted a player choice");
     }
 }
+

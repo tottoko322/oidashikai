@@ -6692,6 +6692,7 @@ MonoBehaviour:
   enemyActionText: {fileID: 216837856}
   playerHitVfx: {fileID: 1787579611}
   enemyHitVfx: {fileID: 126110502}
+  enemyPortraitFrame: {fileID: 2095762063}
   playerStartHP: 10
   enemyStartHP: 10
   playerMaxHP: 10
@@ -7078,3 +7079,4 @@ SceneRoots:
   - {fileID: 1224510692}
   - {fileID: 1790315734}
   - {fileID: 298041252}
+

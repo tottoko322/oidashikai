@@ -110,7 +110,7 @@ public class BrandIntroUI : MonoBehaviour
         words.characterSpacing=4; wordGroup=words.gameObject.AddComponent<CanvasGroup>();
         Label("PresentedBy","PRESENTED BY",new Vector2(0,250),new Vector2(480,36),16,new Color(0.48f,0.72f,0.82f));
         Box("WordmarkRail",transform,new Vector2(0,-282),new Vector2(640,1),new Color(0.15f,0.7f,0.85f,0.35f));
-        Label("SkipHint","くりっく / Space ですきっぷ",new Vector2(385,-326),new Vector2(450,30),16,new Color(0.42f,0.6f,0.7f));
+        Label("SkipHint","クリック / Space でスキップ",new Vector2(385,-326),new Vector2(450,30),16,new Color(0.42f,0.6f,0.7f));
         scan=Box("ScanBeam",transform,Vector2.zero,new Vector2(940,2),new Color(0.65f,1f,1f,0.75f)).rectTransform;
         RenderAt(0f); return true;
     }
@@ -190,3 +190,4 @@ public class BrandIntroUI : MonoBehaviour
         if(qSprite!=null)Destroy(qSprite); if(iSprite!=null)Destroy(iSprite);
     }
 }
+

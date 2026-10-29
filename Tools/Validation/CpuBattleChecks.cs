@@ -272,13 +272,13 @@ public static class CpuBattleChecks
             var reveal = canvas.AddComponent<CpuCardRevealUI>();
             var revealConfig = ScriptableObject.CreateInstance<CpuBattleConfig>();
             reveal.Initialize(canvas.transform, null, null, revealConfig);
-            Drain(reveal.Show(cheap, "こうげき", "ATK 2"));
+            Drain(reveal.Show(cheap, "コウゲキ", "ATK 2"));
             var root = canvas.transform.Find("CpuCardReveal");
             Check(root != null && !root.gameObject.activeSelf, "Reveal returns and hides after its animation");
             Check(root.Find("Artwork").GetComponent<UnityEngine.UI.Button>() != null &&
                 !root.Find("Usage").GetComponent<Image>().raycastTarget,
                 "Only the compact artwork accepts inspection clicks");
-            Check(root.GetComponentInChildren<TMP_Text>(true).text.Contains("こうげき"), "Reveal identifies how the CPU used the card");
+            Check(root.GetComponentInChildren<TMP_Text>(true).text.Contains("コウゲキ"), "Reveal identifies how the CPU used the card");
             System.IO.File.WriteAllText("cpu-checks-result.txt", "PASS " + checks);
             Debug.Log("ALL CPU CHECKS PASSED: " + checks);
             EditorApplication.Exit(0);
@@ -290,3 +290,4 @@ public static class CpuBattleChecks
         }
     }
 }
+

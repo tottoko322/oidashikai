@@ -43,7 +43,7 @@ public class DefenseSelectUI : MonoBehaviour
         }
     }
 
-    public void BeginSelection(string msg = "ぼうぎょするか、すきっぷをえらんでください")
+    public void BeginSelection(string msg = "ボウギョするか、スキップをえらんでください")
     {
         waiting = true;
         SetupPrompt();
@@ -56,7 +56,7 @@ public class DefenseSelectUI : MonoBehaviour
         {
             message.enabled = true;
             message.text = string.IsNullOrWhiteSpace(msg)
-                ? "ぼうぎょするか、すきっぷをえらんでください" : msg;
+                ? "ボウギョするか、スキップをえらんでください" : msg;
         }
     }
 
@@ -88,3 +88,4 @@ public class DefenseSelectUI : MonoBehaviour
         BattleStateMachine.I?.SkipDefense();
     }
 }
+

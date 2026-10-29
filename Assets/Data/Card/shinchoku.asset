@@ -14,6 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   cardId: 11
   displayName: shinchoku
+  encyclopediaDescription: "\u9032\u6357\u78ba\u8a8d\n\n\u4eba\u304c\u6b7b\u306c\u8a00\u8449\u3002"
   cost: 0
   attack: 1
   defense: 3

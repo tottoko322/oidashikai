@@ -14,6 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   cardId: 12
   displayName: sleep-bucho
+  encyclopediaDescription: "\u3069\u3053\u3067\u3067\u3082\u5bdd\u308b\u90e8\u9577\n\n\u90e8\u9577\u306f\u7720\u308b\u3088\u3069\u3053\u3067\u3067\u3082\u3002"
   cost: 0
   attack: 2
   defense: 2

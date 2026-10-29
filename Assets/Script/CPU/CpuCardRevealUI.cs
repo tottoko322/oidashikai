@@ -66,9 +66,9 @@ public class CpuCardRevealUI : MonoBehaviour
         returning = false;
         positioned = false;
         artwork.sprite = card.artwork;
-        label.text = $"CPUの{usage}\n{detail}\n<size=18>くりっくでくわしく</size>";
-        label.color = usage == "こうげき" ? new Color(1f, 0.65f, 0.55f)
-            : usage == "ぼうぎょ" ? new Color(0.55f, 0.85f, 1f) : new Color(0.95f, 0.65f, 1f);
+        label.text = $"CPUの{usage}\n{detail}\n<size=18>クリックでくわしく</size>";
+        label.color = usage == "コウゲキ" ? new Color(1f, 0.65f, 0.55f)
+            : usage == "ボウギョ" ? new Color(0.55f, 0.85f, 1f) : new Color(0.95f, 0.65f, 1f);
         var parent = (RectTransform)root.parent;
         Vector2 start = origin != null ? (Vector2)parent.InverseTransformPoint(origin.position)
             - parent.rect.center : new Vector2(0f, 420f);
@@ -155,7 +155,7 @@ public class CpuCardRevealUI : MonoBehaviour
         card.GetComponent<Button>().onClick.AddListener(CloseDetails);
         var hint = new GameObject("CloseHint", typeof(RectTransform)); hint.transform.SetParent(rect, false);
         var text = hint.AddComponent<TextMeshProUGUI>(); GameFonts.Apply(text);
-        text.text = "くりっく / Esc でとじる"; text.fontSize = 24f; text.color = Color.white;
+        text.text = "クリック / Esc でとじる"; text.fontSize = 24f; text.color = Color.white;
         text.alignment = TextAlignmentOptions.Center; text.raycastTarget = false;
         text.rectTransform.sizeDelta = new Vector2(600f, 44f);
         text.rectTransform.anchoredPosition = new Vector2(0f, -height * 0.5f - 30f);
@@ -209,3 +209,4 @@ public class CpuCardRevealUI : MonoBehaviour
 
     private void OnDestroy() { CloseDetails(); if (root != null) Destroy(root.gameObject); }
 }
+

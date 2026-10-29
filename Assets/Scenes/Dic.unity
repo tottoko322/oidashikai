@@ -1186,7 +1186,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: "\u3053\u3046\u3052\u304D\u308A\u3087\u304F"
+  m_Text: "\u30B3\u30A6\u30B2\u30AD\u308A\u3087\u304F"
 --- !u!222 &558743358
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -4121,7 +4121,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: "\u307C\u3046\u304E\u3087\u308A\u3087\u304F"
+  m_Text: "\u30DC\u30A6\u30AE\u30E7\u308A\u3087\u304F"
 --- !u!222 &1926561598
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -4528,3 +4528,4 @@ SceneRoots:
   - {fileID: 2028946169}
   - {fileID: 965709044}
   - {fileID: 341509528}
+

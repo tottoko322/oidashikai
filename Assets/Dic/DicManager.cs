@@ -23,14 +23,29 @@ public class DicManager : MonoBehaviour
     AsyncOperationHandle<IList<CardData>> handle;
     private void Awake()
     {
+        allLoaded = false;
+        cardList = new List<Transform>();
+        description = descriptionFB;
+        descText = descTextFB;
+        if (descText != null)
+        {
+            GameFonts.ApplyJapanese(descText);
+            descText.enableAutoSizing = true;
+            descText.fontSizeMin = 18f;
+            descText.fontSizeMax = 28f;
+            descText.alignment = TextAlignmentOptions.TopLeft;
+            descText.textWrappingMode = TextWrappingModes.Normal;
+            descText.raycastTarget = false;
+            var rect = descText.rectTransform;
+            rect.anchorMin = Vector2.zero;
+            rect.anchorMax = Vector2.one;
+            rect.offsetMin = new Vector2(20f, 20f);
+            rect.offsetMax = new Vector2(-20f, -20f);
+        }
         cardView=cardViewFB;
-        if(!cardView)return;
-        cardView.SetActive(false);
-        if(!sortOptionUI)return;
-        sortOptionUI.SetActive(false);
-        description=descriptionFB;
-        descText=descTextFB;
-        description.SetActive(false);
+        if (cardView != null) cardView.SetActive(false);
+        if (sortOptionUI != null) sortOptionUI.SetActive(false);
+        if (description != null) description.SetActive(false);
     }
     void Start()
     {
@@ -65,7 +80,8 @@ public class DicManager : MonoBehaviour
 
     void OnDestroy()
     {
-        Addressables.Release(handle);
+        if (handle.IsValid()) Addressables.Release(handle);
+        allLoaded = false;
         Debug.Log("All Data Released");
     }
     public void ToggleSortingUI()
@@ -135,4 +151,12 @@ public class DicManager : MonoBehaviour
     {
         descText.text=text.text;
     }
+
+    public static void ShowDescription(CardData data)
+    {
+        if (descText == null || data == null) return;
+        GameFonts.ApplyJapanese(descText);
+        descText.text = data.encyclopediaDescription;
+    }
 }
+

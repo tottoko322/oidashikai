@@ -23,6 +23,11 @@ public class CharacterHitVfx : MonoBehaviour
         if (targetRect == null) targetRect = GetComponent<RectTransform>();
         if (targetImage == null) targetImage = GetComponent<Image>();
 
+        Rebase();
+    }
+
+    public void Rebase()
+    {
         if (targetRect != null) basePos = targetRect.anchoredPosition;
         if (targetImage != null) baseColor = targetImage.color;
     }
@@ -63,3 +68,4 @@ public class CharacterHitVfx : MonoBehaviour
         }
     }
 }
+

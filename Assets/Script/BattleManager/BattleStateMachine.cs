@@ -470,7 +470,7 @@ public partial class BattleStateMachine : MonoBehaviour
                 return $"enemy max HP -{effect.valueA}";
 
             case EffectType.BlockEffectsAndSelfDamageWhileInHand:
-                return "このかーどはこうかとしてつかえません";
+                return "このカードはこうかとしてつかえません";
 
             case EffectType.None:
             default:
@@ -716,3 +716,4 @@ public partial class BattleStateMachine : MonoBehaviour
             InputLockManager.I?.Unlock();
     }
 }
+
