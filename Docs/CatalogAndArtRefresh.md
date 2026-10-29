@@ -15,10 +15,9 @@ PJは追加指定に基づく「Planning Jam。作るゲームの構想を立て
 
 ## あそびかた
 
-RuleシーンのSlideControllerは現在、新しいHow_To_Play1・How_To_Play2だけを参照。
+RuleシーンのSlideControllerは、完成版How_To_Play1〜How_To_Play7を順番に参照。
 新しい画像の矢印と×に透明な操作領域を合わせ、縦横比を維持して表示する。
-画像内に描かれた1/6・2/6は提供画像のまま。実際に移動できるページは2枚だけ。
-3枚目以降が届いたら、Image 3・Image 4とAdditional Pagesに順番に設定できる。
+画像内のページ番号は1/7〜7/7。Image 1〜Image 4とAdditional Pagesの3枚で全7枚を構成。
 
 ## カード画像と相手アバター
 
@@ -34,3 +33,4 @@ Unity 6000.4.11f1の独立した検証プロジェクトで、CatalogRefreshChec
 全13件の紹介文と漢字の生成、新画像参照、2枚のナビゲーション、図鑑の選択更新、
 両キャラクターの円形マスクと被弾後の位置復帰を確認。実際のレンダリングも確認。
 既存のCPU・フォント検証も実行する。
+
