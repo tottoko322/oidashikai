@@ -5,6 +5,8 @@ public class CardData : ScriptableObject
 {
     public string cardId;
     public string displayName;
+    public string sortReading;
+    [TextArea(2, 8)] public string effectDescription;
 
     [Header("Encyclopedia")]
     [TextArea(3, 8)] public string encyclopediaDescription;
@@ -20,4 +22,5 @@ public class CardData : ScriptableObject
     [Header("Art")]
     public Sprite artwork;
 }
+
 

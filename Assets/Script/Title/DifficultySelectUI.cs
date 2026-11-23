@@ -64,7 +64,7 @@ public class DifficultySelectUI : MonoBehaviour
         Label("Heading", panel.transform, "むずかしさをえらんでください", new Vector2(0f, 246f), new Vector2(700f, 60f), 36f);
 
         string[] names = { "やさしい", "ふつう", "むずかしい" };
-        string[] descriptions = { "きがるにあそびたいひとむけ", "コウゲキ・かいふく・こうかをかんがえます", "カードのくみあわせや、のこしかたもかんがえます" };
+        string[] descriptions = { "きがるにあそびたいひとむけ", "コウゲキ・かいふく・コウカをかんがえます", "カードのくみあわせや、のこしかたもかんがえます" };
         for (int i = 0; i < 3; i++)
         {
             int index = i;
@@ -189,4 +189,5 @@ public class DifficultySelectUI : MonoBehaviour
         return button;
     }
 }
+
 

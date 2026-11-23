@@ -78,7 +78,7 @@ public sealed class BattleHistory
     public static string SideName(BattleSide side) => side == BattleSide.Player ? "じぶん"
         : side == BattleSide.Enemy ? "あいて" : "システム";
     public static string ReasonName(DiscardReason reason) => reason == DiscardReason.Attack ? "コウゲキ"
-        : reason == DiscardReason.Defense ? "ボウギョ" : reason == DiscardReason.Effect ? "こうか" : "すてたカード";
+        : reason == DiscardReason.Defense ? "ボウギョ" : reason == DiscardReason.Effect ? "コウカ" : "すてたカード";
     public static string CardName(CardData card)
     {
         if (card == null) return "カード";
@@ -87,3 +87,4 @@ public sealed class BattleHistory
         return string.IsNullOrWhiteSpace(card.displayName) ? "カード" : card.displayName;
     }
 }
+

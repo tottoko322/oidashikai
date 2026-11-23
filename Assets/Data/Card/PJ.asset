@@ -13,10 +13,13 @@ MonoBehaviour:
   m_Name: PJ
   m_EditorClassIdentifier: 
   cardId: 1
-  displayName: PJ
-  encyclopediaDescription: "PJ\n\nPlanning Jam\u3002\u4f5c\u308b\u30b2\u30fc\u30e0\u306e\u69cb\u60f3\u3092\u7acb\u3066\u308b\u3002"
+  displayName: "PJ"
+  encyclopediaDescription: "PJ\n\nPlanning Jam\u306e\u7565\u79f0\u3002\u30b2\u30fc\u30e0\u306e\u69cb\u60f3\u3060\u3051\u3092\u30b0\u30eb\u30fc\u30d7\u3067\u4f5c\u308b\u30a4\u30d9\u30f3\u30c8\u3002"
+  sortReading: "\u3074\u30fc\u3058\u3047\u30fc"
+  effectDescription: "\u3064\u304e\u306b\u30dc\u30a6\u30ae\u30e7\u3059\u308b\u3068\u304d\u3001\u30dc\u30a6\u30ae\u30e7\u30ab\u304c2\u3070\u3044\u306b\u306a\u308b\u3002"
   cost: 0
   attack: 1
   defense: 2
   effect: {fileID: 11400000, guid: 23cf0478fa9e26f428880afffd1623b7, type: 2}
   artwork: {fileID: -673917918437617033, guid: 5b3f3d9b8be576d47922b15e9f3a15c2, type: 3}
+

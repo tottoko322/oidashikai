@@ -133,7 +133,7 @@ public static class MenuMusicRevealChecks
                 (skip ? "Skip" : "Defense") + " returns the card and resolves damage once");
         }
         float holdStarted = Time.realtimeSinceStartup;
-        yield return InspectTimed(reveal.Show(attackCard, "こうか", "draw"), reveal);
+        yield return InspectTimed(reveal.Show(attackCard, "コウカ", "draw"), reveal);
         Check(Time.realtimeSinceStartup - holdStarted >= 1.5f && !reveal.IsVisible,
             "Non-attack cards remain visible for the longer hold and then return");
     }

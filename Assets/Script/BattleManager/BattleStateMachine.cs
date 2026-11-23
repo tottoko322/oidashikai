@@ -104,7 +104,7 @@ public partial class BattleStateMachine : MonoBehaviour
     {
         if (deckCountText != null && deckManager != null)
         {
-            deckCountText.text = $"やまふだ {deckManager.Remaining}";
+            deckCountText.text = $"山札 {deckManager.Remaining}";
         }
     }
 
@@ -432,40 +432,40 @@ public partial class BattleStateMachine : MonoBehaviour
         switch (effect.type)
         {
             case EffectType.Draw:
-                return $"{effect.valueA} draw";
+                return $"{effect.valueA}ドロー";
 
             case EffectType.Heal:
-                return $"HP {effect.valueA} heal";
+                return $"HPを{effect.valueA}かいふく";
 
             case EffectType.DealDamage:
-                return $"{effect.valueA} damage";
+                return $"あいてに{effect.valueA}ダメージ";
 
             case EffectType.AddCost:
-                return $"cost {effect.valueA} heal";
+                return $"コスト +{effect.valueA}";
 
             case EffectType.MultiplyNextDamage:
-                return $"next attack x{effect.valueF}";
+                return $"つぎのコウゲキカ x{effect.valueF}";
 
             case EffectType.PierceDefense:
-                return $"next defense x{effect.valueF}";
+                return $"つぎのボウギョカ x{effect.valueF}";
 
             case EffectType.DiscardAttackMinusOneDamage:
-                return "one discard and damage";
+                return "カードをすててダメージ";
 
             case EffectType.DiscardDefenseMinusOneHeal:
-                return "one discard and heal";
+                return "カードをすててかいふく";
 
             case EffectType.HandCountMinusTwoDamage:
-                return "hand count -2 and damage";
+                return "てふだのまいすう-2ダメージ";
 
             case EffectType.HealAndSelfDamageNextTurnEnd:
-                return $"HP {effect.valueA} heal";
+                return $"HPを{effect.valueA}かいふく";
 
             case EffectType.ReduceEnemyMaxHP:
-                return $"enemy max HP -{effect.valueA}";
+                return $"あいてのHPのじょうげん -{effect.valueA}";
 
             case EffectType.BlockEffectsAndSelfDamageWhileInHand:
-                return "このカードはこうかとしてつかえません";
+                return "このカードはコウカとしてつかえません";
 
             case EffectType.None:
             default:
@@ -721,5 +721,6 @@ public partial class BattleStateMachine : MonoBehaviour
             InputLockManager.I?.Unlock();
     }
 }
+
 
 
