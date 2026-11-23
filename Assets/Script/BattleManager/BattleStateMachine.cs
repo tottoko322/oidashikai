@@ -183,6 +183,8 @@ public partial class BattleStateMachine : MonoBehaviour
         if (SaveManager.I != null)
             config.useConfirm = SaveManager.I.GetConfirm(config.useConfirm);
 
+        SetupHistoryUI();
+
         handManager.config = config;
 
         PlayerHP = Mathf.Clamp(playerStartHP, 0, playerMaxHP);
@@ -201,6 +203,7 @@ public partial class BattleStateMachine : MonoBehaviour
             playerFirst = coinToss.PlayerFirst;
         }
         turnSystem.SetFirst(playerFirst ? TurnOwner.Player : TurnOwner.Enemy);
+        History.Record(BattleSide.System, $"たいせん開始 / 先攻: {(playerFirst ? "じぶん" : "あいて")}");
 
         handManager.ClearHand();
         handLayout?.Rebuild();
@@ -210,6 +213,7 @@ public partial class BattleStateMachine : MonoBehaviour
         {
             Debug.LogError("[BattleStateMachine] Deck setup failed. Check deckDefinition entries.");
             BattleReady = false;
+            History.Finish(false, "山札の設定エラー");
             winLose.Lose();
             yield break;
         }
@@ -241,6 +245,7 @@ public partial class BattleStateMachine : MonoBehaviour
     private IEnumerator CoStartCurrentTurn()
     {
         if (!BattleReady) yield break;
+        History.BeginTurn(turnSystem.Current == TurnOwner.Player ? BattleSide.Player : BattleSide.Enemy);
 
         PlayerActionUsed = false;
         resolvingAction = false;
@@ -323,6 +328,7 @@ public partial class BattleStateMachine : MonoBehaviour
 
     public bool TryPlayCard(CardView view, DropZoneType zoneType)
     {
+        if (IsHistoryOpen) return false;
         if (!BattleReady) return false;
         if (resolvingAction) return false;
         if (waitingForDefense) return false;
@@ -356,6 +362,9 @@ public partial class BattleStateMachine : MonoBehaviour
         PlayerActionUsed = true;
         InputLockManager.I?.Lock();
         turnEndButton?.SetIdleOnly(true);
+
+        RecordUsedCard(false, card, zoneType == DropZoneType.Enemy ? DiscardReason.Attack : DiscardReason.Effect,
+            zoneType == DropZoneType.Enemy ? $"ATK {Mathf.FloorToInt(Mathf.Max(0, card.attack) * pendingNextAttackMultiplier)}" : "");
 
         // 使用したカード1枚だけを手札から消す
         if (handManager.Contains(usedCard))
@@ -407,21 +416,7 @@ public partial class BattleStateMachine : MonoBehaviour
             yield return CoApplyEffect(card);
         }
 
-        // 敵HPが0ならターンエンドせず勝利
-        if (EnemyHP <= 0)
-        {
-            BattleReady = false;
-            winLose.Win();
-            yield break;
-        }
-
-        // 自分HPが0ならターンエンドせず敗北
-        if (PlayerHP <= 0)
-        {
-            BattleReady = false;
-            winLose.Lose();
-            yield break;
-        }
+        if (CheckBattleEnded()) yield break;
 
         resolvingAction = false;
 
@@ -499,9 +494,11 @@ public partial class BattleStateMachine : MonoBehaviour
         waitingForDiscardSelect = false;
     }
 
-    private IEnumerator CoConsumeHandCard(CardView card)
+    private IEnumerator CoConsumeHandCard(CardView card, DiscardReason reason = DiscardReason.Discard, string detail = "")
     {
         if (card == null) yield break;
+
+        RecordUsedCard(false, card.Data, reason, detail);
 
         handManager.RemoveCard(card);
         handLayout?.Rebuild();
@@ -526,6 +523,7 @@ public partial class BattleStateMachine : MonoBehaviour
 
     public void OnTurnEndButtonPressed()
     {
+        if (IsHistoryOpen) return;
         Debug.Log("[TurnEnd] Button pressed");
 
         if (!BattleReady)
@@ -552,6 +550,7 @@ public partial class BattleStateMachine : MonoBehaviour
             waitingForDefense = false;
             defenseSkipped = true;
             pendingDefenseCard = null;
+            History.Record(BattleSide.Player, "ボウギョをスキップ");
 
             InputLockManager.I?.Lock();
 
@@ -587,6 +586,7 @@ public partial class BattleStateMachine : MonoBehaviour
         turnTransitioning = true;
         yield return CoEndSideEffects(false);
         if (!BattleReady || CheckBattleEnded()) yield break;
+        History.Record(BattleSide.Player, "ターン終了");
         yield return ShowCenterMessage("Turn End");
         turnSystem.NextTurn();
         turnTransitioning = false;
@@ -600,6 +600,7 @@ public partial class BattleStateMachine : MonoBehaviour
 
     public void SelectDefenseCard(CardView view)
     {
+        if (IsHistoryOpen) return;
         if (!waitingForDefense) return;
         if (view == null) return;
         if (!handManager.Contains(view)) return;
@@ -616,6 +617,7 @@ public partial class BattleStateMachine : MonoBehaviour
 
     public bool TrySelectDefenseByDrop(CardView view)
     {
+        if (IsHistoryOpen) return false;
         Debug.Log("ドラッグ防御検出");
 
         if (!waitingForDefense)
@@ -638,6 +640,7 @@ public partial class BattleStateMachine : MonoBehaviour
 
     public void SkipDefense()
     {
+        if (IsHistoryOpen) return;
         Debug.Log("SkipDefense 呼ばれた");
 
         if (!waitingForDefense)
@@ -650,10 +653,12 @@ public partial class BattleStateMachine : MonoBehaviour
 
         defenseSkipped = true;
         pendingDefenseCard = null;
+        History.Record(BattleSide.Player, "ボウギョをスキップ");
     }
 
     public void SelectDiscardCard(CardView view)
     {
+        if (IsHistoryOpen) return;
         if (!waitingForDiscardSelect) return;
         if (selectedDiscardCard != null || !BattleReady) return;
         if (view == null) return;
@@ -716,4 +721,5 @@ public partial class BattleStateMachine : MonoBehaviour
             InputLockManager.I?.Unlock();
     }
 }
+
 

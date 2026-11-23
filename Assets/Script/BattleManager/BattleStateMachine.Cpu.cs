@@ -34,7 +34,7 @@ public partial class BattleStateMachine
             return false;
         }
         for (int i = 0; i < config.startHandCount; i++)
-            if (!enemyState.TryDraw()) { NotifyDeckEmpty(true); return false; }
+            if (!DrawCpuCard()) { NotifyDeckEmpty(true); return false; }
         firstEnemyTurnStarted = false;
         cpuWasFirst = turnSystem.Current == TurnOwner.Enemy;
         SetupCpuUI();
@@ -134,7 +134,7 @@ public partial class BattleStateMachine
         enemyState.StartTurn();
         bool skipDraw = !firstEnemyTurnStarted && cpuWasFirst;
         firstEnemyTurnStarted = true;
-        if (!skipDraw && !enemyState.TryDraw()) { NotifyDeckEmpty(true); yield break; }
+        if (!skipDraw && !DrawCpuCard()) { NotifyDeckEmpty(true); yield break; }
         RefreshCpuUI();
         var action = EnemyAI.Decide(CpuContext(), cpuDifficulty);
         if (action.card != null && enemyState.TryPay(action.card.cost))
@@ -143,12 +143,14 @@ public partial class BattleStateMachine
             RefreshCpuUI();
             if (action.useEffect)
             {
+                RecordUsedCard(true, action.card, DiscardReason.Effect);
                 yield return RevealCpuCard(action.card, "こうか", GetEffectPopupText(action.card.effect));
                 yield return CoApplyCardEffect(action.card, true);
             }
             else
             {
                 int attack = Mathf.FloorToInt(Mathf.Max(0, action.card.attack) * enemyState.attackMultiplier);
+                RecordUsedCard(true, action.card, DiscardReason.Attack, $"ATK {attack}");
                 enemyState.attackMultiplier = 1f;
                 RefreshCpuUI();
                 bool canChooseDefense = attack > 0 && handManager.handViews.Count > 0;
@@ -160,6 +162,7 @@ public partial class BattleStateMachine
         if (CheckBattleEnded()) yield break;
         yield return CoEndSideEffects(true);
         if (!BattleReady || CheckBattleEnded()) yield break;
+        History.Record(BattleSide.Enemy, "ターン終了");
         yield return ShowCenterMessage("Turn End");
         turnSystem.NextTurn(); TurnCount++;
         turnTransitioning = false;
@@ -188,8 +191,9 @@ public partial class BattleStateMachine
             defense = Mathf.FloorToInt(Mathf.Max(0, pendingDefenseCard.Data.defense) * pendingNextDefenseMultiplier);
             pendingNextDefenseMultiplier = 1f;
             RefreshActiveEffectUI();
-            yield return CoConsumeHandCard(pendingDefenseCard);
+            yield return CoConsumeHandCard(pendingDefenseCard, DiscardReason.Defense, $"DEF {defense}");
         }
+        if (DamageCalculator.Calc(attack, defense) == 0) History.Record(BattleSide.Player, "コウゲキによるだめーじ 0");
         ApplyDamage(false, DamageCalculator.Calc(attack, defense));
         yield return new WaitForSeconds(0.2f);
     }
@@ -202,16 +206,20 @@ public partial class BattleStateMachine
         {
             enemyState.hand.Remove(card);
             defense = Mathf.FloorToInt(Mathf.Max(0, card.defense) * enemyState.defenseMultiplier);
+            RecordUsedCard(true, card, DiscardReason.Defense, $"DEF {defense}");
             enemyState.defenseMultiplier = 1f;
             RefreshCpuUI();
             yield return RevealCpuCard(card, "ボウギョ", $"DEF {defense}");
         }
+        else if (attack > 0) History.Record(BattleSide.Enemy, "ボウギョをスキップ");
+        if (DamageCalculator.Calc(attack, defense) == 0) History.Record(BattleSide.Enemy, "コウゲキによるだめーじ 0");
         ApplyDamage(true, DamageCalculator.Calc(attack, defense));
         yield return new WaitForSeconds(0.2f);
     }
 
     public void NotifyDeckEmpty(bool enemy)
     {
+        History.Finish(enemy, (enemy ? "あいて" : "じぶん") + "の山札がなくなりました");
         BattleReady = false;
         waitingForDefense = waitingForDiscardSelect = false;
         InputLockManager.I?.Lock();
@@ -221,8 +229,8 @@ public partial class BattleStateMachine
     private bool CheckBattleEnded()
     {
         if (!BattleReady) return true;
-        if (EnemyHP <= 0) { BattleReady = false; winLose?.Win(); }
-        else if (PlayerHP <= 0) { BattleReady = false; winLose?.Lose(); }
+        if (EnemyHP <= 0) { History.Finish(true, "あいてのHPが0になりました"); BattleReady = false; winLose?.Win(); }
+        else if (PlayerHP <= 0) { History.Finish(false, "じぶんのHPが0になりました"); BattleReady = false; winLose?.Lose(); }
         if (!BattleReady)
         {
             characterEffectPanelUI?.Close();
@@ -234,19 +242,23 @@ public partial class BattleStateMachine
 
     private void ApplyDamage(bool enemy, int amount)
     {
+        int before = enemy ? EnemyHP : PlayerHP;
         amount = Mathf.Max(0, amount);
         if (enemy) EnemyHP = Mathf.Max(0, EnemyHP - amount);
         else PlayerHP = Mathf.Max(0, PlayerHP - amount);
         RefreshHpUI();
         if (amount <= 0) return;
+        RecordHP(enemy, before, enemy ? EnemyHP : PlayerHP, $"{before - (enemy ? EnemyHP : PlayerHP)}だめーじ");
         if (enemy) enemyHitVfx?.Play(); else playerHitVfx?.Play();
         AudioManager.I?.PlayDamage();
     }
 
     private void HealSide(bool enemy, int amount)
     {
+        int before = enemy ? EnemyHP : PlayerHP;
         if (enemy) EnemyHP = Mathf.Min(enemyMaxHP, EnemyHP + Mathf.Max(0, amount));
         else PlayerHP = Mathf.Min(playerMaxHP, PlayerHP + Mathf.Max(0, amount));
+        RecordHP(enemy, before, enemy ? EnemyHP : PlayerHP, $"{(enemy ? EnemyHP : PlayerHP) - before}かいふく");
         RefreshHpUI(); AudioManager.I?.PlayHeal();
     }
 
@@ -264,6 +276,9 @@ public partial class BattleStateMachine
             if (enemy) enemyState.selfDamageNextTurnEnd += amount;
             else pendingSelfDamageNextPlayerTurnEnd += amount;
         }
+        if (effect.timing != EffectTiming.Immediate && amount > 0)
+            History.Record(enemy ? BattleSide.Enemy : BattleSide.Player,
+                (effect.timing == EffectTiming.TurnEndBeforeCurse ? "今回" : "つぎ") + $"の自分のターン終了に{amount}だめーじを予約");
     }
 
     private IEnumerator CoEndSideEffects(bool enemy)
@@ -307,22 +322,27 @@ public partial class BattleStateMachine
                 if (enemy)
                 {
                     for (int i = 0; i < amount; i++)
-                        if (!enemyState.TryDraw()) { NotifyDeckEmpty(true); yield break; }
+                        if (!DrawCpuCard()) { NotifyDeckEmpty(true); yield break; }
                 }
                 else yield return cardDealAnimator.Draw(amount);
                 break;
             case EffectType.Heal: HealSide(enemy, amount); break;
             case EffectType.DealDamage: ApplyDamage(!enemy, amount); break;
             case EffectType.AddCost:
+                int costBefore = enemy ? enemyState.Cost : costManager.Current;
                 if (enemy) enemyState.AddCost(amount); else costManager.Add(amount);
+                History.Record(enemy ? BattleSide.Enemy : BattleSide.Player,
+                    $"コスト {costBefore} → {(enemy ? enemyState.Cost : costManager.Current)}");
                 AudioManager.I?.PlayBuff(); break;
             case EffectType.MultiplyNextDamage:
                 if (enemy) enemyState.attackMultiplier = Mathf.Max(1f, effect.valueF);
                 else pendingNextAttackMultiplier = Mathf.Max(1f, effect.valueF);
+                History.Record(enemy ? BattleSide.Enemy : BattleSide.Player, $"つぎのコウゲキ x{Mathf.Max(1f, effect.valueF)}");
                 AudioManager.I?.PlayBuff(); break;
             case EffectType.PierceDefense:
                 if (enemy) enemyState.defenseMultiplier = Mathf.Max(1f, effect.valueF);
                 else pendingNextDefenseMultiplier = Mathf.Max(1f, effect.valueF);
+                History.Record(enemy ? BattleSide.Enemy : BattleSide.Player, $"つぎのボウギョ x{Mathf.Max(1f, effect.valueF)}");
                 AudioManager.I?.PlayBuff(); break;
             case EffectType.DiscardAttackMinusOneDamage:
             case EffectType.DiscardDefenseMinusOneHeal:
@@ -333,6 +353,7 @@ public partial class BattleStateMachine
                     if (discarded != null)
                     {
                         enemyState.hand.Remove(discarded);
+                        RecordUsedCard(true, discarded, DiscardReason.Discard);
                         yield return RevealCpuCard(discarded, "すてふだ", "こうかのたいしょう");
                     }
                 }
@@ -361,6 +382,8 @@ public partial class BattleStateMachine
             case EffectType.ReduceEnemyMaxHP:
                 if (enemy) { playerMaxHP = Mathf.Max(1, playerMaxHP - amount); PlayerHP = Mathf.Min(PlayerHP, playerMaxHP); }
                 else { enemyMaxHP = Mathf.Max(1, enemyMaxHP - amount); EnemyHP = Mathf.Min(EnemyHP, enemyMaxHP); }
+                History.Record(enemy ? BattleSide.Player : BattleSide.Enemy,
+                    $"最大HPが{(enemy ? playerMaxHP : enemyMaxHP)}になりました / HP {(enemy ? PlayerHP : EnemyHP)}");
                 RefreshHpUI(); AudioManager.I?.PlayBuff(); break;
         }
         RefreshDeckUI(); RefreshActiveEffectUI(); RefreshCpuUI();
@@ -380,4 +403,5 @@ public partial class BattleStateMachine
         return text.TrimEnd();
     }
 }
+
 
