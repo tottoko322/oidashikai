@@ -13,10 +13,13 @@ MonoBehaviour:
   m_Name: iubeam
   m_EditorClassIdentifier: 
   cardId: 10
-  displayName: iubeam
+  displayName: "\u3044\u3046\u30d3\u30fc\u30e0"
   encyclopediaDescription: "\u3044\u3046\u30d3\u30fc\u30e0\n\n\u3059\u3079\u3066\u3092\u7834\u58ca\u3059\u308b\u3002"
+  sortReading: "\u3044\u3046\u3073\u30fc\u3080"
+  effectDescription: "\u3042\u3044\u3066\u306b2\u30c0\u30e1\u30fc\u30b8\u3042\u305f\u3048\u308b\u3002"
   cost: 0
   attack: 3
   defense: 0
   effect: {fileID: 11400000, guid: 410bab0f97928e345a248266f5a762a3, type: 2}
   artwork: {fileID: -7765329772703150778, guid: aab68538f5e0f7d418a36599660f69c2, type: 3}
+

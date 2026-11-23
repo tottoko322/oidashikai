@@ -29,7 +29,7 @@ public class BattleHistoryUI : MonoBehaviour
         if (battle != null) return;
         battle = owner; board = canvas;
         logButton = Button("BattleLogButton", board.transform, "ログをみる", OpenLog);
-        discardButton = Button("DiscardPileButton", board.transform, "すてふだをみる", OpenDiscards);
+        discardButton = Button("DiscardPileButton", board.transform, "ごみばこをみる", OpenDiscards);
         LayoutButtons();
         BuildOverlay();
         battle.History.Changed += MarkDirty;
@@ -138,9 +138,9 @@ public class BattleHistoryUI : MonoBehaviour
     private void Refresh()
     {
         dirty = false;
-        discardButton.GetComponentInChildren<TMP_Text>().text = $"すてふだをみる ({battle.History.Discards.Count})";
+        discardButton.GetComponentInChildren<TMP_Text>().text = $"ごみばこをみる ({battle.History.Discards.Count})";
         if (!IsOpen) return;
-        heading.text = showingDiscards ? "すてふだ" : "たいせんログ";
+        heading.text = showingDiscards ? "ごみばこ" : "たいせんログ";
         playerTab.gameObject.SetActive(showingDiscards); enemyTab.gameObject.SetActive(showingDiscards);
         playerTab.GetComponent<Image>().color = side == BattleSide.Player ? new Color(.15f,.45f,.62f) : Blue;
         enemyTab.GetComponent<Image>().color = side == BattleSide.Enemy ? new Color(.15f,.45f,.62f) : Blue;
@@ -165,7 +165,7 @@ public class BattleHistoryUI : MonoBehaviour
                 text.margin = new Vector4(8f, 6f, 8f, 6f); count++;
             }
         }
-        if (count == 0) Text("Empty", content, showingDiscards ? "すてふだはまだありません" : "記録はまだありません", 26);
+        if (count == 0) Text("Empty", content, showingDiscards ? "ごみばこはまだありません" : "記録はまだありません", 26);
         Canvas.ForceUpdateCanvases(); LayoutRebuilder.ForceRebuildLayoutImmediate(content);
     }
 
@@ -242,3 +242,4 @@ public class BattleHistoryUI : MonoBehaviour
         return button;
     }
 }
+

@@ -1,4 +1,5 @@
 using System;
+using System.Globalization;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
@@ -31,8 +32,8 @@ public class DicManager : MonoBehaviour
         {
             GameFonts.ApplyJapanese(descText);
             descText.enableAutoSizing = true;
-            descText.fontSizeMin = 18f;
-            descText.fontSizeMax = 28f;
+            descText.fontSizeMin = 14f;
+            descText.fontSizeMax = 26f;
             descText.alignment = TextAlignmentOptions.TopLeft;
             descText.textWrappingMode = TextWrappingModes.Normal;
             descText.raycastTarget = false;
@@ -118,7 +119,8 @@ public class DicManager : MonoBehaviour
         if(list.Count<=0)return list;
         switch (orderRule){
         case "alphabet":
-            list.Sort((e1,e2)=>string.Compare(e1.name,e2.name));
+            list.Sort((e1,e2)=>CultureInfo.GetCultureInfo("ja-JP").CompareInfo.Compare(
+                SortReading(e1), SortReading(e2), CompareOptions.IgnoreKanaType | CompareOptions.IgnoreWidth));
             return list;
         case "atk":
             list.Sort((e1,e2)=>int.Parse(getAtk(e1)).CompareTo(int.Parse(getAtk(e2))));
@@ -133,6 +135,13 @@ public class DicManager : MonoBehaviour
     private string getAtk(Transform trans)
     {
         return trans.GetComponent<CardView>().atkText.text;
+    }
+
+    private static string SortReading(Transform trans)
+    {
+        var view = trans.GetComponent<CardView>();
+        return view != null && view.Data != null && !string.IsNullOrEmpty(view.Data.sortReading)
+            ? view.Data.sortReading : trans.name;
     }
     private string getDef(Transform trans)
     {
@@ -156,7 +165,12 @@ public class DicManager : MonoBehaviour
     {
         if (descText == null || data == null) return;
         GameFonts.ApplyJapanese(descText);
-        descText.text = data.encyclopediaDescription;
+        string introduction = data.encyclopediaDescription ?? "";
+        int firstLine = introduction.IndexOf('\n');
+        if (firstLine >= 0) introduction = introduction.Substring(firstLine).Trim();
+        descText.text = string.IsNullOrEmpty(data.effectDescription) ? data.encyclopediaDescription
+            : $"{data.displayName}\n\nコウカ\n{data.effectDescription}\n\nカード紹介\n{introduction}";
     }
 }
+
 

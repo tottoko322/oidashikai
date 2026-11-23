@@ -113,12 +113,12 @@ public static class CatalogRefreshChecks
         panel.rectTransform.sizeDelta=new Vector2(570,330);panel.rectTransform.anchoredPosition=new Vector2(250,0);
         var prose=UI("Description",panel.transform).AddComponent<TextMeshProUGUI>();prose.rectTransform.anchorMin=Vector2.zero;prose.rectTransform.anchorMax=Vector2.one;prose.rectTransform.offsetMin=Vector2.one*24;prose.rectTransform.offsetMax=Vector2.one*-24;prose.fontSize=32;prose.color=new Color(.65f,.94f,1);prose.alignment=TextAlignmentOptions.TopLeft;
         DicManager.descText=prose;DicManager.ShowDescription(bushitu);yield return null;
-        Check(prose.text==bushitu.encyclopediaDescription&&prose.font==font,"dictionary displays selected CardData prose in Japanese face");
+        Check(prose.text.Contains(bushitu.effectDescription)&&prose.text.Contains(bushitu.encyclopediaDescription.Split('\n')[0])&&prose.font==font,"dictionary displays selected CardData prose in Japanese face");
         Capture("new-dictionary-preview");
         var view=UI("DictionaryCard",root.transform).AddComponent<CardView>();view.art=art;view.Bind(kouza);
         DicManager.cardView=art.gameObject;DicManager.allLoaded=true;
         var click=view.gameObject.AddComponent<CardOnClick>();click.btn=view.gameObject;click.OnButtonClick();
-        Check(prose.text==kouza.encyclopediaDescription,"clicking a second dictionary card updates its description");
+        Check(prose.text.Contains(kouza.effectDescription)&&prose.text.Contains(kouza.displayName),"clicking a second dictionary card updates its description");
         UnityEngine.Object.Destroy(art.gameObject);UnityEngine.Object.Destroy(panel.gameObject);UnityEngine.Object.Destroy(view.gameObject);
         yield return null;
 
@@ -140,3 +140,4 @@ public static class CatalogRefreshChecks
         }
     }
 }
+

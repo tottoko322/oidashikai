@@ -157,11 +157,11 @@ public class CharacterEffectPanelUI : MonoBehaviour
             return;
 
         if (titleText != null)
-            titleText.text = characterName + "のこうか  <size=18>クリックでとじる</size>";
+            titleText.text = characterName + "のコウカ  <size=18>クリックでとじる</size>";
 
         effectListText.text =
             string.IsNullOrWhiteSpace(effects)
-                ? "いまはこうかがありません。"
+                ? "いまはコウカがありません。"
                 : effects;
 
         if (backdrop != null)
@@ -199,4 +199,5 @@ public class CharacterEffectPanelUI : MonoBehaviour
         if (backdrop != null) Destroy(backdrop);
     }
 }
+
 

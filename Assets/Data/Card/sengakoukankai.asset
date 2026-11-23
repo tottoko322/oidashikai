@@ -13,11 +13,14 @@ MonoBehaviour:
   m_Name: sengakoukankai
   m_EditorClassIdentifier: 
   cardId: 3
-  displayName: sengakoukankai
+  displayName: "\u7dda\u753b\u4ea4\u63db\u4f1a"
   encyclopediaDescription: "\u7dda\u753b\u4ea4\u63db\u4f1a\n\n\u81ea\u5206\u304c\u63cf\u3044\u305f\u7dda\u753b\u3068\u4ed6\u306e\u4eba\u304c\u63cf\u3044\u305f\u7dda\u753b\u3092\u4ea4\u63db\u3057\u3001\u8272\u5857\u308a\u3092\u3059\u308b\u30a4\u30d9\u30f3\u30c8\u3002"
+  sortReading: "\u305b\u3093\u304c\u3053\u3046\u304b\u3093\u304b\u3044"
+  effectDescription: "1\u30c9\u30ed\u30fc\u3059\u308b\u3002"
   cost: 0
   attack: 1
   defense: 2
   effect: {fileID: 11400000, guid: 3a11baa108002e247bb98fc6dc8ffac2, type: 2}
   artwork: {fileID: 21300000, guid: 32afaf362ec22b64fa18dce7b5785285, type: 3}
+
 

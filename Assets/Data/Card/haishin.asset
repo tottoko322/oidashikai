@@ -13,10 +13,13 @@ MonoBehaviour:
   m_Name: haishin
   m_EditorClassIdentifier: 
   cardId: 6
-  displayName: haishin
-  encyclopediaDescription: "\u914d\u4fe1\n\n\u90e8\u9577\u304c\u5b9a\u671f\u7684\u306b\u884c\u3046\u914d\u4fe1\u3002\u30b2\u30fc\u30e0\u914d\u4fe1\u304c\u591a\u3044\u3002"
+  displayName: "\u914d\u4fe1"
+  encyclopediaDescription: "\u914d\u4fe1\n\n\u90e8\u9577\u304c\u5b9a\u671f\u7684\u306b\u884c\u3046\u914d\u4fe1\u3002\u30b2\u30fc\u30e0\u5b9f\u6cc1\u304c\u591a\u3044\u3002"
+  sortReading: "\u306f\u3044\u3057\u3093"
+  effectDescription: "HP\u30923\u304b\u3044\u3075\u304f\u3059\u308b\u3002(10\u3044\u3058\u3087\u3046\u306b\u306f\u306a\u3089\u306a\u3044) \u3064\u304e\u306e\u3058\u3076\u3093\u306e\u30bf\u30fc\u30f3\u306e\u304a\u308f\u308a\u306b\u3058\u3076\u3093\u306b3\u30c0\u30e1\u30fc\u30b8\u3042\u305f\u3048\u308b\u3002"
   cost: 0
   attack: 1
   defense: 1
   effect: {fileID: 11400000, guid: dd36e6051b2fa17448f503fd91c6324e, type: 2}
   artwork: {fileID: 21300000, guid: 5c43b9c17a9640f3aa93a273cbb9ef07, type: 3}
+

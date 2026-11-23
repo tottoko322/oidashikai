@@ -29,7 +29,7 @@ public static class GameFontChecks
     static void SameFont(TMP_Text text, string name)
     {
         string visible = System.Text.RegularExpressions.Regex.Replace(text.text ?? "", "<[^>]*>", "");
-        Check(GameFonts.Default.HasCharacters(visible.Replace("\n", "").Replace("\r", "")), name + " has every glyph in the Complete atlas");
+        Check(GameFonts.Default.HasCharacters(visible.Replace("\n", "").Replace("\r", ""), out uint[] missing, true, true), name + " has every glyph in the shared font or Japanese fallback");
         Check(text.font == GameFonts.Default, name + " uses the shared Complete font");
         Check(text.fontSharedMaterial == GameFonts.Default.material, name + " uses the matching atlas material");
     }
@@ -88,15 +88,15 @@ public static class GameFontChecks
             battle.enemyHpText.rectTransform.anchoredPosition = new Vector2(300f, 200f);
             battle.deckCountText = text;
             text.rectTransform.sizeDelta = new Vector2(240f, 60f);
-            text.text = "やまふだ 13";
+            text.text = "山札 13";
             typeof(BattleStateMachine).GetMethod("SetupCpuUI", Private).Invoke(battle, null);
             SameFont(battle.enemyInfoText, "CPU resources");
             typeof(BattleStateMachine).GetMethod("RefreshCpuUI", Private).Invoke(battle, null);
-            Check(battle.enemyInfoText.text == "やまふだ 0", "CPU resources contain only the deck count");
+            Check(battle.enemyInfoText.text == "山札 0", "CPU resources contain only the deck count");
             Check(battle.enemyInfoText.fontSize == text.fontSize && battle.enemyInfoText.color == text.color &&
                 battle.enemyInfoText.alignment == text.alignment && battle.enemyInfoText.rectTransform.rect.size == text.rectTransform.rect.size,
                 "CPU deck label inherits the player deck label styling and dimensions");
-            Check(text.text == "やまふだ 13", "CPU refresh preserves the player deck label");
+            Check(text.text == "山札 13", "CPU refresh preserves the player deck label");
             var deckCorners = new Vector3[4]; var hpCorners = new Vector3[4];
             battle.enemyInfoText.rectTransform.GetWorldCorners(deckCorners);
             battle.enemyHpText.rectTransform.GetWorldCorners(hpCorners);
@@ -148,4 +148,5 @@ public static class GameFontChecks
         }
     }
 }
+
 

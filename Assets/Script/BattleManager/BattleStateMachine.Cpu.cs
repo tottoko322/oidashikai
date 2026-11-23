@@ -106,7 +106,7 @@ public partial class BattleStateMachine
     {
         if (enemyInfoText != null)
         {
-            enemyInfoText.text = $"やまふだ {EnemyDeckRemaining}";
+            enemyInfoText.text = $"山札 {EnemyDeckRemaining}";
         }
         enemyActiveEffectDisplay?.Clear();
     }
@@ -144,7 +144,7 @@ public partial class BattleStateMachine
             if (action.useEffect)
             {
                 RecordUsedCard(true, action.card, DiscardReason.Effect);
-                yield return RevealCpuCard(action.card, "こうか", GetEffectPopupText(action.card.effect));
+                yield return RevealCpuCard(action.card, "コウカ", GetEffectPopupText(action.card.effect));
                 yield return CoApplyCardEffect(action.card, true);
             }
             else
@@ -193,7 +193,7 @@ public partial class BattleStateMachine
             RefreshActiveEffectUI();
             yield return CoConsumeHandCard(pendingDefenseCard, DiscardReason.Defense, $"DEF {defense}");
         }
-        if (DamageCalculator.Calc(attack, defense) == 0) History.Record(BattleSide.Player, "コウゲキによるだめーじ 0");
+        if (DamageCalculator.Calc(attack, defense) == 0) History.Record(BattleSide.Player, "コウゲキによるダメージ 0");
         ApplyDamage(false, DamageCalculator.Calc(attack, defense));
         yield return new WaitForSeconds(0.2f);
     }
@@ -212,7 +212,7 @@ public partial class BattleStateMachine
             yield return RevealCpuCard(card, "ボウギョ", $"DEF {defense}");
         }
         else if (attack > 0) History.Record(BattleSide.Enemy, "ボウギョをスキップ");
-        if (DamageCalculator.Calc(attack, defense) == 0) History.Record(BattleSide.Enemy, "コウゲキによるだめーじ 0");
+        if (DamageCalculator.Calc(attack, defense) == 0) History.Record(BattleSide.Enemy, "コウゲキによるダメージ 0");
         ApplyDamage(true, DamageCalculator.Calc(attack, defense));
         yield return new WaitForSeconds(0.2f);
     }
@@ -248,7 +248,7 @@ public partial class BattleStateMachine
         else PlayerHP = Mathf.Max(0, PlayerHP - amount);
         RefreshHpUI();
         if (amount <= 0) return;
-        RecordHP(enemy, before, enemy ? EnemyHP : PlayerHP, $"{before - (enemy ? EnemyHP : PlayerHP)}だめーじ");
+        RecordHP(enemy, before, enemy ? EnemyHP : PlayerHP, $"{before - (enemy ? EnemyHP : PlayerHP)}ダメージ");
         if (enemy) enemyHitVfx?.Play(); else playerHitVfx?.Play();
         AudioManager.I?.PlayDamage();
     }
@@ -278,7 +278,7 @@ public partial class BattleStateMachine
         }
         if (effect.timing != EffectTiming.Immediate && amount > 0)
             History.Record(enemy ? BattleSide.Enemy : BattleSide.Player,
-                (effect.timing == EffectTiming.TurnEndBeforeCurse ? "今回" : "つぎ") + $"の自分のターン終了に{amount}だめーじを予約");
+                (effect.timing == EffectTiming.TurnEndBeforeCurse ? "今回" : "つぎ") + $"の自分のターン終了に{amount}ダメージを予約");
     }
 
     private IEnumerator CoEndSideEffects(bool enemy)
@@ -354,7 +354,7 @@ public partial class BattleStateMachine
                     {
                         enemyState.hand.Remove(discarded);
                         RecordUsedCard(true, discarded, DiscardReason.Discard);
-                        yield return RevealCpuCard(discarded, "すてふだ", "こうかのたいしょう");
+                        yield return RevealCpuCard(discarded, "ごみばこ", "コウカのたいしょう");
                     }
                 }
                 else if (handManager.handViews.Count > 0)
@@ -396,12 +396,13 @@ public partial class BattleStateMachine
         string text = "";
         if (!Mathf.Approximately(attack, 1f)) text += $"・つぎのコウゲキ x{attack}\n";
         if (!Mathf.Approximately(defense, 1f)) text += $"・つぎのボウギョ x{defense}\n";
-        if (currentDamage > 0) text += $"・じぶんのたーんおわりに {currentDamage}だめーじ\n";
-        if (nextDamage > 0) text += $"・つぎのじぶんのたーんおわりに {nextDamage}だめーじ\n";
-        if (hasProgressCheck) text += "・しんちょくかくにん: このカードはこうかとしてつかえません/じぶんのたーんおわりに1だめーじ\n";
+        if (currentDamage > 0) text += $"・じぶんのターンおわりに {currentDamage}ダメージ\n";
+        if (nextDamage > 0) text += $"・つぎのじぶんのターンおわりに {nextDamage}ダメージ\n";
+        if (hasProgressCheck) text += "・しんちょくかくにん: このカードはコウカとしてつかえません/じぶんのターンおわりに1ダメージ\n";
         if (reduction > 0) text += $"・さいだいHP -{reduction}(いまのさいだいHP: {maxHP})\n";
         return text.TrimEnd();
     }
 }
+
 
 

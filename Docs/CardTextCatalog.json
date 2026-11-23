@@ -1,0 +1,233 @@
+{
+  "source": "Q-Gi-Oh!文章データ一覧 (1).docx",
+  "terms": [
+    "コウゲキ・・・自分のターン時に、カードを相手アバターに持って行った時の行動。コウゲキ力によってダメージを決定する。",
+    "ボウギョ・・・相手のターン時に、カードを盤面または相手アバターに持って行ったときの行動。ボウギョ力によってダメージを決定する。",
+    "コウカ・・・自分のターン時に、カードを盤面に持って行ったときに発動する。コウゲキ力2倍のように持続するコウカは左下(自分)または右上(相手)のスロットに効果が表示される。スロットの上限は4個で、スロットが上限のときコウカが増えようとしている場合、古いコウカから消滅する。コウカは古いものから発動する。",
+    "山札・・・文字通り、山札。初期の山札は40枚で、山札が0枚のときに山札を引く行動をした場合その行動をしようとしたプレイヤーは敗北する。",
+    "ごみばこ・・・墓地。使用したカードや捨てたカードが自動的に行く場所。クリックすると中身を確認できる。",
+    "HP・・・体力。初期のHPは10。HPが0になったプレイヤーは敗北する。"
+  ],
+  "cards": [
+    {
+      "name": "いうビーム",
+      "reading": "いうびーむ",
+      "effect": "あいてに2ダメージあたえる。",
+      "attack": 3,
+      "defense": 0,
+      "description": "すべてを破壊する。",
+      "currentAsset": "iubeam"
+    },
+    {
+      "name": "imp!inter.",
+      "reading": "",
+      "effect": "あいてにかかっているコウカのかず✖1ダメージあいてにあたえる。",
+      "attack": 1,
+      "defense": 1,
+      "description": "impression! intersection.の略称。個性的なクリエイターが集まる、創作の交差点。",
+      "currentAsset": null
+    },
+    {
+      "name": "運動会",
+      "reading": "うんどうかい",
+      "effect": "あいてのてふだをランダムに1まいすてる。",
+      "attack": 2,
+      "defense": 1,
+      "description": "夏休み期間に行われる合宿の中で行われる運動会。ドッジボールが名物。",
+      "currentAsset": null
+    },
+    {
+      "name": "映像合作",
+      "reading": "えいぞうがっさく",
+      "effect": "ごみばこのカードが10しゅるいいかのとき、このカードのコウカはつかえず、コウゲキにもボウギョにもつかえない。 つぎにコウゲキするとき、コウゲキカが3ばいになる。",
+      "attack": 3,
+      "defense": 3,
+      "description": "過去のQMF作品を使い、希望者を集め大人数で行う映像の合作。",
+      "currentAsset": null
+    },
+    {
+      "name": "追い出し会",
+      "reading": "おいだしかい",
+      "effect": "じぶんのてふだのまいすう-あいてのてふだのまいすうぶん、あいてにダメージをあたえる。",
+      "attack": 0,
+      "defense": 2,
+      "description": "卒業してしまう部員の方を見送る会。このゲームは追い出し会で制作を開始した。",
+      "currentAsset": null
+    },
+    {
+      "name": "お疲れ様会",
+      "reading": "おつかれさまかい",
+      "effect": "てふだを1まいすてる。じぶんにかかっているコウカをすべてなくす。",
+      "attack": 1,
+      "defense": 1,
+      "description": "何かの節目で行われる、部員をねぎらう食事会。多くの人が参加する。",
+      "currentAsset": null
+    },
+    {
+      "name": "QMF",
+      "reading": "きゅーえむえふ",
+      "effect": "あいてにかかっているコウカのかず✖1ダメージあいてにあたえる。",
+      "attack": 1,
+      "defense": 1,
+      "description": "Qpic Music Festaの略称。4つの役職に分かれ、音楽作品を制作するイベント。",
+      "currentAsset": null
+    },
+    {
+      "name": "QGJ",
+      "reading": "きゅーじーじぇー",
+      "effect": "てふだを1まいすてる。そのカードのコウゲキカ-1ダメージあいてにあたえる。(1いかなら0ダメージ)",
+      "attack": 1,
+      "defense": 3,
+      "description": "Qpic Game Jamの略称。4つの役職に分かれ、ゲームを制作するイベント。",
+      "currentAsset": "QGJ"
+    },
+    {
+      "name": "Qpicゲームセンター",
+      "reading": "きゅーぴっくげーむせんたー",
+      "effect": "あいてがつぎにボウギョするとき、あいてのボウギョカ-2。(0いかにはならない)",
+      "attack": 2,
+      "defense": 1,
+      "description": "年に1回、秋ごろに行われる九大祭で出展する。",
+      "currentAsset": null
+    },
+    {
+      "name": "Qpic釣り部",
+      "reading": "きゅーぴっくつりぶ",
+      "effect": "あいてがつぎにコウゲキするとき、あいてのコウゲキカ-2。(0いかにはならない)",
+      "attack": 1,
+      "defense": 2,
+      "description": "夏休み期間に行われる合宿の中で活動が活発になる、釣りをする人たち。",
+      "currentAsset": null
+    },
+    {
+      "name": "局会",
+      "reading": "きょくかい",
+      "effect": "2ドローする。",
+      "attack": 1,
+      "defense": 1,
+      "description": "週に1度、ほとんどの場合金曜に行われる集会。たいていすぐ終わる。",
+      "currentAsset": "kyokukai",
+      "notes": "カード画像の名称は修正予定。"
+    },
+    {
+      "name": "クリスマス会",
+      "reading": "くりすますかい",
+      "effect": "じぶんのてふだを1まいすてる。あいてのてふだをランダムに2まいすてる。",
+      "attack": 1,
+      "defense": 1,
+      "description": "12月末に行われる会。プレゼント交換などのレクリエーションを行う。",
+      "currentAsset": null
+    },
+    {
+      "name": "講座",
+      "reading": "こうざ",
+      "effect": "コウカをはつどうしたあとのてふだのまいすう-2ダメージあいてにあたえる。",
+      "attack": 0,
+      "defense": 3,
+      "description": "各役職の先輩が直接教えてくれるその役職についての講座。4~5月にかけて行われる。",
+      "currentAsset": "kouza"
+    },
+    {
+      "name": "コミケ",
+      "reading": "こみけ",
+      "effect": "あいてのHPのじょうげんを1へらす。",
+      "attack": 2,
+      "defense": 1,
+      "description": "1年に2度行われるサブカル文化の祭典。Qpic/impression!では夏に出展する。",
+      "currentAsset": "komike"
+    },
+    {
+      "name": "作業集会",
+      "reading": "さぎょうしゅうかい",
+      "effect": "バリア2をかくとくする。(バリア:つぎのじぶんのターンのはじめになるか、バリアのあたいぶんのごうけいダメージをうけるとなくなる。)",
+      "attack": 1,
+      "defense": 1,
+      "description": "2週に1度、ほとんどの場合金曜に行われる集会。大橋キャンパスで行われる。",
+      "currentAsset": null
+    },
+    {
+      "name": "射的",
+      "reading": "しゃてき",
+      "effect": "つぎにコウゲキするとき、コウゲキカが2ばいになる。",
+      "attack": 2,
+      "defense": 1,
+      "description": "年に1回、秋ごろに行われる九大祭で出展する。",
+      "currentAsset": "gakusai"
+    },
+    {
+      "name": "進捗確認",
+      "reading": "しんちょくかくにん",
+      "effect": "このカードをもっているとき、じぶんのターンのおわりに1ダメージ。このカードのコウカはつかえない。",
+      "attack": 1,
+      "defense": 3,
+      "description": "人が死ぬ言葉。",
+      "currentAsset": "shinchoku"
+    },
+    {
+      "name": "線画交換会",
+      "reading": "せんがこうかんかい",
+      "effect": "1ドローする。",
+      "attack": 1,
+      "defense": 2,
+      "description": "自分が描いた線画と他の人が描いた線画を交換し、色塗りをするイベント。",
+      "currentAsset": "sengakoukankai",
+      "notes": "コウカは変更の可能性あり。"
+    },
+    {
+      "name": "どこででも寝る部長",
+      "reading": "どこででもねるぶちょう",
+      "effect": "HPを1かいふくする。(10いじょうにはならない)",
+      "attack": 2,
+      "defense": 2,
+      "description": "部長は眠るよどこででも。",
+      "currentAsset": "sleep-bucho"
+    },
+    {
+      "name": "配信",
+      "reading": "はいしん",
+      "effect": "HPを3かいふくする。(10いじょうにはならない) つぎのじぶんのターンのおわりにじぶんに3ダメージあたえる。",
+      "attack": 1,
+      "defense": 1,
+      "description": "部長が定期的に行う配信。ゲーム実況が多い。",
+      "currentAsset": "haishin"
+    },
+    {
+      "name": "BBQ",
+      "reading": "ばーべきゅー",
+      "effect": "HPを2かいふくする。(10いじょうにはならない)",
+      "attack": 2,
+      "defense": 1,
+      "description": "夏休み期間に行われる合宿の中で行われる。1日限定。",
+      "currentAsset": "gasshuku"
+    },
+    {
+      "name": "PJ",
+      "reading": "ぴーじぇー",
+      "effect": "つぎにボウギョするとき、ボウギョカが2ばいになる。",
+      "attack": 1,
+      "defense": 2,
+      "description": "Planning Jamの略称。ゲームの構想だけをグループで作るイベント。",
+      "currentAsset": "PJ",
+      "notes": "図鑑紹介は従来のゲーム内文章から変更。"
+    },
+    {
+      "name": "部室",
+      "reading": "ぶしつ",
+      "effect": "てふだを1まいすてる。そのカードのボウギョカ-1ぶんHPをかいふくする。(1いかなら0、HPは10いじょうにはならない)",
+      "attack": 1,
+      "defense": 2,
+      "description": "課外活動施設1にあるQpicの部室。部室係ですら知らないものも眠っている…",
+      "currentAsset": "bushitu"
+    },
+    {
+      "name": "LINEスタンプ",
+      "reading": "らいんすたんぷ",
+      "effect": "てふだを1まいすてる。あいてにかかっているコウカをすべてなくす。",
+      "attack": 1,
+      "defense": 1,
+      "description": "QpicがLINEで発売しているスタンプ。お手ごろな値段。",
+      "currentAsset": null
+    }
+  ],
+  "scope": "文言の基準データ。currentAssetがnullのカードは未実装。用語に含まれる山札40枚・コウカ4枠のルール変更は別途実装する。"
+}
