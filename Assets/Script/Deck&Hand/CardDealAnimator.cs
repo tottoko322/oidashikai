@@ -46,6 +46,7 @@ public class CardDealAnimator : MonoBehaviour
         }
 
         var view = hand.AddCard(c);
+        BattleStateMachine.I?.RecordPlayerDraw();
         AudioManager.I?.PlayDraw();
 
         // ホバー通知や入力は CardInteraction 側で付ける想定（後で）
@@ -56,4 +57,5 @@ public class CardDealAnimator : MonoBehaviour
         return true;
     }
 }
+
 
